@@ -8,7 +8,7 @@ const Footer = () => {
         This is a beta program developed by ejcabada.
         <br />
         <a
-          href="https://github.com/EjCabada"
+          href="https://github.com/EjCabada/sbux-memory-app"
           target="_blank"
           rel="noopener noreferrer"
         >

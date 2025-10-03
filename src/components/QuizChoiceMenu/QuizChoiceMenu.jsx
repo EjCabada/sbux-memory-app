@@ -6,7 +6,7 @@ const QuizChoiceMenu = () => {
     <div className={styles.menu}>
       <Link to="/quiz/beginner" className={styles.boxLink}>
         <div className={`${styles.box} ${styles.beginnerQuiz}`}>
-          <h3>Beginner Quiz</h3>
+          <h3>Beginner Quiz (DOES NOT WORK YET)</h3>
           <p>Learn the fundamentals like shots and syrup pumps per size.</p>
         </div>
       </Link>
