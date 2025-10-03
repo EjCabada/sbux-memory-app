@@ -1,0 +1,122 @@
+.searchBarContainer {
+  margin: 2rem 0;
+  position: relative;
+  /* Crucial for positioning the suggestions */
+  display: inline-block;
+  /* Ensures container wraps input width */
+}
+
+.searchInput {
+  padding: 0.8em 1.5em;
+  border-radius: 50px;
+  border: 2px solid #555;
+  background-color: #f2f0eb;
+  color: #333;
+  width: 350px;
+  /* Fixed width */
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #00a862;
+  /* Starbucks Green */
+}
+
+.suggestionsList {
+  position: absolute;
+  top: 100%;
+  /* Position right below the search bar */
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  z-index: 100;
+  text-align: left;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.suggestionItem {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #333;
+}
+
+.suggestionItem:hover {
+  background-color: #d4e9e2;
+  /* Light green hover */
+}
+
+.searchBarContainer {
+  margin: 2rem 0;
+  position: relative;
+  /* Crucial for positioning the suggestions */
+  display: inline-block;
+  /* Ensures container wraps input width */
+  width: 350px;
+}
+
+.searchInput {
+  padding: 0.8em 1.5em;
+  border-radius: 50px;
+  border: 2px solid #555;
+  background-color: #f2f0eb;
+  color: #333;
+  width: 100%;
+  /* Make input fill the container */
+  box-sizing: border-box;
+  /* Include padding in the width */
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #00a862;
+  /* Starbucks Green */
+}
+
+/* This is the key fix for the suggestions dropdown */
+.suggestionsList {
+  position: absolute;
+  top: 100%;
+  /* Position right below the search bar */
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  list-style-type: none;
+  margin: 1em 0 0 0;
+  padding: 0;
+  z-index: 100;
+  text-align: left;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.suggestionItem {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #333;
+}
+
+.suggestionItem:hover {
+  background-color: #d4e9e2;
+  /* Light green hover */
+}

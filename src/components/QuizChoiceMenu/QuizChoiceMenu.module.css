@@ -1,0 +1,54 @@
+.menu {
+  width: 100vw;
+  margin: 2rem 0;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: var(--sbux-dark-green);
+}
+
+/* Use a media query for larger screens */
+@media (min-width: 768px) {
+  .menu {
+    flex-direction: row;
+  }
+}
+
+.box {
+  background-color: white;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1em;
+  text-align: center;
+  flex-grow: 1;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+  border: 1px solid #444;
+  color: #222;
+}
+
+.box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.box h3 {
+  margin-top: 0;
+  color: #1e3932;
+  /* Starbucks Green */
+}
+
+.box p {
+  color: #222;
+  line-height: 1.6;
+}
+
+.boxLink {
+  text-decoration: none;
+  flex-grow: 1;
+  display: flex;
+  /* Ensures the link fills the space */
+}

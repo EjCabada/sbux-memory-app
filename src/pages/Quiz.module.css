@@ -1,0 +1,110 @@
+.quizContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .5em 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--sbux-dark-green);
+  color: white;
+}
+
+.flashcardArea {
+  min-height: 450px;
+  /* Increased to give space for stats */
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.srsControls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.srsControls button {
+  flex-grow: 1;
+  border: none;
+  color: white;
+  padding: .5rem;
+  border-radius: 8px;
+  font-size: .7rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.srsControls button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.dontKnow {
+  background-color: #d9534f;
+  /* Red */
+}
+
+.somewhat {
+  background-color: #f0ad4e;
+  /* Orange */
+}
+
+.knowWell {
+  background-color: #5cb85c;
+  /* Green */
+}
+
+/* --- MODIFIED & NEW STYLES --- */
+
+.allDone {
+  text-align: center;
+  padding: 2rem;
+  background-color: #2c2c2c;
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.quizStats {
+  margin-top: 1rem;
+  color: #888;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  /* Adjusted gap */
+}
+
+.cardCounter {
+  color: #555;
+  font-weight: bold;
+}
+
+.knownCounter {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.resetButton {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.resetButton:hover {
+  background-color: #d9534f;
+  /* Red */
+}

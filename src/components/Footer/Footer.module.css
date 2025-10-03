@@ -1,0 +1,27 @@
+.footer {
+  background-color: #202020;
+  color: #a0a0a0; 
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-top: 1px solid #bba075; 
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: auto; 
+}
+
+.footer p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.footer a {
+  color: #bba075;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s ease-in-out;
+}
+
+.footer a:hover {
+  color: #d4c19a; 
+}

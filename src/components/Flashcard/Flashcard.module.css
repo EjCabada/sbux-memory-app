@@ -1,0 +1,143 @@
+.flashcardContainer {
+  width: 90vw;
+  max-width: 400px;
+  height: 450px; /* Fixed height for consistency */
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.flashcard {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped {
+  transform: rotateY(180deg);
+}
+
+.cardFace {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  color: var(--text-primary);
+  box-shadow: 0 4px 15px var(--shadow-color);
+  overflow: hidden; /* Hide overflow on the front */
+}
+
+.cardFace h2 {
+  font-size: 2.2rem;
+  text-align: center;
+}
+
+.cardBack {
+  transform: rotateY(180deg);
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 1rem;
+}
+
+.cardBack h3 {
+  text-align: center;
+  color: var(--primary-green);
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tabContent {
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto; /* THIS IS THE FIX! */
+  padding: 0 1rem; /* Add padding for scrollbar */
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.sizeDetail strong {
+  color: #eee;
+  text-transform: capitalize;
+}
+
+.sizeDetail p {
+  margin: 0.25rem 0 0 1rem;
+  color: #ccc;
+}
+
+/* New style for the mastery indicator */
+.masteryIndicator {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 2rem;
+  filter: drop-shadow(0 0 5px #ffdd4a);
+}
+
+.tabContainer {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #555;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  color: #ccc;
+  padding: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tabButton:hover {
+  color: white;
+}
+
+.tabButton.activeTab {
+  color: #00a862;
+  border-bottom-color: #00a862;
+  font-weight: bold;
+}
+
+.tabContent {
+  width: 100%;
+  flex-grow: 1; /* Allows content to fill available space */
+}
+
+ol {
+text-align: left;
+}
+
+@media (max-width: 480px) {
+  .detailsGrid {
+    grid-template-columns: 1fr; /* Stack components on small screens */
+  }
+
+  .cardFace h2 {
+    font-size: 2rem;
+  }
+}

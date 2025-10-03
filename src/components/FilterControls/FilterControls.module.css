@@ -1,0 +1,80 @@
+.filterContainer {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 100vw;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  padding-bottom: 1rem; /* Space for scrollbar */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  scrollbar-width: thin; /* Firefox scrollbar styling */
+  scrollbar-color: var(--primary-green) var(--accent-green);
+}
+
+/* Hide scrollbar for a cleaner look but keep functionality */
+.filterContainer::-webkit-scrollbar {
+    height: 8px;
+}
+
+.filterContainer::-webkit-scrollbar-thumb {
+    background: var(--primary-green);
+    border-radius: 4px;
+}
+
+.filterButton {
+  background-color: var(--background-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap; /* Prevent button text from wrapping */
+}
+
+.filterButton:hover {
+  background-color: var(--accent-green);
+
+}
+
+.filterButton.active {
+  /* background-color: #d0a157; */
+  background-color: var(--sbux-dark-green);
+  color: white;
+  border-color: var(--sbux-dark-green);
+  font-weight: bold;
+}
+
+.filterWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.logicToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #3f3f3f;
+  padding: 6px;
+  border-radius: 20px;
+  color: #ccc;
+  font-size: 0.8rem;
+}
+
+.logicToggle button {
+  border: none;
+  background-color: transparent;
+  color: #ccc;
+  padding: 0.4rem 0.8rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.logicToggle button.activeLogic {
+  background-color: #00a862;
+  color: white;
+  font-weight: bold;
+}

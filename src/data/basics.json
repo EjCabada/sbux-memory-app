@@ -1,0 +1,27 @@
+[
+  {
+    "id": "b1",
+    "question": "Shots and syrups in a Hot Caffè Latte",
+    "answer": "Short: 1, Tall: 1, Grande: 2, Venti: 2"
+  },
+  {
+    "id": "b2",
+    "question": "Shots and syrups in an Iced Caffè Latte",
+    "answer": "Short: 2, Tall: 3, Grande: 4, Venti: 5"
+  },
+  {
+    "id": "b3",
+    "question": "Shots and syrups in an Iced Shaken Espresso",
+    "answer": "Tall: 2, Grande: 3, Venti: 4"
+  },
+  {
+    "id": "b4",
+    "question": "Shots and syrups in an Americano",
+    "answer": "Short: 1, Tall: 2, Grande: 3, Venti: 4"
+  },
+  {
+    "id": "b5",
+    "question": "Frap Roast and syrups for a Frappuccino",
+    "answer": "Tall: 2, Grande: 3, Venti: 4 (Coffee & Crème Base)"
+  }
+]
