@@ -799,7 +799,7 @@
   },
   {
     "name": "Caramel Ribbon Crunch Frappuccino",
-    "tags": ["cold bar", "Frappuccinos", "seasonal drinks"],
+    "tags": ["cold bar", "Frappuccinos", "core drinks"],
     "comments": "",
     "components": {
       "frap roast": [2, 3, 4],
@@ -821,7 +821,7 @@
   },
   {
     "name": "Mocha Cookie Crumble Frappuccino",
-    "tags": ["cold bar", "Frappuccinos", "seasonal drinks"],
+    "tags": ["cold bar", "Frappuccinos", "core drinks"],
     "comments": "",
     "components": {
       "frap roast": [2, 3, 4],
