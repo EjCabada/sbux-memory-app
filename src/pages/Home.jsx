@@ -34,7 +34,6 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
-      {/* Top Bar with Version Tag */}
       <div className={styles.topBar}>
         <button
           className={styles.versionBadge}
@@ -45,13 +44,11 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Hero Header */}
       <header className={styles.hero}>
         <h1>Barista Training Deck</h1>
         <p>Master hot bar routines, pump ratios, and recipe sequencing.</p>
       </header>
 
-      {/* Global Recipe Search */}
       <SearchBar
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
@@ -60,7 +57,6 @@ const Home = () => {
         onSuggestionClick={navigateToSearch}
       />
 
-      {/* Curriculum Sections */}
       <div className={styles.curriculumContainer}>
         {/* Section: Week 2 */}
         <section className={styles.curriculumSection}>
@@ -73,7 +69,6 @@ const Home = () => {
               Core espresso drinks, cortados, shots, and syrup pumps.
             </p>
           </div>
-
           <div className={styles.cardsGrid}>
             {/* Mode 1: Flashcards */}
             <Link to="/quiz/flashcards" className={styles.curriculumCard}>
@@ -91,11 +86,11 @@ const Home = () => {
               </div>
             </Link>
 
-            {/* Mode 2: Quiz */}
+            {/* Mode 2: Speed Quiz */}
             <Link to="/quiz/beginner" className={styles.curriculumCard}>
               <div className={styles.cardHeader}>
                 <span className={styles.cardTagQuiz}>Timed / Mastery</span>
-                <span className={styles.cardIcon}>⏱️</span>
+                <span className={styles.cardIcon}>⚡</span>
               </div>
               <h3>Hot Bar Speed Quiz</h3>
               <p>
@@ -103,6 +98,22 @@ const Home = () => {
               </p>
               <div className={styles.cardFooter}>
                 <span>Instant Feedback</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
+
+            {/* Mode 3: Sequencing Drill */}
+            <Link to="/quiz/sequencing" className={styles.curriculumCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTagQuiz}>Workflow Drill</span>
+                <span className={styles.cardIcon}>🔄</span>
+              </div>
+              <h3>Hot Bar Sequencing</h3>
+              <p>
+                Interleaved 10-drink sliding queue. Train the initiate &rarr; upkeep &rarr; pivot routine without single-threading.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Dual-Slot Sim</span>
                 <span className={styles.arrowIcon}>&rarr;</span>
               </div>
             </Link>
@@ -120,12 +131,11 @@ const Home = () => {
               Comprehensive beverage build process, sequencing, and step-by-step assembly.
             </p>
           </div>
-
           <div className={styles.cardsGrid}>
             <Link to="/quiz/advanced" className={`${styles.curriculumCard} ${styles.finalCard}`}>
               <div className={styles.cardHeader}>
                 <span className={styles.finalTag}>Full Build Evaluation</span>
-                <span className={styles.cardIcon}>🎓</span>
+                <span className={styles.cardIcon}>📝</span>
               </div>
               <h3>Drink Build Quiz</h3>
               <p>
