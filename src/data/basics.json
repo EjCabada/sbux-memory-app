@@ -1,27 +1,114 @@
 [
   {
-    "id": "b1",
-    "question": "Shots and syrups in a Hot Caffè Latte",
-    "answer": "Short: 1, Tall: 1, Grande: 2, Venti: 2"
+    "id": "latte",
+    "name": "Caffè Latte",
+    "question": "How many shots and pumps in a Caffè Latte?",
+    "sizes": [
+      { "size": "Tl", "shots": "1", "pumps": "3" },
+      { "size": "Gr", "shots": "2", "pumps": "4" },
+      { "size": "Vt Ht", "shots": "2", "pumps": "5" },
+      { "size": "Vt Icd", "shots": "3", "pumps": "6" }
+    ],
+    "notes": "Standard 2% steamed milk with light foam."
   },
   {
-    "id": "b2",
-    "question": "Shots and syrups in an Iced Caffè Latte",
-    "answer": "Short: 2, Tall: 3, Grande: 4, Venti: 5"
+    "id": "cappuccino",
+    "name": "Cappuccino",
+    "question": "How many shots and pumps in a Cappuccino?",
+    "sizes": [
+      { "size": "Tl", "shots": "1", "pumps": "3" },
+      { "size": "Gr", "shots": "2", "pumps": "4" },
+      { "size": "Vt Ht", "shots": "2", "pumps": "5" }
+    ],
+    "notes": "Aerate milk 6–8 seconds for dense foam. (Hot only)."
   },
   {
-    "id": "b3",
-    "question": "Shots and syrups in an Iced Shaken Espresso",
-    "answer": "Tall: 2, Grande: 3, Venti: 4"
+    "id": "caramel-macchiato",
+    "name": "Caramel Macchiato",
+    "question": "How many shots and pumps in a Caramel Macchiato?",
+    "sizes": [
+      { "size": "Tl", "shots": "1", "pumps": "2 (Vanilla)" },
+      { "size": "Gr", "shots": "2", "pumps": "3 (Vanilla)" },
+      { "size": "Vt Ht", "shots": "2", "pumps": "4 (Vanilla)" },
+      { "size": "Vt Icd", "shots": "3", "pumps": "5 (Vanilla)" }
+    ],
+    "notes": "Gets 1 less pump of vanilla because caramel drizzle counts as sweetness."
   },
   {
-    "id": "b4",
-    "question": "Shots and syrups in an Americano",
-    "answer": "Short: 1, Tall: 2, Grande: 3, Venti: 4"
+    "id": "mocha",
+    "name": "Mocha / White Mocha",
+    "question": "How many shots and pumps in a Mocha / White Mocha?",
+    "sizes": [
+      { "size": "Tl", "shots": "1", "pumps": "3" },
+      { "size": "Gr", "shots": "2", "pumps": "4" },
+      { "size": "Vt Ht", "shots": "2", "pumps": "5" },
+      { "size": "Vt Icd", "shots": "3", "pumps": "6" }
+    ],
+    "notes": "Swirl espresso with sauce, topped with whipped cream."
   },
   {
-    "id": "b5",
-    "question": "Frap Roast and syrups for a Frappuccino",
-    "answer": "Tall: 2, Grande: 3, Venti: 4 (Coffee & Crème Base)"
+    "id": "flat-white",
+    "name": "Flat White",
+    "question": "How many shots and pumps in a Flat White?",
+    "sizes": [
+      { "size": "Tl", "shots": "2R", "pumps": "3 (if asked)" },
+      { "size": "Gr", "shots": "3R", "pumps": "4 (if asked)" },
+      { "size": "Vt Ht", "shots": "3R", "pumps": "5 (if asked)" },
+      { "size": "Vt Icd", "shots": "4R", "pumps": "6 (if asked)" }
+    ],
+    "notes": "Uses Whole Milk and Ristretto (R) shots by default (+1 shot over Latte)."
+  },
+  {
+    "id": "americano",
+    "name": "Caffè Americano",
+    "question": "How many shots and pumps in an Americano?",
+    "sizes": [
+      { "size": "Tl", "shots": "2", "pumps": "3 (if asked)" },
+      { "size": "Gr", "shots": "3", "pumps": "4 (if asked)" },
+      { "size": "Vt Ht", "shots": "4", "pumps": "5 (if asked)" },
+      { "size": "Vt Icd", "shots": "4", "pumps": "6 (if asked)" }
+    ],
+    "notes": "Shots: 2, 3, 4, 4. Hot water to the top."
+  },
+  {
+    "id": "chai-latte",
+    "name": "Chai Tea Latte",
+    "question": "How many shots and pumps in a Chai Tea Latte?",
+    "sizes": [
+      { "size": "Tl", "shots": "0", "pumps": "3 Chai" },
+      { "size": "Gr", "shots": "0", "pumps": "4 Chai" },
+      { "size": "Vt Ht", "shots": "0", "pumps": "5 Chai" },
+      { "size": "Vt Icd", "shots": "0", "pumps": "6 Chai" }
+    ],
+    "notes": "Hot: half water, half 2% steamed milk. Iced: no water, milk to line 3."
+  },
+  {
+    "id": "hot-chocolate",
+    "name": "Hot Chocolate",
+    "question": "How many shots and pumps in a Hot Chocolate?",
+    "sizes": [
+      { "size": "Tl", "shots": "0", "pumps": "3 Mocha" },
+      { "size": "Gr", "shots": "0", "pumps": "4 Mocha" },
+      { "size": "Vt Ht", "shots": "0", "pumps": "5 Mocha" }
+    ],
+    "notes": "Steamed 2% milk, mocha sauce, whipped cream, mocha drizzle. (Hot only)."
+  },
+  {
+    "id": "cortado",
+    "name": "Cortado",
+    "question": "How many shots and pumps in a Cortado?",
+    "sizes": [
+      { "size": "Short (8oz)", "shots": "3R Blonde", "pumps": "0" }
+    ],
+    "notes": "Served only in Short size. 3 Blonde Ristretto shots with steamed whole milk."
+  },
+  {
+    "id": "brown-sugar-cortado",
+    "name": "Brown Sugar Oatmilk Cortado",
+    "question": "How many shots and pumps in a Brown Sugar Oatmilk Cortado?",
+    "sizes": [
+      { "size": "Short (8oz)", "shots": "3R Blonde", "pumps": "2 Brown Sugar" }
+    ],
+    "notes": "Served only in Short size. 3 Blonde Ristretto shots, cinnamon powder, and steamed oatmilk."
   }
 ]

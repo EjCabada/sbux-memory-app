@@ -1,0 +1,112 @@
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.topBar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.versionBadge {
+  background: var(--background-secondary);
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  border-radius: 20px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.versionBadge:hover {
+  background: var(--primary-green);
+  color: white;
+}
+
+.hero h1 {
+  font-size: 1.8rem;
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-top: 0;
+}
+
+.modeGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  .modeGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.modeCard {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-decoration: none;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.modeCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.badge {
+  background: #00a862;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.badgeSecondary {
+  background: #555;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.modeCard p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+}

@@ -1,0 +1,62 @@
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modalContent {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  padding: 1.5rem;
+  color: #fff;
+  position: relative;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.modalHeader {
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.versionTag {
+  background-color: #00a862;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  margin-left: 0.5rem;
+}
+
+.featuresList {
+  list-style: disc;
+  padding-left: 1.25rem;
+  color: #ddd;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}

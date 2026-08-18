@@ -843,4 +843,107 @@
       ]
     }
   }
+        ,
+    {
+    "name": "Hot Chocolate",
+    "tags": [
+      "espresso bar",
+      "core drinks"
+    ],
+    "comments": "Made without espresso, using mocha sauce and steamed milk, topped with whipped cream and mocha drizzle.",
+    "components": {
+      "pumps": [
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "steps": {
+      "hot": [
+        "Pump Mocha sauce into the cup",
+        "Aerate milk to proper temperature",
+        "Pour steamed milk into the cup",
+        "Stir to dissolve the mocha sauce",
+        "Top with whipped cream and mocha drizzle"
+      ]
+    }
+  } 
+        ,
+    {
+    "name": "Hazelnut Shaken Espresso",
+    "tags": [
+      "core drinks",
+      "espresso bar"
+    ],
+    "comments": "Made with Blonde espresso shots, Hazelnut syrup, and Oatmilk.",
+    "components": {
+      "shots": [
+        2,
+        3,
+        4
+      ],
+      "pumps": [
+        1,
+        2,
+        "-",
+        3
+      ]
+    },
+    "steps": {
+      "iced": [
+        "Pump Hazelnut syrup into shaker",
+        "Queue Blonde shots into shot glass",
+        "Add ice to shaker",
+        "Add shots into shaker",
+        "Shake 10 times",
+        "Pour into cup and top with Oatmilk"
+      ]
+    }
+  },
+  {
+    "name": "Cortado",
+    "tags": [
+      "espresso bar",
+      "core drinks"
+    ],
+    "comments": "Served in a Short size only, made with Blonde espresso ristretto shots and whole milk.",
+    "components": {
+      "shots": [
+        "3R"
+      ]
+    },
+    "steps": {
+      "hot": [
+        "Queue 3 Blonde Ristretto shots",
+        "Aerate whole milk",
+        "Pour steamed whole milk over shots"
+      ]
+    }
+  },
+  {
+    "name": "Brown Sugar Oatmilk Cortado",
+    "tags": [
+      "espresso bar",
+      "core drinks"
+    ],
+    "comments": "Served in a Short size only, made with 3 Blonde Ristretto shots, brown sugar syrup, cinnamon powder, and steamed oatmilk.",
+    "components": {
+      "shots": [
+        "3R"
+      ],
+      "pumps": [
+        2
+      ]
+    },
+    "steps": {
+      "hot": [
+        "Pump Brown Sugar syrup into the cup",
+        "Queue 3 Blonde Ristretto shots into the cup",
+        "Add cinnamon powder",
+        "Aerate oatmilk",
+        "Pour steamed oatmilk over shots and syrup"
+      ]
+    }
+  }
 ]

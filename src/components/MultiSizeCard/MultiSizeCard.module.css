@@ -1,0 +1,139 @@
+.container {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.questionHeader {
+  text-align: center;
+  color: #ffffff;
+}
+
+.questionHeader h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+  color: #d4e9e2;
+}
+
+.questionHeader p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+/* Mobile-First Layout: Stack vertically on mobile */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Desktop: Horizontal layout spreading 1-4 cards */
+@media (min-width: 768px) {
+  .cardsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+.flipCard {
+  background-color: transparent;
+  height: 170px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.flipCardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  border-radius: 12px;
+}
+
+.flipCard.flipped .flipCardInner {
+  transform: rotateY(180deg);
+}
+
+.cardFront,
+.cardBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cardFront {
+  background-color: #1e3932;
+  border: 2px solid #00a862;
+  color: white;
+}
+
+.cardFront .sizeLabel {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #d4e9e2;
+}
+
+.cardFront .tapHint {
+  font-size: 0.75rem;
+  color: #a0c2b5;
+  margin-top: 0.5rem;
+}
+
+.cardBack {
+  background-color: #2c2c2c;
+  border: 2px solid #00a862;
+  color: white;
+  transform: rotateY(180deg);
+  text-align: left;
+  align-items: flex-start;
+  justify-content: space-evenly;
+}
+
+.dataRow {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.dataLabel {
+  color: #a0a0a0;
+  font-weight: 600;
+}
+
+.dataValue {
+  color: #5cb85c;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.notesBox {
+  background: rgba(0, 0, 0, 0.25);
+  border-left: 3px solid #00a862;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #ccc;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}

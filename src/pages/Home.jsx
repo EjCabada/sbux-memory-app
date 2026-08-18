@@ -1,31 +1,30 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar/SearchBar.jsx";
-import QuizChoiceMenu from "../components/QuizChoiceMenu/QuizChoiceMenu.jsx";
-import recipesData from "../data/recipes.json"; // Import recipe data
+import VersionModal, { CURRENT_VERSION } from "../components/VersionModal/VersionModal.jsx";
+import recipesData from "../data/recipes.json";
+import styles from "./Home.module.css";
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [isVersionOpen, setIsVersionOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Handles changes in the search input
   const handleSearchChange = (term) => {
     setSearchTerm(term);
     if (term.length > 1) {
-      // Filter recipes based on the input term
       const filtered = recipesData
         .filter((recipe) =>
-          recipe.name.toLowerCase().includes(term.toLowerCase()),
+          recipe.name.toLowerCase().includes(term.toLowerCase())
         )
-        .slice(0, 5); // Get the top 5 matches
+        .slice(0, 5);
       setSuggestions(filtered);
     } else {
-      setSuggestions([]); // Clear suggestions if search term is short
+      setSuggestions([]);
     }
   };
 
-  // Navigates to the search page with the selected term
   const navigateToSearch = (term) => {
     if (!term.trim()) return;
     setSearchTerm("");
@@ -33,30 +32,49 @@ const Home = () => {
     navigate("/search", { state: { searchTerm: term } });
   };
 
-  // Handler for submitting the search form (e.g., pressing Enter)
-  const handleSearchSubmit = (term) => {
-    navigateToSearch(term);
-  };
-
-  // Handler for clicking a suggestion from the dropdown
-  const handleSuggestionClick = (term) => {
-    navigateToSearch(term);
-  };
-
   return (
-    <div>
-      <p>
-        Your digital flashcard deck to help memorize recipes and succeed on the
-        floor.
-      </p>
+    <div className={styles.homeContainer}>
+      <div className={styles.topBar}>
+        <button
+          className={styles.versionBadge}
+          onClick={() => setIsVersionOpen(true)}
+        >
+          {CURRENT_VERSION} &bull; What's New?
+        </button>
+      </div>
+
+      <header className={styles.hero}>
+        <h1>Barista Memory Deck</h1>
+        <p>Master Hot Bar recipes, shot counts, and syrup pumps.</p>
+      </header>
+
       <SearchBar
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
-        onSearchSubmit={handleSearchSubmit}
+        onSearchSubmit={navigateToSearch}
         suggestions={suggestions}
-        onSuggestionClick={handleSuggestionClick}
+        onSuggestionClick={navigateToSearch}
       />
-      <QuizChoiceMenu />
+
+      <div className={styles.modeGrid}>
+        <Link to="/quiz/beginner" className={styles.modeCard}>
+          <div className={styles.cardHeader}>
+            <span className={styles.badge}>Hot Bar Focus</span>
+            <h3>Flashcard Mode</h3>
+          </div>
+          <p>Drill shots and pumps across all cup sizes with multi-size flip cards.</p>
+        </Link>
+
+        <Link to="/quiz/advanced" className={styles.modeCard}>
+          <div className={styles.cardHeader}>
+            <span className={styles.badgeSecondary}>Full Builds</span>
+            <h3>Drink Build Quiz</h3>
+          </div>
+          <p>Practice complete step-by-step beverage recipes and sequencing.</p>
+        </Link>
+      </div>
+
+      {isVersionOpen && <VersionModal onClose={() => setIsVersionOpen(false)} />}
     </div>
   );
 };

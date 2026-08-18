@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import basicsData from "../data/basics.json";
-import Flashcard from "../components/Flashcard/Flashcard.jsx";
-import styles from "./Quiz.module.css"; // Re-using the same styles
+import MultiSizeCard from "../components/MultiSizeCard/MultiSizeCard.jsx";
+import styles from "./Quiz.module.css";
 
 const MASTERY_THRESHOLD = 2;
 
@@ -10,27 +10,25 @@ const BeginnerQuiz = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   useEffect(() => {
-    const savedDeck = localStorage.getItem("srs-deck-beginner");
-    let initialDeck;
+    const savedDeck = localStorage.getItem("srs-deck-hotbar-basics");
     if (savedDeck) {
-      initialDeck = JSON.parse(savedDeck);
+      setDeck(JSON.parse(savedDeck));
     } else {
-      initialDeck = basicsData.map((card) => ({
+      const initialDeck = basicsData.map((card) => ({
         ...card,
         masteryLevel: 0,
       }));
+      setDeck(initialDeck);
     }
-    setDeck(initialDeck);
   }, []);
 
-  const activeDeck = React.useMemo(
+  const activeDeck = useMemo(
     () => deck.filter((card) => card.masteryLevel < MASTERY_THRESHOLD),
-    [deck],
+    [deck]
   );
 
   const handleKnowledgeUpdate = (level) => {
     if (activeDeck.length === 0) return;
-
     const currentCard = activeDeck[currentCardIndex];
     let cardWasMastered = false;
 
@@ -38,7 +36,6 @@ const BeginnerQuiz = () => {
       if (card.id === currentCard.id) {
         let newMasteryLevel = card.masteryLevel;
         if (level === 2) {
-          // 2 = Know Well
           newMasteryLevel++;
         } else {
           newMasteryLevel = 0;
@@ -52,7 +49,7 @@ const BeginnerQuiz = () => {
     });
 
     setDeck(updatedDeck);
-    localStorage.setItem("srs-deck-beginner", JSON.stringify(updatedDeck));
+    localStorage.setItem("srs-deck-hotbar-basics", JSON.stringify(updatedDeck));
 
     if (cardWasMastered && currentCardIndex >= activeDeck.length - 1) {
       setCurrentCardIndex(0);
@@ -67,7 +64,7 @@ const BeginnerQuiz = () => {
       masteryLevel: 0,
     }));
     setDeck(initialDeck);
-    localStorage.setItem("srs-deck-beginner", JSON.stringify(initialDeck));
+    localStorage.setItem("srs-deck-hotbar-basics", JSON.stringify(initialDeck));
     setCurrentCardIndex(0);
   };
 
@@ -76,18 +73,16 @@ const BeginnerQuiz = () => {
 
   return (
     <div className={styles.quizContainer}>
-      <h2>Beginner Quiz</h2>
-      <p>
-        Learn the fundamentals. Master a card by marking it "Know Well" twice.
-      </p>
+      <h2>Hot Bar Flashcards</h2>
+      <p>Test your knowledge of shots and syrup pumps per size.</p>
 
       <div className={styles.flashcardArea}>
         {currentCard ? (
-          <Flashcard basicCard={currentCard} />
+          <MultiSizeCard item={currentCard} />
         ) : (
           <div className={styles.allDone}>
-            <h3>You've mastered all the basics!</h3>
-            <p>Reset your progress to start again.</p>
+            <h3>All Hot Bar drinks mastered!</h3>
+            <p>Reset progress to drill again.</p>
           </div>
         )}
       </div>
@@ -118,8 +113,8 @@ const BeginnerQuiz = () => {
       <div className={styles.quizStats}>
         <div className={styles.cardCounter}>
           {activeDeck.length > 0
-            ? `Card ${currentCardIndex + 1} of ${activeDeck.length}`
-            : "No cards left."}
+            ? `Drink ${currentCardIndex + 1} of ${activeDeck.length}`
+            : "Deck Completed"}
         </div>
         <div className={styles.knownCounter}>
           ({knownCardsCount} / {deck.length} mastered)
