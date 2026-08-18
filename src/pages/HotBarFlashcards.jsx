@@ -9,18 +9,18 @@ const HotBarFlashcards = () => {
   const [deck, setDeck] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
-  useEffect(() => {
-    const savedDeck = localStorage.getItem("srs-deck-hotbar-flashcards");
-    if (savedDeck) {
-      setDeck(JSON.parse(savedDeck));
-    } else {
-      const initialDeck = basicsData.map((card) => ({
-        ...card,
-        masteryLevel: 0,
-      }));
-      setDeck(initialDeck);
-    }
-  }, []);
+useEffect(() => {
+  const savedDeck = sessionStorage.getItem("srs-deck-hotbar-flashcards");
+  if (savedDeck) {
+    setDeck(JSON.parse(savedDeck));
+  } else {
+    const initialDeck = basicsData.map((card) => ({
+      ...card,
+      masteryLevel: 0,
+    }));
+    setDeck(initialDeck);
+  }
+}, []);
 
   const activeDeck = useMemo(
     () => deck.filter((card) => card.masteryLevel < MASTERY_THRESHOLD),
@@ -49,7 +49,7 @@ const HotBarFlashcards = () => {
     });
 
     setDeck(updatedDeck);
-    localStorage.setItem("srs-deck-hotbar-flashcards", JSON.stringify(updatedDeck));
+    sessionStorage.setItem("srs-deck-hotbar-flashcards", JSON.stringify(updatedDeck));
 
     if (cardWasMastered && currentCardIndex >= activeDeck.length - 1) {
       setCurrentCardIndex(0);
@@ -64,7 +64,7 @@ const HotBarFlashcards = () => {
       masteryLevel: 0,
     }));
     setDeck(initialDeck);
-    localStorage.setItem("srs-deck-hotbar-flashcards", JSON.stringify(initialDeck));
+    sessionStorage.setItem("srs-deck-hotbar-flashcards", JSON.stringify(initialDeck));
     setCurrentCardIndex(0);
   };
 

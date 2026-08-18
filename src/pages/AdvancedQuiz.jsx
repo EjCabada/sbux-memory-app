@@ -12,22 +12,22 @@ const AdvancedQuiz = () => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [filterLogic, setFilterLogic] = useState("AND"); // State for filter logic
 
-  useEffect(() => {
-    const savedDeck = localStorage.getItem("srs-deck-advanced");
-    let initialDeck;
-    if (savedDeck) {
-      initialDeck = JSON.parse(savedDeck).map((card) => ({
-        ...card,
-        masteryLevel: card.masteryLevel || 0,
-      }));
-    } else {
-      initialDeck = recipesData.map((recipe) => ({
-        ...recipe,
-        masteryLevel: 0,
-      }));
-    }
-    setDeck(initialDeck);
-  }, []);
+useEffect(() => {
+  const savedDeck = sessionStorage.getItem("srs-deck-advanced");
+  let initialDeck;
+  if (savedDeck) {
+    initialDeck = JSON.parse(savedDeck).map((card) => ({
+      ...card,
+      masteryLevel: card.masteryLevel || 0,
+    }));
+  } else {
+    initialDeck = recipesData.map((recipe) => ({
+      ...recipe,
+      masteryLevel: 0,
+    }));
+  }
+  setDeck(initialDeck);
+}, []);
 
   const handleFilterToggle = (tag) => {
     setActiveFilters((prev) =>
@@ -78,7 +78,7 @@ const AdvancedQuiz = () => {
     });
 
     setDeck(updatedDeck);
-    localStorage.setItem("srs-deck-advanced", JSON.stringify(updatedDeck));
+    sessionStorage.setItem("srs-deck-advanced", JSON.stringify(updatedDeck));
 
     if (cardWasMastered && currentCardIndex >= activeDeck.length - 1) {
       setCurrentCardIndex(0);
@@ -93,7 +93,7 @@ const AdvancedQuiz = () => {
       masteryLevel: 0,
     }));
     setDeck(initialDeck);
-    localStorage.setItem("srs-deck-advanced", JSON.stringify(initialDeck));
+    sessionStorage.setItem("srs-deck-advanced", JSON.stringify(initialDeck));
     setCurrentCardIndex(0);
   };
 
