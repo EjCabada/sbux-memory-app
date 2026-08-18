@@ -34,20 +34,24 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
+      {/* Top Bar with Version Tag */}
       <div className={styles.topBar}>
         <button
           className={styles.versionBadge}
           onClick={() => setIsVersionOpen(true)}
         >
+          <span className={styles.versionDot}></span>
           {CURRENT_VERSION} &bull; What's New?
         </button>
       </div>
 
+      {/* Hero Header */}
       <header className={styles.hero}>
-        <h1>Barista Memory Deck</h1>
-        <p>Master Hot Bar recipes, shot counts, and syrup pumps.</p>
+        <h1>Barista Training Deck</h1>
+        <p>Master hot bar routines, pump ratios, and recipe sequencing.</p>
       </header>
 
+      {/* Global Recipe Search */}
       <SearchBar
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
@@ -56,22 +60,84 @@ const Home = () => {
         onSuggestionClick={navigateToSearch}
       />
 
-      <div className={styles.modeGrid}>
-        <Link to="/quiz/beginner" className={styles.modeCard}>
-          <div className={styles.cardHeader}>
-            <span className={styles.badge}>Hot Bar Focus</span>
-            <h3>Flashcard Mode</h3>
+      {/* Curriculum Sections */}
+      <div className={styles.curriculumContainer}>
+        {/* Section: Week 2 */}
+        <section className={styles.curriculumSection}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionTitleGroup}>
+              <span className={styles.weekBadge}>Active Training</span>
+              <h2>Week 2: Hot Bar</h2>
+            </div>
+            <p className={styles.sectionSubtext}>
+              Core espresso drinks, cortados, shots, and syrup pumps.
+            </p>
           </div>
-          <p>Drill shots and pumps across all cup sizes with multi-size flip cards.</p>
-        </Link>
 
-        <Link to="/quiz/advanced" className={styles.modeCard}>
-          <div className={styles.cardHeader}>
-            <span className={styles.badgeSecondary}>Full Builds</span>
-            <h3>Drink Build Quiz</h3>
+          <div className={styles.cardsGrid}>
+            {/* Mode 1: Flashcards */}
+            <Link to="/quiz/flashcards" className={styles.curriculumCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTag}>Study Mode</span>
+                <span className={styles.cardIcon}>📇</span>
+              </div>
+              <h3>Hot Bar Flashcards</h3>
+              <p>
+                Flip individual size cards (Tl, Gr, Vt Ht, Vt Icd) to drill shot and pump ratios.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Multi-Size Drill</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
+
+            {/* Mode 2: Quiz */}
+            <Link to="/quiz/beginner" className={styles.curriculumCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTagQuiz}>Timed / Mastery</span>
+                <span className={styles.cardIcon}>⏱️</span>
+              </div>
+              <h3>Hot Bar Speed Quiz</h3>
+              <p>
+                Rapid-fire shots and pumps test with 1/2/5-min timers, perfection mode, and spaced retesting.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Instant Feedback</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
           </div>
-          <p>Practice complete step-by-step beverage recipes and sequencing.</p>
-        </Link>
+        </section>
+
+        {/* Section: Final Exam */}
+        <section className={styles.curriculumSection}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionTitleGroup}>
+              <span className={styles.lockedBadge}>🔒 Locked</span>
+              <h2 className={styles.lockedTitle}>Final (Do not look yet!)</h2>
+            </div>
+            <p className={styles.sectionSubtext}>
+              Comprehensive beverage build process, sequencing, and step-by-step assembly.
+            </p>
+          </div>
+
+          <div className={styles.cardsGrid}>
+            <Link to="/quiz/advanced" className={`${styles.curriculumCard} ${styles.finalCard}`}>
+              <div className={styles.cardHeader}>
+                <span className={styles.finalTag}>Full Build Evaluation</span>
+                <span className={styles.cardIcon}>🎓</span>
+              </div>
+              <h3>Drink Build Quiz</h3>
+              <p>
+                Full beverage recipe steps, routine ordering, toppings, and modifiers across all bar stations.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Comprehensive Test</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
+          </div>
+        </section>
       </div>
 
       {isVersionOpen && <VersionModal onClose={() => setIsVersionOpen(false)} />}
