@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,11 +19,15 @@
   border-radius: 14px;
   width: 100%;
   max-width: 480px;
+  max-height: 85vh; /* Lock height to viewport */
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
   color: #fff;
   position: relative;
   text-align: left;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
 }
 
 .closeButton {
@@ -43,8 +47,65 @@
   margin-bottom: 1rem;
 }
 
+.scrollContainer {
+  overflow-y: auto; /* Make inner content scrollable */
+  padding-right: 0.25rem;
+  flex-grow: 1;
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #ccc;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.versionSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  padding: 0.75rem 0;
+  margin-top: 1rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.versionSectionHeader:hover opacity {
+  opacity: 0.8;
+}
+
+.versionTitleGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggleIcon {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: bold;
+}
+
 .versionTag {
   background-color: #00a862;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  margin-left: 0.5rem;
+}
+
+.versionTagMuted {
+  background-color: #555;
   color: white;
   font-size: 0.75rem;
   font-weight: bold;
@@ -58,5 +119,6 @@
   padding-left: 1.25rem;
   color: #ddd;
   line-height: 1.6;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  margin: 0.5rem 0 1rem 0;
 }

@@ -90,10 +90,10 @@
     },
     "steps": {
       "hot": [
+        "Add classic sweetener into cup",
         "Pour milk into steaming pitcher",
         "Add matcha powder scoops",
         "Steam milk and matcha together",
-        "Add classic sweetener into cup",
         "Pour into cup"
       ],
       "iced": [
@@ -226,10 +226,9 @@
     },
     "steps": {
       "hot": [
-        "Pump Chai concentrate and Classic sweetener",
-        "Fill with hot water to halfway point",
-        "Aerate milk",
-        "Top with steamed milk and foam"
+        "Pump Chai concentrate, Classic sweetener, and milk into pitcher",
+        "Aerate contents",
+        "Pour into the cup"
       ],
       "iced": [
         "Pump Chai concentrate and Classic sweetener",
