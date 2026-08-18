@@ -9,22 +9,216 @@
   box-sizing: border-box;
 }
 
+/* Mobile-Viewport Fit: No overflow/scroll on mobile screens */
 .quizWrapper {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0.85rem;
   width: 100%;
   max-width: 480px;
-  min-height: calc(100dvh - 70px);
-  padding: 0.75rem 1rem 1.25rem;
+  padding: 0.5rem 1rem 0.5rem;
   margin: 0 auto;
   box-sizing: border-box;
 }
 
-/* Header & Menu */
+/* Header & Status */
+.topStatus {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.exitBtn {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+}
+
+.timerBadge {
+  background: #2a2a2a;
+  color: #00a862;
+  font-weight: bold;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 16px;
+}
+
+/* Drink Banner Card */
+.drinkHeaderCard {
+  background: #1e3932;
+  border-radius: 14px;
+  padding: 1rem 1rem 0.85rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.drinkCategory {
+  color: #a0c2b5;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.drinkName {
+  color: #ffffff;
+  font-size: 1.45rem;
+  margin: 0.25rem 0 0.5rem;
+  font-weight: 700;
+}
+
+/* Ascending Cup Size Bars */
+.visualSizeContainer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 0.4rem 0 0.85rem;
+  height: 52px;
+}
+
+.sizeBarWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  opacity: 0.3;
+  transition: all 0.2s ease;
+}
+
+.activeSizeBarWrapper {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.sizeBar {
+  width: 22px;
+  background: #666;
+  border-radius: 4px 4px 2px 2px;
+  transition: background-color 0.2s ease;
+}
+
+.activeSizeBar {
+  background: #bba075;
+  box-shadow: 0 0 12px rgba(187, 160, 117, 0.7);
+}
+
+.sizeBarLabel {
+  font-size: 0.72rem;
+  color: #bbb;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.activeSizeBarWrapper .sizeBarLabel {
+  color: #f7c873;
+  font-weight: bold;
+}
+
+.sizeBadge {
+  display: inline-block;
+  background: #bba075;
+  color: white;
+  padding: 0.3rem 0.95rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Elevated Input Keypads */
+.inputArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.selectorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.groupLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.okLabel {
+  color: #5cb85c;
+  font-size: 0.82rem;
+  font-weight: bold;
+}
+
+.errLabel {
+  color: #d9534f;
+  font-size: 0.82rem;
+  font-weight: bold;
+}
+
+.keypadRow {
+  display: flex;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.keyBtn {
+  flex: 1;
+  min-height: 52px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  font-size: 1.15rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.selectedKey {
+  background: #00704a;
+  color: white;
+  border-color: #00a862;
+}
+
+.correctKey {
+  background: #5cb85c !important;
+  color: white !important;
+  border-color: #4cae4c !important;
+  animation: pulseGreen 0.25s ease;
+}
+
+.wrongKey {
+  background: #d9534f !important;
+  color: white !important;
+  border-color: #d43f3a !important;
+  animation: shake 0.25s ease;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Menu & Summary Styles */
 .header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .header h2 {
@@ -53,15 +247,15 @@
 }
 
 .modeSection h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .modeList {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
 .perfectionCard {
@@ -80,16 +274,16 @@
 }
 
 .modeTitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: bold;
   color: #d4e9e2;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .modeDesc {
   font-size: 0.8rem;
   color: #ccc;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .timedRow {
@@ -120,155 +314,11 @@
   cursor: pointer;
 }
 
-/* Active Quiz View */
-.topStatus {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.exitBtn {
-  background: transparent;
-  border: none;
-  color: #888;
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0.4rem;
-}
-
-.timerBadge {
-  background: #2a2a2a;
-  color: #00a862;
-  font-weight: bold;
-  font-size: 0.9rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 16px;
-}
-
-.drinkHeaderCard {
-  background: #1e3932;
-  border-radius: 14px;
-  padding: 1.25rem 1rem;
-  text-align: center;
-  margin: 0.75rem 0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-}
-
-.drinkCategory {
-  color: #a0c2b5;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.drinkName {
-  color: #ffffff;
-  font-size: 1.4rem;
-  margin: 0.35rem 0 0.75rem;
-}
-
-.sizeBadge {
-  display: inline-block;
-  background: #bba075;
-  color: white;
-  padding: 0.35rem 1rem;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.95rem;
-}
-
-/* Selectors */
-.inputArea {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.selectorGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.groupLabel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.okLabel {
-  color: #5cb85c;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-
-.errLabel {
-  color: #d9534f;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-
-.keypadRow {
-  display: flex;
-  gap: 0.4rem;
-  width: 100%;
-}
-
-.keyBtn {
-  flex: 1;
-  min-height: 48px;
-  border-radius: 8px;
-  border: 1px solid #444;
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-}
-
-.selectedKey {
-  background: #00704a;
-  color: white;
-  border-color: #00a862;
-}
-
-.correctKey {
-  background: #5cb85c !important;
-  color: white !important;
-  border-color: #4cae4c !important;
-  animation: pulseGreen 0.3s ease;
-}
-
-.wrongKey {
-  background: #d9534f !important;
-  color: white !important;
-  border-color: #d43f3a !important;
-  animation: shake 0.3s ease;
-}
-
-@keyframes pulseGreen {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}
-
-/* Summary Card */
 .summaryCard {
   background: var(--background-secondary);
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  padding: 1.5rem;
+  padding: 1.25rem;
   width: 100%;
   text-align: center;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
@@ -277,26 +327,26 @@
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  margin: 1.25rem 0;
+  gap: 0.6rem;
+  margin: 1rem 0;
 }
 
 .statBox {
   background: rgba(0, 0, 0, 0.05);
-  padding: 0.75rem 0.25rem;
+  padding: 0.65rem 0.2rem;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
 }
 
 .statVal {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: bold;
   color: var(--primary-green);
 }
 
 .statLbl {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   margin-top: 0.2rem;
 }
@@ -304,39 +354,39 @@
 .studySection {
   text-align: left;
   border-top: 1px solid var(--border-color);
-  padding-top: 1rem;
-  margin-top: 1rem;
+  padding-top: 0.85rem;
+  margin-top: 0.85rem;
 }
 
 .studySection h4 {
   margin: 0 0 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-primary);
 }
 
 .studyList {
-  padding-left: 1.25rem;
+  padding-left: 1.2rem;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .studyList li {
   display: flex;
   justify-content: space-between;
-  margin: 0.35rem 0;
+  margin: 0.3rem 0;
 }
 
 .errorPill {
   background: #d9534f;
   color: white;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
   border-radius: 10px;
 }
 
 .flawlessMsg {
   color: #5cb85c;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin: 0.25rem 0;
 }
 
@@ -344,14 +394,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 .primaryAction {
   background: var(--primary-green);
   color: white;
   border: none;
-  padding: 0.85rem;
+  padding: 0.8rem;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
@@ -361,12 +411,11 @@
   background: transparent;
   border: 1px solid #666;
   color: var(--text-primary);
-  padding: 0.75rem;
+  padding: 0.7rem;
   border-radius: 8px;
   cursor: pointer;
 }
 
-/* Modal */
 .modalBackdrop {
   position: fixed;
   top: 0;

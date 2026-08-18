@@ -5,7 +5,6 @@ const MultiSizeCard = ({ item }) => {
   const [flippedCards, setFlippedCards] = useState({});
 
   useEffect(() => {
-    // Reset flipped state when a new drink item loads
     setFlippedCards({});
   }, [item]);
 
@@ -21,8 +20,10 @@ const MultiSizeCard = ({ item }) => {
   return (
     <div className={styles.container}>
       <div className={styles.questionHeader}>
-        <h2>{item.question}</h2>
-        <p>Tap each size card to reveal shots & pumps</p>
+        <span className={styles.categoryBadge}>HOT BAR CORE DRINK</span>
+        <h2 className={styles.drinkTitle}>{item.name}</h2>
+        <p className={styles.questionSubtext}>{item.question}</p>
+        <span className={styles.tapInstruction}>Tap each size card to reveal shots & pumps</span>
       </div>
 
       <div className={styles.cardsGrid}>
@@ -37,7 +38,7 @@ const MultiSizeCard = ({ item }) => {
               <div className={styles.flipCardInner}>
                 <div className={styles.cardFront}>
                   <span className={styles.sizeLabel}>{s.size}</span>
-                  <span className={styles.tapHint}>Tap to reveal</span>
+                  <span className={styles.tapHint}>Tap to flip</span>
                 </div>
                 <div className={styles.cardBack}>
                   <div className={styles.dataRow}>

@@ -7,23 +7,13 @@
     ],
     "comments": "",
     "components": {
-      "shots": [
-        1,
-        2,
-        2,
-        3
-      ],
-      "pumps": [
-        2,
-        3,
-        4,
-        5
-      ]
+      "shots": [1, 2, 2, 3],
+      "pumps": [3, 4, 5, 6]
     },
     "steps": {
       "hot": [
         "Queue Shots",
-        "Aerate Milk to proper temperature (150-170°F)",
+        "Aerate Milk to proper temperature (150-170 F)",
         "Pour shots into cup",
         "Free pour steamed milk",
         "Top with a dot of foam"
@@ -44,18 +34,8 @@
     ],
     "comments": "",
     "components": {
-      "shots": [
-        1,
-        2,
-        2,
-        3
-      ],
-      "pumps": [
-        2,
-        3,
-        4,
-        5
-      ]
+      "shots": [1, 2, 2, 3],
+      "pumps": [2, 3, 4, 5]
     },
     "steps": {
       "hot": [
@@ -84,21 +64,11 @@
     ],
     "comments": "A wetter cappuccino has more steamed milk, a drier one has more foam.",
     "components": {
-      "shots": [
-        1,
-        2,
-        2,
-        "-"
-      ],
-      "pumps": [
-        3,
-        4,
-        5,
-        "-"
-      ]
+      "shots": [1, 2, 2, "-"],
+      "pumps": [3, 4, 5, "-"]
     },
     "steps": {
-       "hot": [
+      "hot": [
         "Queue Shots",
         "Aerate milk for 6-8 seconds to create significant foam",
         "Pour shots into cup",
@@ -115,32 +85,22 @@
     ],
     "comments": "",
     "components": {
-      "matcha scoops": [
-        2,
-        3,
-        4,
-        4
-      ],
-            "pumps": [
-        2,
-        3,
-        4,
-        4
-      ]
+      "matcha scoops": [2, 3, 4, 4],
+      "classic sweetener pumps": [3, 4, 5, 6]
     },
     "steps": {
-       "hot": [
+      "hot": [
         "Pour milk into steaming pitcher",
         "Add matcha powder scoops",
         "Steam milk and matcha together",
-        "Add classic sweetner into cup",
+        "Add classic sweetener into cup",
         "Pour into cup"
       ],
       "iced": [
         "Pour milk to the third line in the cup",
         "Add matcha powder scoops into foam blender",
-        "Add classic into foam blender",
-        "Add milke and ice to the foam blender",
+        "Add classic sweetener into foam blender",
+        "Add milk and ice to the foam blender",
         "Blend on #3 or #4 for Venti",
         "Pour into cup"
       ]
@@ -154,18 +114,8 @@
     ],
     "comments": "",
     "components": {
-      "shots": [
-        1,
-        2,
-        2,
-        3
-      ],
-      "pumps": [
-        3,
-        4,
-        5,
-        6
-      ]
+      "shots": [1, 2, 2, 3],
+      "pumps": [3, 4, 5, 6]
     },
     "steps": {
       "hot": [
@@ -192,12 +142,8 @@
     ],
     "comments": "Uses whole milk and ristretto shots by default.",
     "components": {
-      "shots": [
-        "2R",
-        "3R",
-        "3R",
-        "4R"
-      ]
+      "shots": ["2R", "3R", "3R", "4R"],
+      "pumps": [3, 4, 5, 6]
     },
     "steps": {
       "hot": [
@@ -206,7 +152,7 @@
         "Aerate whole milk",
         "Free pour steamed milk, finishing with a dot of foam"
       ],
-            "iced": [
+      "iced": [
         "Queue Ristretto Shots into cup",
         "Add milk to the third line",
         "Add ice"
@@ -221,18 +167,8 @@
     ],
     "comments": "",
     "components": {
-      "shots": [
-        1,
-        2,
-        2,
-        3
-      ],
-      "pumps": [
-        3,
-        4,
-        5,
-        6
-      ]
+      "shots": [1, 2, 2, 3],
+      "pumps": [3, 4, 5, 6]
     },
     "steps": {
       "hot": [
@@ -259,28 +195,18 @@
     ],
     "comments": "",
     "components": {
-      "shots": [
-        2,
-        3,
-        4,
-        4
-      ],
-            "pumps": [
-        3,
-        4,
-        5,
-        6
-      ]
+      "shots": [2, 3, 4, 4],
+      "pumps": [3, 4, 5, 6]
     },
     "steps": {
-       "hot": [
+      "hot": [
         "Queue shots into cup",
-        "pump syrups if asked",
+        "Pump syrups if asked",
         "Add hot water"
       ],
       "iced": [
         "Queue shots into cup",
-                "pump syrups if asked",
+        "Pump syrups if asked",
         "Add cold water to the third line",
         "Add ice"
       ]
@@ -290,56 +216,97 @@
     "name": "Chai Latte",
     "tags": [
       "cold bar",
+      "espresso bar",
       "core drinks"
     ],
-    "comments": "",
+    "comments": "Chai concentrate is not sweet, so standard builds include Classic sweetener pumps.",
     "components": {
-      "chai pumps": [
-        2,
-        3,
-        4,
-        5
-      ],
-            "sweetner pumps": [
-        3,
-        4,
-        5,
-        6
-      ]
+      "chai pumps": [2, 3, 4, 5],
+      "classic sweetener pumps": [3, 4, 5, 6]
     },
     "steps": {
       "hot": [
-        "Pump Chai concentrate",
+        "Pump Chai concentrate and Classic sweetener",
         "Fill with hot water to halfway point",
         "Aerate milk",
         "Top with steamed milk and foam"
       ],
       "iced": [
-        "Pump Chai concentrate",
+        "Pump Chai concentrate and Classic sweetener",
         "Add milk to the third line",
         "Add ice"
       ]
     }
   },
   {
-    "name": "Shaken Espresso",
+    "name": "Hot Chocolate",
+    "tags": [
+      "espresso bar",
+      "core drinks"
+    ],
+    "comments": "Made without espresso, using mocha sauce and steamed milk, topped with whipped cream and mocha drizzle.",
+    "components": {
+      "pumps": [3, 4, 5, 6]
+    },
+    "steps": {
+      "hot": [
+        "Pump Mocha sauce into the cup",
+        "Aerate milk to proper temperature",
+        "Pour steamed milk into the cup",
+        "Stir to dissolve the mocha sauce",
+        "Top with whipped cream and mocha drizzle"
+      ]
+    }
+  },
+  {
+    "name": "Cortado",
+    "tags": [
+      "espresso bar",
+      "core drinks"
+    ],
+    "comments": "Served in a Short size only, made with Blonde espresso ristretto shots and whole milk.",
+    "components": {
+      "shots": ["3R"]
+    },
+    "steps": {
+      "hot": [
+        "Queue 3 Blonde Ristretto shots",
+        "Aerate whole milk",
+        "Pour steamed whole milk over shots"
+      ]
+    }
+  },
+  {
+    "name": "Brown Sugar Oatmilk Cortado",
+    "tags": [
+      "espresso bar",
+      "core drinks"
+    ],
+    "comments": "Served in a Short size only, made with 3 Blonde Ristretto shots, brown sugar syrup, cinnamon powder, and steamed oatmilk.",
+    "components": {
+      "shots": ["3R"],
+      "pumps": [2]
+    },
+    "steps": {
+      "hot": [
+        "Pump Brown Sugar syrup into the cup",
+        "Queue 3 Blonde Ristretto shots into the cup",
+        "Add cinnamon powder",
+        "Aerate oatmilk",
+        "Pour steamed oatmilk over shots and syrup"
+      ]
+    }
+  },
+  {
+    "name": "Iced Shaken Espresso",
     "tags": [
       "core drinks",
       "espresso bar"
     ],
     "comments": "Default is made with Classic syrup and 2% milk.",
     "components": {
-      "shots": [
-        2,
-        3,
-        4
-      ],
-      "pumps": [
-        1,
-        2,
-        "-",
-        3
-      ]
+      "shots": [2, 3, 4],
+      "pumps": [1, 2, 3]
     },
     "steps": {
       "iced": [
@@ -360,17 +327,8 @@
     ],
     "comments": "Made with Oatmilk and Cinnamon powder.",
     "components": {
-      "shots": [
-        2,
-        3,
-        4
-      ],
-      "pumps": [
-        1,
-        2,
-        "-",
-        3
-      ]
+      "shots": [2, 3, 4],
+      "pumps": [1, 2, 3]
     },
     "steps": {
       "iced": [
@@ -378,499 +336,13 @@
         "Queue shots into shot glass",
         "Add Cinnamon Powder (2 shakes)",
         "Add ice to shaker",
-                "Add shots into shaker",
+        "Add shots into shaker",
         "Shake 10 times",
         "Pour into cup and top with Oatmilk"
       ]
     }
   },
   {
-    "name": "Iced Tea",
-    "tags": [
-      "core drinks",
-      "cold bar",
-      "iced teas"
-    ],
-    "comments": "Default is sweetened with Classic, goes up to trenta",
-    "components": {
-      "pumps": [
-        3,
-        4,
-        "-",
-        6,
-        7
-      ]
-    },
-    "steps": {
-      "iced": [
-        "Pour tea concentrate to the first line in shaker",
-        "Add water to the third line in shaker",
-        "Pump Liquid Cane Sugar",
-        "Add ice and shake",
-        "Pour into cup"
-      ]
-    }
-  },
-  {
-    "name": "Iced Peach Green Tea",
-    "tags": [
-      "core drinks",
-      "cold bar",
-      "iced teas"
-    ],
-    "comments": "Default is made with Classic syrup, goes up to trenta",
-    "components": {
-      "pumps": [
-        3,
-        4,
-        "-",
-        6,
-        7
-      ]
-    },
-    "steps": {
-       "iced": [
-        "Pour Green Tea concentrate to the first line in shaker",
-        "Add water to the third line in shaker",
-        "Pump Peach-flavored syrup",
-        "Add ice and shake",
-        "Pour into cup"
-      ]
-    }
-  },
-  {
-    "name": "Coffee Frappuccino",
-    "tags": [
-      "cold bar",
-      "Frappuccinos",
-      "core drinks"
-    ],
-    "comments": "",
-    "components": {
-      "frap roast": [
-        2,
-        3,
-        4
-      ],
-            "syrup (if requested)": [
-        2,
-        3,
-        4
-      ]
-    },
-    "steps": {
-      "iced": [
-        "Pump Frap Roast into cup",
-        "Pour whole milk to the lower line of the cup",
-        "Pour into blender pitcher",
-        "Add ice",
-        "Pump Coffee Base",
-        "Blend on setting #1"
-      ]
-    }
-  },
-  {
-    "name": "Mocha Frappuccino",
-    "tags": [
-      "cold bar",
-      "Frappuccinos",
-      "core drinks"
-    ],
-    "comments": "",
-    "components": {
-      "frap roast": [
-        2,
-        3,
-        4
-      ],
-      "mocha sauce": [
-        2,
-        3,
-        4
-      ]
-    },
-    "steps": {
-       "iced": [
-        "Pump Frap Roast into cup",
-        "Pour whole milk to the lower line of the cup",
-        "Pour into blender pitcher",
-        "Pump Mocha Sauce",
-        "Add ice",
-        "Pump Coffee Base",
-        "Blend on setting #1",
-        "Top with whipped cream"
-      ]
-    }
-  },
-  {
-    "name": "Caramel Frappuccino",
-    "tags": [
-      "cold bar",
-      "Frappuccinos",
-      "core drinks"
-    ],
-    "comments": "",
-    "components": {
-      "frap roast": [
-        2,
-        3,
-        4
-      ],
-      "caramel syrup": [
-        2,
-        3,
-        4
-      ]
-    },
-    "steps": {
-       "iced": [
-        "Pump Frap Roast into cup",
-        "Pour whole milk to the lower line of the cup",
-        "Pour into blender pitcher",
-        "Pump Caramel Syrup",
-        "Add ice",
-        "Pump Coffee Base",
-        "Blend on setting #1",
-        "Top with whipped cream and caramel drizzle"
-      ]
-    }
-  },
-  {
-    "name": "Vanilla Bean Frappuccino",
-    "tags": [
-      "cold bar",
-      "Frappuccinos",
-      "core drinks"
-    ],
-    "comments": "",
-    "components": {
-      "powder scoops": [
-        2,
-        3,
-        4
-      ]
-    },
-    "steps": {
-       "iced": [
-        "Pour whole milk to the lower line of the cup",
-        "Pour into blender pitcher",
-        "Add scoops of Vanilla Bean powder",
-        "Add ice",
-        "Pump Crème Base",
-        "Blend on setting #1",
-        "Top with whipped cream"
-      ]
-    }
-  },
-  {
-    "name": "Green Tea Creme Frappuccino",
-    "tags": [
-      "cold bar",
-      "Frappuccinos",
-      "core drinks"
-    ],
-    "comments": "",
-    "components": {
-      "powder scoops": [
-        2,
-        3,
-        4
-      ],
-      "classic syrup": [
-        2,
-        3,
-        4
-      ]
-    },
-    "steps": {
-       "iced": [
-        "Pour whole milk to the lower line of the cup",
-        "Pour into blender pitcher",
-        "Add scoops of Matcha powder",
-        "Pump Classic Syrup",
-        "Add ice",
-        "Pump Crème Base",
-        "Blend on setting #1",
-        "Top with whipped cream"
-      ]
-    }
-  },
-  {
-    "name": "Strawberry Creme Frappuccino",
-    "tags": [
-      "cold bar",
-      "Frappuccinos",
-      "core drinks"
-    ],
-    "comments": "",
-    "components": {
-      "classic syrup": [
-        2,
-        3,
-        4
-      ]
-    },
-    "steps": {
-       "iced": [
-        "Pour Strawberry Puree to the lower ridge",
-        "Pour whole milk to the lower line of the cup",
-        "Pour into blender pitcher",
-        "Pump Classic Syrup",
-        "Add ice",
-        "Pump Crème Base",
-        "Blend on setting #1",
-        "Pour Strawberry Puree to the lower ridge (again)",
-        "Top with whipped cream"
-      ]
-    }
-  },
-  {
-    "name": "Iced Coffee",
-    "tags": ["core drinks", "cold bar"],
-    "comments": "Default is sweetened with Classic syrup. Defaul milk is 2%, Goes up to trenta",
-    "components": {
-      "pumps": [3, 4, 6, 7]
-    },
-    "steps": {
-      "iced": [
-        "Pump Classic syrup",
-        "Add Iced Coffee to the third line",
-        "Add ice"
-      ]
-    }
-  },
-  {
-    "name": "Cold Brew",
-    "tags": ["core drinks", "cold bar", "cold brew"],
-    "comments": "No sweetner or milk is default, but if asked default sweetner is Classic syrup. Defaul milk is 2%, Goes up to trenta",
-    "components": {
-      "pumps": [3, 4, 6, 7]
-    },
-    "steps": {
-      "iced": ["Pour Cold Brew to the third line", "Add ice"]
-    }
-  },
-  {
-    "name": "Vanilla Sweet Cream Cold Brew",
-    "tags": ["core drinks", "cold bar", "cold brew"],
-    "comments": "",
-    "components": {
-      "pumps": [1, 2, 3, 4]
-    },
-    "steps": {
-      "iced": [
-        "Pump Vanilla syrup",
-        "Pour Cold Brew to the third line",
-        "Add ice",
-        "Top with a splash of Vanilla Sweet Cream"
-      ]
-    }
-  },
-  {
-    "name": "Salted Caramel Cream Cold Brew",
-    "tags": ["core drinks", "cold bar", "cold brew"],
-    "comments": "",
-    "components": {
-      "pumps": [1 , 2, 3, 4]
-    },
-    "steps": {
-      "iced": [
-        "Pump Caramel syrup",
-        "Pour Cold Brew to the third line",
-        "Add ice",
-        "Top with Salted Caramel Cream Cold Foam",
-        "(Salted Foam: sweetcream + caramel syrup (2 pumps) + 2 salt portions)"
-      ]
-    }
-  },
-  {
-    "name": "Nitro Cold Brew",
-    "tags": ["core drinks", "cold bar", "cold brew"],
-    "comments": "Served without ice, up to a grande size",
-    "components": {},
-    "steps": {
-      "iced": ["Pour Nitro Cold Brew directly from the tap into the cup"]
-    }
-  },
-  {
-    "name": "Vanilla Sweet Cream Nitro Cold Brew",
-    "tags": ["core drinks", "cold bar", "cold brew"],
-    "comments": "Served without ice.",
-    "components": {},
-    "steps": {
-      "iced": [
-        "Pour Nitro Cold Brew from the tap, leaving room at the top",
-        "Top with a splash of Vanilla Sweet Cream"
-      ]
-    }
-  },
-    {
-    "name": "Refreshers (strawberry acai & mango dragon fruit)",
-    "tags": [
-      "cold bar",
-      "refreshers"
-    ],
-    "comments": "goes up to trenta",
-    "components": {
-            "fruit scoops": [
-        1,
-        1,
-        "-",
-        1,
-        2
-      ],
-            "pumps (if requested)": [
-        3,
-        4,
-        "-",
-        6,
-        7
-      ]
-    },
-    "steps": {
-      "iced": [
-        "Pour Refresher base to the first line in shaker",
-        "Add water/lemonade to the third line in shaker",
-        "Add corresponding fruit inclusions",
-        "Add ice and shake  10x",
-        "Pour into cup"
-      ]
-    }
-  },
-  {
-    "name": "Pink Drink",
-    "tags": ["core drinks", "cold bar", "refreshers"],
-    "comments": "Strawberry Acai Refresher with Coconut milk.",
-    "components": {
-            "fruit scoops": [
-        1,
-        1,
-        "-",
-        1,
-        2
-      ],
-            "pumps (if requested)": [
-        3,
-        4,
-        "-",
-        6,
-        7
-      ]
-    },
-    "steps": {
-      "iced": [
-        "Pour Strawberry Acai base to the first line in shaker",
-        "Pour Coconut milk to the third line in shaker",
-        "Add strawberry inclusions",
-        "Add ice and shake",
-        "Pour into cup"
-      ]
-    }
-  },
-  {
-    "name": "Dragon Drink",
-    "tags": ["core drinks", "cold bar", "refreshers"],
-    "comments": "Mango Dragonfruit Refresher with Coconut milk.",
-    "components": {
-            "fruit scoops": [
-        1,
-        1,
-        "-",
-        1,
-        2
-      ],
-            "pumps (if requested)": [
-        3,
-        4,
-        "-",
-        6,
-        7
-      ]
-    },
-    "steps": {
-      "iced": [
-        "Pour Mango Dragonfruit base to the first line in shaker",
-        "Pour Coconut milk to the third line in shaker",
-        "Add dragonfruit inclusions",
-        "Add ice and shake",
-        "Pour into cup"
-      ]
-    }
-  },
-  {
-    "name": "Caramel Ribbon Crunch Frappuccino",
-    "tags": ["cold bar", "Frappuccinos", "core drinks"],
-    "comments": "",
-    "components": {
-      "frap roast": [2, 3, 4],
-      "dark caramel sauce": [2, 3, 4]
-    },
-    "steps": {
-      "iced": [
-        "Pour frap roast into cup",
-        "Pour whole milk to the lower line",
-        "Pour into blender",
-        "Pump dark caramel sauce",
-        "Add ice and coffee base",
-        "Blend on #1",
-        "Layer cup with whipped cream and dark caramel",
-        "Pour Frappuccino into cup",
-        "Top with whipped cream, caramel drizzle, and caramel crunch topping"
-      ]
-    }
-  },
-  {
-    "name": "Mocha Cookie Crumble Frappuccino",
-    "tags": ["cold bar", "Frappuccinos", "core drinks"],
-    "comments": "",
-    "components": {
-      "frap roast": [2, 3, 4],
-      "mocha sauce": [2, 3, 4],
-      "frap chips": [2, 3, 4]
-    },
-    "steps": {
-      "iced": [
-                "Pour frap roast into cup",
-        "Pour whole milk to the lower line",
-        "Pour into blender",
-        "Pump mocha sauce",
-        "Add frap chips",
-        "Add ice and coffee base",
-        "Blend on #1",
-        "Layer cup with whipped cream, mocha drizzle, and cookie topping",
-        "Pour Frappuccino into cup",
-        "Top with whipped cream, mocha drizzle, and more cookie topping"
-      ]
-    }
-  }
-        ,
-    {
-    "name": "Hot Chocolate",
-    "tags": [
-      "espresso bar",
-      "core drinks"
-    ],
-    "comments": "Made without espresso, using mocha sauce and steamed milk, topped with whipped cream and mocha drizzle.",
-    "components": {
-      "pumps": [
-        3,
-        4,
-        5,
-        6
-      ]
-    },
-    "steps": {
-      "hot": [
-        "Pump Mocha sauce into the cup",
-        "Aerate milk to proper temperature",
-        "Pour steamed milk into the cup",
-        "Stir to dissolve the mocha sauce",
-        "Top with whipped cream and mocha drizzle"
-      ]
-    }
-  } 
-        ,
-    {
     "name": "Hazelnut Shaken Espresso",
     "tags": [
       "core drinks",
@@ -878,17 +350,8 @@
     ],
     "comments": "Made with Blonde espresso shots, Hazelnut syrup, and Oatmilk.",
     "components": {
-      "shots": [
-        2,
-        3,
-        4
-      ],
-      "pumps": [
-        1,
-        2,
-        "-",
-        3
-      ]
+      "shots": [2, 3, 4],
+      "pumps": [1, 2, 3]
     },
     "steps": {
       "iced": [
@@ -898,51 +361,6 @@
         "Add shots into shaker",
         "Shake 10 times",
         "Pour into cup and top with Oatmilk"
-      ]
-    }
-  },
-  {
-    "name": "Cortado",
-    "tags": [
-      "espresso bar",
-      "core drinks"
-    ],
-    "comments": "Served in a Short size only, made with Blonde espresso ristretto shots and whole milk.",
-    "components": {
-      "shots": [
-        "3R"
-      ]
-    },
-    "steps": {
-      "hot": [
-        "Queue 3 Blonde Ristretto shots",
-        "Aerate whole milk",
-        "Pour steamed whole milk over shots"
-      ]
-    }
-  },
-  {
-    "name": "Brown Sugar Oatmilk Cortado",
-    "tags": [
-      "espresso bar",
-      "core drinks"
-    ],
-    "comments": "Served in a Short size only, made with 3 Blonde Ristretto shots, brown sugar syrup, cinnamon powder, and steamed oatmilk.",
-    "components": {
-      "shots": [
-        "3R"
-      ],
-      "pumps": [
-        2
-      ]
-    },
-    "steps": {
-      "hot": [
-        "Pump Brown Sugar syrup into the cup",
-        "Queue 3 Blonde Ristretto shots into the cup",
-        "Add cinnamon powder",
-        "Aerate oatmilk",
-        "Pour steamed oatmilk over shots and syrup"
       ]
     }
   }

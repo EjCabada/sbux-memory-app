@@ -14,33 +14,36 @@ const SHOT_OPTIONS_STANDARD = ["0", "1", "2", "3", "4"];
 const SHOT_OPTIONS_RISTRETTO = ["0", "1R", "2R", "3R", "4R"];
 const PUMP_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
 
-// Helper to shuffle array
+// Ascending Cup Size Spec (Short -> Tall -> Grande -> Venti Hot -> Venti Iced)
+const getSizeBarSpec = (sizeStr) => {
+  if (sizeStr.includes("Short")) return { rank: 1, height: 16, label: "Short" };
+  if (sizeStr.includes("Tall")) return { rank: 2, height: 24, label: "Tall" };
+  if (sizeStr.includes("Grande")) return { rank: 3, height: 32, label: "Grande" };
+  if (sizeStr.includes("Venti Hot")) return { rank: 4, height: 40, label: "Vt Ht" };
+  if (sizeStr.includes("Venti Iced")) return { rank: 5, height: 48, label: "Vt Icd" };
+  return { rank: 3, height: 30, label: sizeStr };
+};
+
 const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
 const BeginnerQuiz = () => {
-  // Game State
   const [selectedMode, setSelectedMode] = useState(null);
-  const [gameState, setGameState] = useState("menu"); // "menu" | "playing" | "summary"
+  const [gameState, setGameState] = useState("menu");
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
-  // Queue & Card State
   const [drinkPool, setDrinkPool] = useState([]);
   const [currentDrink, setCurrentDrink] = useState(null);
   const [shuffledSizes, setShuffledSizes] = useState([]);
   const [currentSizeIndex, setCurrentSizeIndex] = useState(0);
 
-  // User input selection & feedback
   const [selectedShot, setSelectedShot] = useState(null);
   const [selectedPump, setSelectedPump] = useState(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
 
-  // Drink Retest Tracking Algorithm
-  // drinkTracking: { [drinkId]: { consecutiveFails: number, errorsThisSession: number, cleanPasses: number } }
   const [drinkTracking, setDrinkTracking] = useState({});
   const [currentDrinkHadError, setCurrentDrinkHadError] = useState(false);
-  const retestQueueRef = useRef([]); // Holds scheduled retest drink IDs
+  const retestQueueRef = useRef([]);
 
-  // Stats & Timers
   const [timeLeft, setTimeLeft] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [totalCardsAttempted, setTotalCardsAttempted] = useState(0);
@@ -48,7 +51,6 @@ const BeginnerQuiz = () => {
   const [wrongCardsCount, setWrongCardsCount] = useState(0);
   const timerIntervalRef = useRef(null);
 
-  // Start a new quiz session
   const startQuiz = (mode) => {
     setSelectedMode(mode);
     setGameState("playing");
@@ -59,29 +61,23 @@ const BeginnerQuiz = () => {
     setCurrentDrinkHadError(false);
     retestQueueRef.current = [];
 
-    // Initialize tracking dictionary
     const initialTracking = {};
     basicsData.forEach((d) => {
       initialTracking[d.id] = { consecutiveFails: 0, errorsThisSession: 0, cleanPasses: 0 };
     });
     setDrinkTracking(initialTracking);
 
-    // Initial randomized pool of all drinks
     const shuffledPool = shuffle(basicsData);
     const firstDrink = shuffledPool[0];
-    const remainingPool = shuffledPool.slice(1);
-
-    setDrinkPool(remainingPool);
+    setDrinkPool(shuffledPool.slice(1));
     loadDrink(firstDrink);
 
-    // Setup Timers
     if (mode === MODES.TIME_1) setTimeLeft(60);
     else if (mode === MODES.TIME_2) setTimeLeft(120);
     else if (mode === MODES.TIME_5) setTimeLeft(300);
     else setTimeLeft(0);
   };
 
-  // Timer Tick
   useEffect(() => {
     if (gameState !== "playing") return;
 
@@ -106,7 +102,6 @@ const BeginnerQuiz = () => {
     return () => clearInterval(timerIntervalRef.current);
   }, [gameState, selectedMode]);
 
-  // Load a drink and randomize its sizes
   const loadDrink = (drink) => {
     setCurrentDrink(drink);
     setShuffledSizes(shuffle(drink.sizes));
@@ -117,30 +112,25 @@ const BeginnerQuiz = () => {
     setIsEvaluating(false);
   };
 
-  // End quiz and trigger summary
   const endQuiz = () => {
     clearInterval(timerIntervalRef.current);
     setGameState("summary");
   };
 
-  // Current active size card
   const activeSize = shuffledSizes[currentSizeIndex];
 
-  // Handle Shot Button Click
   const handleShotClick = (val) => {
     if (isEvaluating || selectedShot !== null) return;
     setSelectedShot(val);
     checkAutoAdvance(val, selectedPump);
   };
 
-  // Handle Pump Button Click
   const handlePumpClick = (val) => {
     if (isEvaluating || selectedPump !== null) return;
     setSelectedPump(val);
     checkAutoAdvance(selectedShot, val);
   };
 
-  // Evaluate answer once both are chosen
   const checkAutoAdvance = (shotVal, pumpVal) => {
     if (shotVal === null || pumpVal === null) return;
 
@@ -157,7 +147,6 @@ const BeginnerQuiz = () => {
       setWrongCardsCount((prev) => prev + 1);
       setCurrentDrinkHadError(true);
 
-      // Record drink error
       setDrinkTracking((prev) => ({
         ...prev,
         [currentDrink.id]: {
@@ -167,28 +156,23 @@ const BeginnerQuiz = () => {
       }));
     }
 
-    // Delay to let the barista see the green/red highlight
     setTimeout(() => {
-      handleNextCard(isPass);
-    }, isPass ? 600 : 1300);
+      handleNextCard();
+    }, isPass ? 550 : 1200);
   };
 
-  // Advance card or finish drink set
-  const handleNextCard = (wasCardCorrect) => {
+  const handleNextCard = () => {
     setSelectedShot(null);
     setSelectedPump(null);
     setIsEvaluating(false);
 
     if (currentSizeIndex < shuffledSizes.length - 1) {
-      // Move to next size of the current drink
       setCurrentSizeIndex((prev) => prev + 1);
     } else {
-      // Completed all sizes for this drink! Apply retest algorithm
       handleDrinkCompletion();
     }
   };
 
-  // Core Spaced-Repetition Queue Logic
   const handleDrinkCompletion = () => {
     const drinkId = currentDrink.id;
     const currentTrack = drinkTracking[drinkId] || { consecutiveFails: 0, cleanPasses: 0 };
@@ -203,20 +187,16 @@ const BeginnerQuiz = () => {
       }));
 
       if (newFails === 1) {
-        // Failed 1st time: Insert 1 other drink first, then retest this drink
         if (nextPool.length > 0) {
           const bufferDrink = nextPool.shift();
           nextQueue = [bufferDrink.id, drinkId, ...nextQueue];
         } else {
-          // If pool empty, retest next
           nextQueue.push(drinkId);
         }
       } else {
-        // Failed 2+ times in a row: Retest IMMEDIATELY
         nextQueue.unshift(drinkId);
       }
     } else {
-      // Clean pass with 0 errors across all sizes!
       setDrinkTracking((prev) => ({
         ...prev,
         [drinkId]: { ...prev[drinkId], consecutiveFails: 0, cleanPasses: prev[drinkId].cleanPasses + 1 },
@@ -226,7 +206,6 @@ const BeginnerQuiz = () => {
     retestQueueRef.current = nextQueue;
     setDrinkPool(nextPool);
 
-    // Pick Next Drink
     if (nextQueue.length > 0) {
       const nextDrinkId = nextQueue.shift();
       retestQueueRef.current = nextQueue;
@@ -237,20 +216,16 @@ const BeginnerQuiz = () => {
       setDrinkPool(nextPool);
       loadDrink(nextDrink);
     } else {
-      // Pool and retest queue are completely empty!
       if (selectedMode === MODES.PERFECTION) {
         endQuiz();
       } else {
-        // For timed modes, recycle drinks to keep drilling until time is up
         const recycled = shuffle(basicsData);
-        const nextDrink = recycled[0];
         setDrinkPool(recycled.slice(1));
-        loadDrink(nextDrink);
+        loadDrink(recycled[0]);
       }
     }
   };
 
-  // Top 3 Recommended Drinks to Study
   const getTopDrinksToStudy = () => {
     return Object.entries(drinkTracking)
       .map(([id, data]) => {
@@ -262,16 +237,13 @@ const BeginnerQuiz = () => {
       .slice(0, 3);
   };
 
-  // Format MM:SS
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  // -------------------------------------------------------------
-  // RENDER: Menu State
-  // -------------------------------------------------------------
+  // Menu State
   if (gameState === "menu") {
     return (
       <div className={styles.container}>
@@ -317,14 +289,9 @@ const BeginnerQuiz = () => {
               <h3>How the Quiz Works</h3>
               <ul>
                 <li><strong>One Drink & One Size:</strong> Each card tests shots & pumps for one specific cup size.</li>
-                <li><strong>Randomized Size Order:</strong> When a drink appears, you will test all of its sizes in random sequence.</li>
+                <li><strong>Visual Cup Indicators:</strong> Ascending height bars indicate which cup size is currently active.</li>
                 <li><strong>Instant Feedback:</strong> Tapping an option immediately turns green (correct) or red (incorrect).</li>
-                <li><strong>Smart Retest Queue:</strong>
-                  <ul>
-                    <li>1st mistake on a drink: Tested again after 1 intervening drink.</li>
-                    <li>2+ mistakes in a row: Retested immediately!</li>
-                  </ul>
-                </li>
+                <li><strong>Smart Retest Queue:</strong> Missed drinks return after 1 intervening drink, or immediately on repeat errors.</li>
               </ul>
               <button className={styles.modalCloseBtn} onClick={() => setIsRulesModalOpen(false)}>
                 Got It!
@@ -336,9 +303,7 @@ const BeginnerQuiz = () => {
     );
   }
 
-  // -------------------------------------------------------------
-  // RENDER: Summary State
-  // -------------------------------------------------------------
+  // Summary State
   if (gameState === "summary") {
     const studyList = getTopDrinksToStudy();
     const accuracy =
@@ -399,17 +364,20 @@ const BeginnerQuiz = () => {
     );
   }
 
-  // -------------------------------------------------------------
-  // RENDER: Active Quiz Card View
-  // -------------------------------------------------------------
+  // Active Quiz View
   const shotOptions = currentDrink.isRistretto ? SHOT_OPTIONS_RISTRETTO : SHOT_OPTIONS_STANDARD;
+
+  // Order sizes for ascending visual bars
+  const orderedSizes = [...currentDrink.sizes].sort((a, b) => {
+    return getSizeBarSpec(a.size).rank - getSizeBarSpec(b.size).rank;
+  });
 
   return (
     <div className={styles.quizWrapper}>
       {/* Top Status Bar */}
       <div className={styles.topStatus}>
         <button className={styles.exitBtn} onClick={() => setGameState("menu")}>
-          ✕ Exit
+          &times; Exit
         </button>
         <div className={styles.timerBadge}>
           {selectedMode === MODES.PERFECTION
@@ -420,14 +388,37 @@ const BeginnerQuiz = () => {
         </div>
       </div>
 
-      {/* Drink Banner Card */}
+      {/* Drink Banner Card with Ascending Cup Size Bars */}
       <div className={styles.drinkHeaderCard}>
         <span className={styles.drinkCategory}>Hot Bar Core Drink</span>
         <h2 className={styles.drinkName}>{currentDrink.name}</h2>
+
+        {/* Visual Ascending Cup Size Bars */}
+        <div className={styles.visualSizeContainer}>
+          {orderedSizes.map((s, idx) => {
+            const { height, label } = getSizeBarSpec(s.size);
+            const isActive = s.size === activeSize.size;
+            return (
+              <div
+                key={idx}
+                className={`${styles.sizeBarWrapper} ${
+                  isActive ? styles.activeSizeBarWrapper : ""
+                }`}
+              >
+                <div
+                  className={`${styles.sizeBar} ${isActive ? styles.activeSizeBar : ""}`}
+                  style={{ height: `${height}px` }}
+                />
+                <span className={styles.sizeBarLabel}>{label}</span>
+              </div>
+            );
+          })}
+        </div>
+
         <div className={styles.sizeBadge}>{activeSize.size}</div>
       </div>
 
-      {/* Inputs Section (Mobile Viewport Optimized) */}
+      {/* Inputs Section */}
       <div className={styles.inputArea}>
         {/* Shots Selector */}
         <div className={styles.selectorGroup}>
