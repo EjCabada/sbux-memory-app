@@ -1,66 +1,64 @@
 import React from "react";
+import { ACTION_DICTIONARY } from "../../utils/drinkAdapters";
 import styles from "./RecipeModal.module.css";
 
-// Helper function to format component names
-const formatComponentName = (name) => {
-  return name
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
+const formatKey = (k) => k.replace(/_/g, " ").toUpperCase();
 
 const RecipeModal = ({ recipe, onClose }) => {
-  // Prevents modal from closing when clicking on its content
-  const handleContentClick = (e) => {
-    e.stopPropagation();
-  };
+  const handleContentClick = (e) => e.stopPropagation();
+  if (!recipe) return null;
 
-  // Renders the recipe details
   const renderRecipeDetails = () => (
     <>
       <h3>{recipe.name}</h3>
 
-      {/* Components Section */}
-      <div className={styles.detailsGrid}>
-        {recipe.components &&
-          Object.entries(recipe.components).map(([name, values]) => (
-            <div key={name} className={styles.detailItem}>
-              <strong>{formatComponentName(name)}:</strong>
-              <p>{Array.isArray(values) ? values.join(" / ") : values}</p>
+      {recipe.sizes && (
+        <div className={styles.detailsGrid}>
+          {Object.entries(recipe.sizes).map(([sizeKey, values]) => (
+            <div key={sizeKey} className={styles.detailItem}>
+              <strong>{formatKey(sizeKey)}:</strong>
+              <p>
+                {values.shots !== undefined && `Shots: ${values.shots}`}
+                {values.pumps !== undefined && ` | Pumps: ${values.pumps}`}
+                {values.scoops !== undefined && ` | Scoops: ${values.scoops}`}
+              </p>
             </div>
           ))}
-      </div>
+        </div>
+      )}
 
-      {(recipe.steps?.hot || recipe.steps?.iced) && <hr />}
+      {(recipe.hot?.steps || recipe.iced?.steps) && <hr />}
       <div className={styles.stepsContainer}>
-        {recipe.steps?.hot && (
+        {recipe.hot?.steps && (
           <div>
             <h4>Hot Steps</h4>
             <ol>
-              {recipe.steps.hot.map((step, i) => (
-                <li key={i}>{step}</li>
+              {recipe.hot.steps.map((step, i) => (
+                <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
               ))}
             </ol>
           </div>
         )}
-        {recipe.steps?.iced && (
+        {recipe.iced?.steps && (
           <div>
             <h4>Iced Steps</h4>
             <ol>
-              {recipe.steps.iced.map((step, i) => (
-                <li key={i}>{step}</li>
+              {recipe.iced.steps.map((step, i) => (
+                <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
               ))}
             </ol>
           </div>
         )}
       </div>
 
-      {recipe.comments && <hr />}
       {recipe.comments && (
-        <div className={styles.commentsContainer}>
-          <h4>Comments</h4>
-          <p>{recipe.comments}</p>
-        </div>
+        <>
+          <hr />
+          <div className={styles.commentsContainer}>
+            <h4>Comments</h4>
+            <p>{recipe.comments}</p>
+          </div>
+        </>
       )}
     </>
   );

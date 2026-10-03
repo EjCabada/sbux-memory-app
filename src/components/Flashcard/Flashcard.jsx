@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { ACTION_DICTIONARY } from "../../utils/drinkAdapters";
 import styles from "./Flashcard.module.css";
 
-const formatComponentName = (name) => {
-  return name
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
+const formatKey = (k) => k.replace(/_/g, " ").toUpperCase();
 
 const Flashcard = ({ recipe, basicCard }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [activeTab, setActiveTab] = useState("components");
-
   const cardData = recipe || basicCard;
-  const isRecipe = !!recipe;
+  const isRecipe = Boolean(recipe);
 
   useEffect(() => {
     setIsFlipped(false);
@@ -28,7 +23,7 @@ const Flashcard = ({ recipe, basicCard }) => {
 
   if (!cardData) return null;
 
-    const renderRecipeBack = () => (
+  const renderRecipeBack = () => (
     <>
       <h3>{recipe.name}</h3>
       <div className={styles.tabContainer}>
@@ -36,7 +31,7 @@ const Flashcard = ({ recipe, basicCard }) => {
           className={`${styles.tabButton} ${activeTab === "components" ? styles.activeTab : ""}`}
           onClick={(e) => { e.stopPropagation(); setActiveTab("components"); }}
         >
-          Components
+          Ratios
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === "steps" ? styles.activeTab : ""}`}
@@ -53,30 +48,45 @@ const Flashcard = ({ recipe, basicCard }) => {
           </button>
         )}
       </div>
-
       <div className={styles.tabContent}>
-        {activeTab === "components" && (
+        {activeTab === "components" && recipe.sizes && (
           <div className={styles.detailsGrid}>
-            {recipe.components && Object.entries(recipe.components).map(([name, values]) => (
-              <div key={name} className={styles.detailItem}>
-                <strong>{formatComponentName(name)}:</strong>
-                <p>{Array.isArray(values) ? values.join(" / ") : values}</p>
+            {Object.entries(recipe.sizes).map(([sizeKey, values]) => (
+              <div key={sizeKey} className={styles.sizeDetail}>
+                <strong>{formatKey(sizeKey)}:</strong>
+                <p>
+                  {values.shots !== undefined && `Shots: ${values.shots}`}
+                  {values.pumps !== undefined && ` | Pumps: ${values.pumps}`}
+                  {values.scoops !== undefined && ` | Scoops: ${values.scoops}`}
+                </p>
               </div>
             ))}
           </div>
         )}
-
         {activeTab === "steps" && (
           <div className={styles.stepsContainer}>
-            {recipe.steps?.hot && (
-              <div><h4>Hot Steps</h4><ol>{recipe.steps.hot.map((step, i) => <li key={i}>{step}</li>)}</ol></div>
+            {recipe.hot?.steps && (
+              <div>
+                <h4>Hot Steps</h4>
+                <ol>
+                  {recipe.hot.steps.map((step, i) => (
+                    <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
+                  ))}
+                </ol>
+              </div>
             )}
-            {recipe.steps?.iced && (
-              <div><h4>Iced Steps</h4><ol>{recipe.steps.iced.map((step, i) => <li key={i}>{step}</li>)}</ol></div>
+            {recipe.iced?.steps && (
+              <div>
+                <h4>Iced Steps</h4>
+                <ol>
+                  {recipe.iced.steps.map((step, i) => (
+                    <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
+                  ))}
+                </ol>
+              </div>
             )}
           </div>
         )}
-
         {activeTab === "comments" && recipe.comments && (
           <div className={styles.commentsContainer}>
             <p>{recipe.comments}</p>
@@ -86,7 +96,6 @@ const Flashcard = ({ recipe, basicCard }) => {
     </>
   );
 
-  // Renders the simple answer for a basic quiz card
   const renderBasicBack = () => (
     <>
       <h3>Answer</h3>
@@ -99,12 +108,12 @@ const Flashcard = ({ recipe, basicCard }) => {
       <div className={`${styles.flashcard} ${isFlipped ? styles.flipped : ""}`}>
         <div className={styles.cardFace}>
           {cardData.masteryLevel === 1 && (
-            <div className={styles.masteryIndicator}>⭐</div>
+            <div className={styles.masteryIndicator}> </div>
           )}
           <h2>{isRecipe ? recipe.name : basicCard.question}</h2>
         </div>
         <div className={`${styles.cardFace} ${styles.cardBack}`}>
-          {isRecipe ? renderRecipeBack() : (<div> {/* Basic back */} </div>)}
+          {isRecipe ? renderRecipeBack() : renderBasicBack()}
         </div>
       </div>
     </div>

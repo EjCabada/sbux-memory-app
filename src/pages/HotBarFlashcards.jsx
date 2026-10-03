@@ -1,26 +1,29 @@
 import React, { useState, useEffect, useMemo } from "react";
-import basicsData from "../data/basics.json";
+import { useDrinkCatalog } from "../context/DrinkContext.jsx";
+import { toFlashcardFormat } from "../utils/drinkAdapters.js";
 import MultiSizeCard from "../components/MultiSizeCard/MultiSizeCard.jsx";
 import styles from "./Quiz.module.css";
 
 const MASTERY_THRESHOLD = 2;
 
 const HotBarFlashcards = () => {
+  const { drinks, isLoading } = useDrinkCatalog();
   const [deck, setDeck] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
-useEffect(() => {
-  const savedDeck = sessionStorage.getItem("srs-deck-hotbar-flashcards");
-  if (savedDeck) {
-    setDeck(JSON.parse(savedDeck));
-  } else {
-    const initialDeck = basicsData.map((card) => ({
-      ...card,
-      masteryLevel: 0,
-    }));
-    setDeck(initialDeck);
-  }
-}, []);
+  useEffect(() => {
+    if (!drinks.length) return;
+    const formatted = drinks
+      .filter((d) => d.isActive && d.station === "espresso_bar")
+      .map(toFlashcardFormat);
+
+    const savedDeck = sessionStorage.getItem("srs-deck-hotbar-flashcards");
+    if (savedDeck) {
+      setDeck(JSON.parse(savedDeck));
+    } else {
+      setDeck(formatted.map((c) => ({ ...c, masteryLevel: 0 })));
+    }
+  }, [drinks]);
 
   const activeDeck = useMemo(
     () => deck.filter((card) => card.masteryLevel < MASTERY_THRESHOLD),
@@ -35,14 +38,10 @@ useEffect(() => {
     const updatedDeck = deck.map((card) => {
       if (card.id === currentCard.id) {
         let newMasteryLevel = card.masteryLevel;
-        if (level === 2) {
-          newMasteryLevel++;
-        } else {
-          newMasteryLevel = 0;
-        }
-        if (newMasteryLevel >= MASTERY_THRESHOLD) {
-          cardWasMastered = true;
-        }
+        if (level === 2) newMasteryLevel++;
+        else newMasteryLevel = 0;
+
+        if (newMasteryLevel >= MASTERY_THRESHOLD) cardWasMastered = true;
         return { ...card, masteryLevel: newMasteryLevel };
       }
       return card;
@@ -59,14 +58,16 @@ useEffect(() => {
   };
 
   const resetProgress = () => {
-    const initialDeck = basicsData.map((card) => ({
-      ...card,
-      masteryLevel: 0,
-    }));
+    const formatted = drinks
+      .filter((d) => d.isActive && d.station === "espresso_bar")
+      .map(toFlashcardFormat);
+    const initialDeck = formatted.map((card) => ({ ...card, masteryLevel: 0 }));
     setDeck(initialDeck);
     sessionStorage.setItem("srs-deck-hotbar-flashcards", JSON.stringify(initialDeck));
     setCurrentCardIndex(0);
   };
+
+  if (isLoading) return <div className={styles.quizContainer}><p>Loading flashcards...</p></div>;
 
   const currentCard = activeDeck[currentCardIndex];
   const knownCardsCount = deck.length - activeDeck.length;
@@ -75,7 +76,6 @@ useEffect(() => {
     <div className={styles.quizContainer}>
       <h2>Hot Bar Multi-Size Flashcards</h2>
       <p>Tap each size card to test shots and pumps before grading.</p>
-
       <div className={styles.flashcardArea}>
         {currentCard ? (
           <MultiSizeCard item={currentCard} />
@@ -86,42 +86,19 @@ useEffect(() => {
           </div>
         )}
       </div>
-
       {activeDeck.length > 0 && (
         <div className={styles.srsControls}>
-          <button
-            className={styles.dontKnow}
-            onClick={() => handleKnowledgeUpdate(0)}
-          >
-            Don't Know
-          </button>
-          <button
-            className={styles.somewhat}
-            onClick={() => handleKnowledgeUpdate(1)}
-          >
-            Know Somewhat
-          </button>
-          <button
-            className={styles.knowWell}
-            onClick={() => handleKnowledgeUpdate(2)}
-          >
-            Know Well
-          </button>
+          <button className={styles.dontKnow} onClick={() => handleKnowledgeUpdate(0)}>Don't Know</button>
+          <button className={styles.somewhat} onClick={() => handleKnowledgeUpdate(1)}>Know Somewhat</button>
+          <button className={styles.knowWell} onClick={() => handleKnowledgeUpdate(2)}>Know Well</button>
         </div>
       )}
-
       <div className={styles.quizStats}>
         <div className={styles.cardCounter}>
-          {activeDeck.length > 0
-            ? `Drink ${currentCardIndex + 1} of ${activeDeck.length}`
-            : "Deck Completed"}
+          {activeDeck.length > 0 ? `Drink ${currentCardIndex + 1} of ${activeDeck.length}` : "Deck Completed"}
         </div>
-        <div className={styles.knownCounter}>
-          ({knownCardsCount} / {deck.length} mastered)
-        </div>
-        <button onClick={resetProgress} className={styles.resetButton}>
-          Reset Progress
-        </button>
+        <div className={styles.knownCounter}>({knownCardsCount} / {deck.length} mastered)</div>
+        <button onClick={resetProgress} className={styles.resetButton}>Reset Progress</button>
       </div>
     </div>
   );

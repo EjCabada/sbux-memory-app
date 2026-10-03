@@ -1,0 +1,344 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.navTabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.75rem 1.25rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  color: var(--primary-green);
+}
+
+.activeTab {
+  color: var(--primary-green) !important;
+  border-bottom-color: var(--primary-green) !important;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.headerRow h2 {
+  color: var(--primary-green);
+  margin: 0 0 0.25rem 0;
+}
+
+.headerRow p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.addBtn, .exportBtn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.exportBtn { background: #bba075; }
+
+.filterRow {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filterRow select {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--background-secondary);
+  color: var(--text-primary);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--background-secondary);
+}
+
+.drinkTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.drinkTable th, .drinkTable td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.drinkTable th {
+  background: rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.inactiveRow { opacity: 0.5; }
+
+.seasonTag {
+  background: #333;
+  color: #ddd;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.actionBtnEdit, .actionBtnDel {
+  border: none;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-right: 0.4rem;
+}
+
+.actionBtnEdit { background: #00704a; color: white; }
+.actionBtnDel { background: #d9534f; color: white; }
+
+/* Archetypes Tab */
+.archContainer {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.archSelectorRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+}
+
+.archSelectorRow select {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--background-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.archEditCard {
+  background: var(--background-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.jsonTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #1e1e1e;
+  color: #a0c2b5;
+}
+
+.archActionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* Cold Foam Reference */
+.foamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.foamCard {
+  background: var(--background-primary);
+  border-left: 4px solid var(--primary-green);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.foamCard h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-green);
+}
+
+.foamCard p {
+  margin: 0.35rem 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modalContent {
+  background: #1e1e1e;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalContent h3 {
+  margin-top: 0;
+  color: #00a862;
+}
+
+.presetBar {
+  background: #2a2a2a;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.presetBar select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: #1e1e1e;
+  border: 1px solid #00a862;
+  color: white;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.inlineTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.formGroup label {
+  font-size: 0.82rem;
+  color: #bbb;
+}
+
+.formGroup input, .formGroup select, .formGroup textarea {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: white;
+  font-family: inherit;
+}
+
+.warningBox {
+  background: rgba(217, 83, 79, 0.15);
+  border: 1px solid #d9534f;
+  color: #f28b82;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+}
+
+.sectionDivider {
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #00a862;
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.3rem;
+  margin-top: 0.5rem;
+}
+
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.modalBtnRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid #666;
+  color: #ccc;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.saveBtn {
+  background: #00a862;
+  border: none;
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}

@@ -20,15 +20,14 @@ const MultiSizeCard = ({ item }) => {
   return (
     <div className={styles.container}>
       <div className={styles.questionHeader}>
-        <span className={styles.categoryBadge}>HOT BAR CORE DRINK</span>
+        <span className={styles.categoryBadge}>{item.station?.replace(/_/g, " ") || "Hot Bar"}</span>
         <h2 className={styles.drinkTitle}>{item.name}</h2>
         <p className={styles.questionSubtext}>{item.question}</p>
-        <span className={styles.tapInstruction}>Tap each size card to reveal shots & pumps</span>
+        <span className={styles.tapInstruction}>Tap each size card to reveal proportions</span>
       </div>
-
       <div className={styles.cardsGrid}>
         {item.sizes.map((s, idx) => {
-          const isFlipped = !!flippedCards[idx];
+          const isFlipped = Boolean(flippedCards[idx]);
           return (
             <div
               key={idx}
@@ -41,21 +40,31 @@ const MultiSizeCard = ({ item }) => {
                   <span className={styles.tapHint}>Tap to flip</span>
                 </div>
                 <div className={styles.cardBack}>
-                  <div className={styles.dataRow}>
-                    <span className={styles.dataLabel}>Shots:</span>
-                    <span className={styles.dataValue}>{s.shots}</span>
-                  </div>
-                  <div className={styles.dataRow}>
-                    <span className={styles.dataLabel}>Pumps:</span>
-                    <span className={styles.dataValue}>{s.pumps}</span>
-                  </div>
+                  {s.metrics && s.metrics.length > 0 ? (
+                    s.metrics.map((m) => (
+                      <div key={m.key} className={styles.dataRow}>
+                        <span className={styles.dataLabel}>{m.label}:</span>
+                        <span className={styles.dataValue}>{m.value}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className={styles.dataRow}>
+                        <span className={styles.dataLabel}>Shots:</span>
+                        <span className={styles.dataValue}>{s.shots}</span>
+                      </div>
+                      <div className={styles.dataRow}>
+                        <span className={styles.dataLabel}>Pumps:</span>
+                        <span className={styles.dataValue}>{s.pumps}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-
       {item.notes && <div className={styles.notesBox}>{item.notes}</div>}
     </div>
   );

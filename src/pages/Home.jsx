@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar/SearchBar.jsx";
 import VersionModal, { CURRENT_VERSION } from "../components/VersionModal/VersionModal.jsx";
-import recipesData from "../data/recipes.json";
+import { useDrinkCatalog } from "../context/DrinkContext.jsx";
 import styles from "./Home.module.css";
 
 const Home = () => {
+  const { drinks } = useDrinkCatalog();
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [isVersionOpen, setIsVersionOpen] = useState(false);
@@ -14,7 +15,7 @@ const Home = () => {
   const handleSearchChange = (term) => {
     setSearchTerm(term);
     if (term.length > 1) {
-      const filtered = recipesData
+      const filtered = (drinks || [])
         .filter((recipe) =>
           recipe.name.toLowerCase().includes(term.toLowerCase())
         )
@@ -43,12 +44,10 @@ const Home = () => {
           {CURRENT_VERSION} &bull; What's New?
         </button>
       </div>
-
       <header className={styles.hero}>
         <h1>Barista Training Deck</h1>
         <p>Master hot bar routines, pump ratios, and recipe sequencing.</p>
       </header>
-
       <SearchBar
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
@@ -56,9 +55,7 @@ const Home = () => {
         suggestions={suggestions}
         onSuggestionClick={navigateToSearch}
       />
-
       <div className={styles.curriculumContainer}>
-        {/* Section: Week 2 */}
         <section className={styles.curriculumSection}>
           <div className={styles.sectionHeader}>
             <div className={styles.sectionTitleGroup}>
@@ -70,11 +67,10 @@ const Home = () => {
             </p>
           </div>
           <div className={styles.cardsGrid}>
-            {/* Mode 1: Flashcards */}
             <Link to="/quiz/flashcards" className={styles.curriculumCard}>
               <div className={styles.cardHeader}>
                 <span className={styles.cardTag}>Study Mode</span>
-                <span className={styles.cardIcon}>📇</span>
+                <span className={styles.cardIcon}> </span>
               </div>
               <h3>Hot Bar Flashcards</h3>
               <p>
@@ -85,12 +81,10 @@ const Home = () => {
                 <span className={styles.arrowIcon}>&rarr;</span>
               </div>
             </Link>
-
-            {/* Mode 2: Speed Quiz */}
             <Link to="/quiz/beginner" className={styles.curriculumCard}>
               <div className={styles.cardHeader}>
                 <span className={styles.cardTagQuiz}>Timed / Mastery</span>
-                <span className={styles.cardIcon}>⚡</span>
+                <span className={styles.cardIcon}> </span>
               </div>
               <h3>Hot Bar Speed Quiz</h3>
               <p>
@@ -101,12 +95,10 @@ const Home = () => {
                 <span className={styles.arrowIcon}>&rarr;</span>
               </div>
             </Link>
-
-            {/* Mode 3: Sequencing Drill */}
             <Link to="/quiz/sequencing" className={styles.curriculumCard}>
               <div className={styles.cardHeader}>
                 <span className={styles.cardTagQuiz}>Workflow Drill</span>
-                <span className={styles.cardIcon}>🔄</span>
+                <span className={styles.cardIcon}> </span>
               </div>
               <h3>Hot Bar Sequencing</h3>
               <p>
@@ -119,12 +111,10 @@ const Home = () => {
             </Link>
           </div>
         </section>
-
-        {/* Section: Final Exam */}
         <section className={styles.curriculumSection}>
           <div className={styles.sectionHeader}>
             <div className={styles.sectionTitleGroup}>
-              <span className={styles.lockedBadge}>🔒 Locked</span>
+              <span className={styles.lockedBadge}>  Locked</span>
               <h2 className={styles.lockedTitle}>Final (Do not look yet!)</h2>
             </div>
             <p className={styles.sectionSubtext}>
@@ -135,7 +125,7 @@ const Home = () => {
             <Link to="/quiz/advanced" className={`${styles.curriculumCard} ${styles.finalCard}`}>
               <div className={styles.cardHeader}>
                 <span className={styles.finalTag}>Full Build Evaluation</span>
-                <span className={styles.cardIcon}>📝</span>
+                <span className={styles.cardIcon}> </span>
               </div>
               <h3>Drink Build Quiz</h3>
               <p>
@@ -149,7 +139,6 @@ const Home = () => {
           </div>
         </section>
       </div>
-
       {isVersionOpen && <VersionModal onClose={() => setIsVersionOpen(false)} />}
     </div>
   );
