@@ -517,12 +517,12 @@
     "allowInSequencing": false
   },
   "tags": ["espresso bar", "core drinks", "hot tea"],
-  "comments": "1 bag Peach Tranquility + 1 bag Jade Citrus Mint (1 bag total for Short). Half hot water, half steamed lemonade.",
+  "comments": "camamile mint blossom tea (1 bag total for Short). Half hot water, half steamed lemonade.",
   "sizes": {
-    "short": { "tea_bags": "1", "honey_pumps": "1", "shots": "0" },
-    "tall": { "tea_bags": "2", "honey_pumps": "1", "shots": "0" },
-    "grande": { "tea_bags": "2", "honey_pumps": "2", "shots": "0" },
-    "venti_hot": { "tea_bags": "2", "honey_pumps": "2", "shots": "0" }
+    "short": { "tea_bags": "1", "pumps": "1", "shots": "0" },
+    "tall": { "tea_bags": "2", "pumps": "1", "shots": "0" },
+    "grande": { "tea_bags": "2", "pumps": "2", "shots": "0" },
+    "venti_hot": { "tea_bags": "2", "pumps": "2", "shots": "0" }
   },
   "hot": {
     "needsSleeve": true,
