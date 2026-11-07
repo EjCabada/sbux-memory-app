@@ -1,50 +1,46 @@
 import React from "react";
-import { ACTION_DICTIONARY } from "../../utils/drinkAdapters";
 import styles from "./RecipeModal.module.css";
-
-const formatKey = (k) => k.replace(/_/g, " ").toUpperCase();
 
 const RecipeModal = ({ recipe, onClose }) => {
   const handleContentClick = (e) => e.stopPropagation();
   if (!recipe) return null;
 
+  const hotSteps = recipe.workflows?.hot?.stepLabels || [];
+  const icedSteps = recipe.workflows?.iced?.stepLabels || [];
+
   const renderRecipeDetails = () => (
     <>
       <h3>{recipe.name}</h3>
 
-      {recipe.sizes && (
+      {recipe.sizeList && recipe.sizeList.length > 0 && (
         <div className={styles.detailsGrid}>
-          {Object.entries(recipe.sizes).map(([sizeKey, values]) => (
-            <div key={sizeKey} className={styles.detailItem}>
-              <strong>{formatKey(sizeKey)}:</strong>
-              <p>
-                {values.shots !== undefined && `Shots: ${values.shots}`}
-                {values.pumps !== undefined && ` | Pumps: ${values.pumps}`}
-                {values.scoops !== undefined && ` | Scoops: ${values.scoops}`}
-              </p>
+          {recipe.sizeList.map((s) => (
+            <div key={s.sizeKey} className={styles.detailItem}>
+              <strong>{s.size}:</strong>
+              <p>{s.metrics.map((m) => `${m.label}: ${m.value}`).join(" | ")}</p>
             </div>
           ))}
         </div>
       )}
 
-      {(recipe.hot?.steps || recipe.iced?.steps) && <hr />}
+      {(hotSteps.length > 0 || icedSteps.length > 0) && <hr />}
       <div className={styles.stepsContainer}>
-        {recipe.hot?.steps && (
+        {hotSteps.length > 0 && (
           <div>
-            <h4>Hot Steps</h4>
+            <h4>Hot Steps ({recipe.workflows.hot.sizeLabel})</h4>
             <ol>
-              {recipe.hot.steps.map((step, i) => (
-                <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
+              {hotSteps.map((step, i) => (
+                <li key={i}>{step}</li>
               ))}
             </ol>
           </div>
         )}
-        {recipe.iced?.steps && (
+        {icedSteps.length > 0 && (
           <div>
-            <h4>Iced Steps</h4>
+            <h4>Iced Steps ({recipe.workflows.iced.sizeLabel})</h4>
             <ol>
-              {recipe.iced.steps.map((step, i) => (
-                <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
+              {icedSteps.map((step, i) => (
+                <li key={i}>{step}</li>
               ))}
             </ol>
           </div>

@@ -1,28 +1,50 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
 import Flashcard from "../components/Flashcard/Flashcard.jsx";
 import FilterControls from "../components/FilterControls/FilterControls.jsx";
 import styles from "./Quiz.module.css";
 
 const MASTERY_THRESHOLD = 2;
+const STORAGE_KEY = "srs-mastery-advanced-v2";
+
+const loadMasteryMap = () => {
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
+};
 
 const AdvancedQuiz = () => {
   const { drinks, isLoading } = useDrinkCatalog();
-  const [deck, setDeck] = useState([]);
+  const [masteryMap, setMasteryMap] = useState(loadMasteryMap);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [activeFilters, setActiveFilters] = useState([]);
   const [filterLogic, setFilterLogic] = useState("AND");
 
-  useEffect(() => {
-    if (!drinks.length) return;
-    const savedDeck = sessionStorage.getItem("srs-deck-advanced");
-    if (savedDeck) {
-      const parsed = JSON.parse(savedDeck);
-      setDeck(parsed.map((card) => ({ ...card, masteryLevel: card.masteryLevel || 0 })));
-    } else {
-      setDeck(drinks.map((recipe) => ({ ...recipe, masteryLevel: 0 })));
-    }
-  }, [drinks]);
+  const activeCatalog = useMemo(() => drinks.filter((d) => d.isActive), [drinks]);
+
+  const deck = useMemo(
+    () =>
+      activeCatalog.map((recipe) => ({
+        ...recipe,
+        masteryLevel: masteryMap[recipe.id] || 0,
+      })),
+    [activeCatalog, masteryMap]
+  );
+
+  const activeDeck = useMemo(() => {
+    return deck.filter((card) => {
+      if (card.masteryLevel >= MASTERY_THRESHOLD) return false;
+      if (activeFilters.length === 0) return true;
+      return filterLogic === "AND"
+        ? activeFilters.every((f) => card.tags?.includes(f))
+        : activeFilters.some((f) => card.tags?.includes(f));
+    });
+  }, [deck, activeFilters, filterLogic]);
+
+  const safeIndex = activeDeck.length > 0 ? currentCardIndex % activeDeck.length : 0;
 
   const handleFilterToggle = (tag) => {
     setActiveFilters((prev) =>
@@ -31,67 +53,46 @@ const AdvancedQuiz = () => {
     setCurrentCardIndex(0);
   };
 
-  const activeDeck = useMemo(() => {
-    const filteredByTag = drinks.filter((recipe) => {
-      if (activeFilters.length === 0) return true;
-      if (filterLogic === "AND") {
-        return activeFilters.every((f) => recipe.tags?.includes(f));
-      } else {
-        return activeFilters.some((f) => recipe.tags?.includes(f));
-      }
-    });
-    const filteredIds = new Set(filteredByTag.map((r) => r.id));
-    return deck.filter(
-      (card) => filteredIds.has(card.id) && card.masteryLevel < MASTERY_THRESHOLD
-    );
-  }, [drinks, deck, activeFilters, filterLogic]);
-
   const handleKnowledgeUpdate = (level) => {
     if (activeDeck.length === 0) return;
-    const currentCard = activeDeck[currentCardIndex];
-    let cardWasMastered = false;
+    const currentCard = activeDeck[safeIndex];
+    const prevLevel = masteryMap[currentCard.id] || 0;
+    const nextLevel = level === 2 ? prevLevel + 1 : 0;
+    const cardWasMastered = nextLevel >= MASTERY_THRESHOLD;
 
-    const updatedDeck = deck.map((card) => {
-      if (card.id === currentCard.id) {
-        let newMasteryLevel = card.masteryLevel;
-        if (level === 2) newMasteryLevel++;
-        else newMasteryLevel = 0;
+    const nextMap = { ...masteryMap, [currentCard.id]: nextLevel };
+    setMasteryMap(nextMap);
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(nextMap));
 
-        if (newMasteryLevel >= MASTERY_THRESHOLD) cardWasMastered = true;
-        return { ...card, masteryLevel: newMasteryLevel };
-      }
-      return card;
-    });
-
-    setDeck(updatedDeck);
-    sessionStorage.setItem("srs-deck-advanced", JSON.stringify(updatedDeck));
-
-    if (cardWasMastered && currentCardIndex >= activeDeck.length - 1) {
-      setCurrentCardIndex(0);
-    } else if (!cardWasMastered) {
-      setCurrentCardIndex((prev) => (prev + 1) % activeDeck.length);
+    if (cardWasMastered) {
+      const nextLen = activeDeck.length - 1;
+      setCurrentCardIndex(nextLen > 0 ? safeIndex % nextLen : 0);
+    } else {
+      setCurrentCardIndex((safeIndex + 1) % activeDeck.length);
     }
   };
 
   const resetProgress = () => {
-    const initialDeck = drinks.map((recipe) => ({
-      ...recipe,
-      masteryLevel: 0,
-    }));
-    setDeck(initialDeck);
-    sessionStorage.setItem("srs-deck-advanced", JSON.stringify(initialDeck));
+    setMasteryMap({});
+    sessionStorage.removeItem(STORAGE_KEY);
     setCurrentCardIndex(0);
   };
 
-  if (isLoading) return <div className={styles.quizContainer}><p>Loading Quiz...</p></div>;
+  if (isLoading) {
+    return (
+      <div className={styles.quizContainer}>
+        <p>Loading Quiz...</p>
+      </div>
+    );
+  }
 
-  const currentRecipe = activeDeck[currentCardIndex];
+  const currentRecipe = activeDeck[safeIndex];
   const knownCardsCount = deck.filter((c) => c.masteryLevel >= MASTERY_THRESHOLD).length;
 
   return (
     <div className={styles.quizContainer}>
       <h2>Drink Build Quiz</h2>
-      <p>Filter by category and master the steps for each drink.</p>
+      <p>Filter by category and master the steps and ratios for each drink.</p>
       <FilterControls
         activeFilters={activeFilters}
         onFilterToggle={handleFilterToggle}
@@ -115,7 +116,7 @@ const AdvancedQuiz = () => {
       {activeDeck.length > 0 && (
         <div className={styles.srsControls}>
           <button className={styles.dontKnow} onClick={() => handleKnowledgeUpdate(0)}>
-            Don't Know
+            Don&apos;t Know
           </button>
           <button className={styles.somewhat} onClick={() => handleKnowledgeUpdate(1)}>
             Know Somewhat
@@ -128,11 +129,11 @@ const AdvancedQuiz = () => {
       <div className={styles.quizStats}>
         <div className={styles.cardCounter}>
           {activeDeck.length > 0
-            ? `Card ${currentCardIndex + 1} of ${activeDeck.length}`
+            ? `Card ${safeIndex + 1} of ${activeDeck.length}`
             : "No cards left in this filter."}
         </div>
         <div className={styles.knownCounter}>
-          ({knownCardsCount} / {drinks.length} total mastered)
+          ({knownCardsCount} / {deck.length} total mastered)
         </div>
         <button onClick={resetProgress} className={styles.resetButton}>
           Reset All Progress

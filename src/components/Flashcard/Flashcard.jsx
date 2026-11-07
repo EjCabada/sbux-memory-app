@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ACTION_DICTIONARY } from "../../utils/drinkAdapters";
 import styles from "./Flashcard.module.css";
-
-const formatKey = (k) => k.replace(/_/g, " ").toUpperCase();
 
 const Flashcard = ({ recipe, basicCard }) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -23,41 +20,51 @@ const Flashcard = ({ recipe, basicCard }) => {
 
   if (!cardData) return null;
 
+  const hotSteps = recipe?.workflows?.hot?.stepLabels || [];
+  const icedSteps = recipe?.workflows?.iced?.stepLabels || [];
+
   const renderRecipeBack = () => (
     <>
       <h3>{recipe.name}</h3>
       <div className={styles.tabContainer}>
         <button
           className={`${styles.tabButton} ${activeTab === "components" ? styles.activeTab : ""}`}
-          onClick={(e) => { e.stopPropagation(); setActiveTab("components"); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveTab("components");
+          }}
         >
           Ratios
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === "steps" ? styles.activeTab : ""}`}
-          onClick={(e) => { e.stopPropagation(); setActiveTab("steps"); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveTab("steps");
+          }}
         >
           Steps
         </button>
         {recipe.comments && (
           <button
             className={`${styles.tabButton} ${activeTab === "comments" ? styles.activeTab : ""}`}
-            onClick={(e) => { e.stopPropagation(); setActiveTab("comments"); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveTab("comments");
+            }}
           >
             Comments
           </button>
         )}
       </div>
       <div className={styles.tabContent}>
-        {activeTab === "components" && recipe.sizes && (
+        {activeTab === "components" && recipe.sizeList && (
           <div className={styles.detailsGrid}>
-            {Object.entries(recipe.sizes).map(([sizeKey, values]) => (
-              <div key={sizeKey} className={styles.sizeDetail}>
-                <strong>{formatKey(sizeKey)}:</strong>
+            {recipe.sizeList.map((s) => (
+              <div key={s.sizeKey} className={styles.sizeDetail}>
+                <strong>{s.size}:</strong>
                 <p>
-                  {values.shots !== undefined && `Shots: ${values.shots}`}
-                  {values.pumps !== undefined && ` | Pumps: ${values.pumps}`}
-                  {values.scoops !== undefined && ` | Scoops: ${values.scoops}`}
+                  {s.metrics.map((m) => `${m.label}: ${m.value}`).join(" | ")}
                 </p>
               </div>
             ))}
@@ -65,22 +72,22 @@ const Flashcard = ({ recipe, basicCard }) => {
         )}
         {activeTab === "steps" && (
           <div className={styles.stepsContainer}>
-            {recipe.hot?.steps && (
+            {hotSteps.length > 0 && (
               <div>
-                <h4>Hot Steps</h4>
+                <h4>Hot Steps ({recipe.workflows.hot.sizeLabel})</h4>
                 <ol>
-                  {recipe.hot.steps.map((step, i) => (
-                    <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
+                  {hotSteps.map((step, i) => (
+                    <li key={i}>{step}</li>
                   ))}
                 </ol>
               </div>
             )}
-            {recipe.iced?.steps && (
+            {icedSteps.length > 0 && (
               <div>
-                <h4>Iced Steps</h4>
+                <h4>Iced Steps ({recipe.workflows.iced.sizeLabel})</h4>
                 <ol>
-                  {recipe.iced.steps.map((step, i) => (
-                    <li key={i}>{ACTION_DICTIONARY[step] || step}</li>
+                  {icedSteps.map((step, i) => (
+                    <li key={i}>{step}</li>
                   ))}
                 </ol>
               </div>
@@ -107,9 +114,7 @@ const Flashcard = ({ recipe, basicCard }) => {
     <div className={styles.flashcardContainer} onClick={handleFlip}>
       <div className={`${styles.flashcard} ${isFlipped ? styles.flipped : ""}`}>
         <div className={styles.cardFace}>
-          {cardData.masteryLevel === 1 && (
-            <div className={styles.masteryIndicator}> </div>
-          )}
+          {cardData.masteryLevel === 1 && <div className={styles.masteryIndicator}> </div>}
           <h2>{isRecipe ? recipe.name : basicCard.question}</h2>
         </div>
         <div className={`${styles.cardFace} ${styles.cardBack}`}>

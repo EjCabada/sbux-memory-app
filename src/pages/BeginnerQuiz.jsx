@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
-import { toFlashcardFormat } from "../utils/drinkAdapters.js";
 import styles from "./BeginnerQuiz.module.css";
 
 const MODES = {
@@ -14,15 +13,6 @@ const MODES = {
 const SHOT_OPTIONS_STANDARD = ["0", "1", "2", "3", "4"];
 const SHOT_OPTIONS_RISTRETTO = ["0", "1R", "2R", "3R", "4R"];
 const PUMP_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
-
-const getSizeBarSpec = (sizeStr) => {
-  if (sizeStr.includes("Short")) return { rank: 1, height: 16, label: "Short" };
-  if (sizeStr.includes("Tall")) return { rank: 2, height: 24, label: "Tall" };
-  if (sizeStr.includes("Grande")) return { rank: 3, height: 32, label: "Grande" };
-  if (sizeStr.includes("Venti Hot")) return { rank: 4, height: 40, label: "Vt Ht" };
-  if (sizeStr.includes("Venti Iced")) return { rank: 5, height: 48, label: "Vt Icd" };
-  return { rank: 3, height: 30, label: sizeStr };
-};
 
 const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
@@ -40,25 +30,42 @@ const BeginnerQuiz = () => {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [drinkTracking, setDrinkTracking] = useState({});
   const [currentDrinkHadError, setCurrentDrinkHadError] = useState(false);
+
+  // Stable session deck locked at quiz start — prevents mid-quiz re-randomization
+  const sessionDeckRef = useRef([]);
   const retestQueueRef = useRef([]);
+  const timerIntervalRef = useRef(null);
+
   const [timeLeft, setTimeLeft] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [totalCardsAttempted, setTotalCardsAttempted] = useState(0);
   const [correctCardsCount, setCorrectCardsCount] = useState(0);
   const [wrongCardsCount, setWrongCardsCount] = useState(0);
-  const timerIntervalRef = useRef(null);
 
-  const getQuizDeck = () => {
-    const rawSelected = getBalancedQuizPool({
-      count: 12,
-      filterFn: (d) => d.isActive && d.curriculum?.allowInSpeedQuiz,
-    });
-    return rawSelected.map(toFlashcardFormat);
-  };
+  const endQuiz = useCallback(() => {
+    clearInterval(timerIntervalRef.current);
+    setGameState("summary");
+  }, []);
+
+  const loadDrink = useCallback((drink) => {
+    setCurrentDrink(drink);
+    setShuffledSizes(shuffle(drink.sizeList));
+    setCurrentSizeIndex(0);
+    setCurrentDrinkHadError(false);
+    setSelectedShot(null);
+    setSelectedPump(null);
+    setIsEvaluating(false);
+  }, []);
 
   const startQuiz = (mode) => {
-    const freshDeck = getQuizDeck();
+    const freshDeck = getBalancedQuizPool({
+      count: 12,
+      filterFn: (d) => d.isActive && d.curriculum?.isFundamental && d.sizeList.length > 0,
+    });
     if (!freshDeck.length) return;
+
+    sessionDeckRef.current = freshDeck;
+    retestQueueRef.current = [];
 
     setSelectedMode(mode);
     setGameState("playing");
@@ -67,7 +74,6 @@ const BeginnerQuiz = () => {
     setWrongCardsCount(0);
     setElapsedSeconds(0);
     setCurrentDrinkHadError(false);
-    retestQueueRef.current = [];
 
     const initialTracking = {};
     freshDeck.forEach((d) => {
@@ -87,7 +93,7 @@ const BeginnerQuiz = () => {
   };
 
   useEffect(() => {
-    if (gameState !== "playing") return;
+    if (gameState !== "playing") return undefined;
     timerIntervalRef.current = setInterval(() => {
       setElapsedSeconds((prev) => prev + 1);
       if (
@@ -105,75 +111,9 @@ const BeginnerQuiz = () => {
       }
     }, 1000);
     return () => clearInterval(timerIntervalRef.current);
-  }, [gameState, selectedMode]);
-
-  const loadDrink = (drink) => {
-    setCurrentDrink(drink);
-    setShuffledSizes(shuffle(drink.sizes));
-    setCurrentSizeIndex(0);
-    setCurrentDrinkHadError(false);
-    setSelectedShot(null);
-    setSelectedPump(null);
-    setIsEvaluating(false);
-  };
-
-  const endQuiz = () => {
-    clearInterval(timerIntervalRef.current);
-    setGameState("summary");
-  };
+  }, [gameState, selectedMode, endQuiz]);
 
   const activeSize = shuffledSizes[currentSizeIndex];
-
-  const handleShotClick = (val) => {
-    if (isEvaluating || selectedShot !== null) return;
-    setSelectedShot(val);
-    checkAutoAdvance(val, selectedPump);
-  };
-
-  const handlePumpClick = (val) => {
-    if (isEvaluating || selectedPump !== null) return;
-    setSelectedPump(val);
-    checkAutoAdvance(selectedShot, val);
-  };
-
-  const checkAutoAdvance = (shotVal, pumpVal) => {
-    if (shotVal === null || pumpVal === null) return;
-    setIsEvaluating(true);
-    setTotalCardsAttempted((prev) => prev + 1);
-
-    const isShotCorrect = shotVal === activeSize.shots;
-    const isPumpCorrect = pumpVal === activeSize.pumps;
-    const isPass = isShotCorrect && isPumpCorrect;
-
-    if (isPass) {
-      setCorrectCardsCount((prev) => prev + 1);
-    } else {
-      setWrongCardsCount((prev) => prev + 1);
-      setCurrentDrinkHadError(true);
-      setDrinkTracking((prev) => ({
-        ...prev,
-        [currentDrink.id]: {
-          ...prev[currentDrink.id],
-          errorsThisSession: (prev[currentDrink.id]?.errorsThisSession || 0) + 1,
-        },
-      }));
-    }
-
-    setTimeout(() => {
-      handleNextCard();
-    }, isPass ? 550 : 1200);
-  };
-
-  const handleNextCard = () => {
-    setSelectedShot(null);
-    setSelectedPump(null);
-    setIsEvaluating(false);
-    if (currentSizeIndex < shuffledSizes.length - 1) {
-      setCurrentSizeIndex((prev) => prev + 1);
-    } else {
-      handleDrinkCompletion();
-    }
-  };
 
   const handleDrinkCompletion = () => {
     const drinkId = currentDrink.id;
@@ -201,40 +141,93 @@ const BeginnerQuiz = () => {
     } else {
       setDrinkTracking((prev) => ({
         ...prev,
-        [drinkId]: { ...prev[drinkId], consecutiveFails: 0, cleanPasses: prev[drinkId].cleanPasses + 1 },
+        [drinkId]: {
+          ...prev[drinkId],
+          consecutiveFails: 0,
+          cleanPasses: (prev[drinkId]?.cleanPasses || 0) + 1,
+        },
       }));
     }
 
     retestQueueRef.current = nextQueue;
     setDrinkPool(nextPool);
 
-    const activeDeck = getQuizDeck();
+    const lockedDeck = sessionDeckRef.current;
 
     if (nextQueue.length > 0) {
       const nextDrinkId = nextQueue.shift();
       retestQueueRef.current = nextQueue;
-      const drinkObj = activeDeck.find((d) => d.id === nextDrinkId) || activeDeck[0];
+      const drinkObj = lockedDeck.find((d) => d.id === nextDrinkId) || lockedDeck[0];
       loadDrink(drinkObj);
     } else if (nextPool.length > 0) {
       const nextDrink = nextPool.shift();
       setDrinkPool(nextPool);
       loadDrink(nextDrink);
+    } else if (selectedMode === MODES.PERFECTION) {
+      endQuiz();
     } else {
-      if (selectedMode === MODES.PERFECTION) {
-        endQuiz();
-      } else {
-        const recycled = shuffle(activeDeck);
-        setDrinkPool(recycled.slice(1));
-        loadDrink(recycled[0]);
-      }
+      const recycled = shuffle(lockedDeck);
+      setDrinkPool(recycled.slice(1));
+      loadDrink(recycled[0]);
     }
   };
 
+  const handleNextCard = () => {
+    setSelectedShot(null);
+    setSelectedPump(null);
+    setIsEvaluating(false);
+    if (currentSizeIndex < shuffledSizes.length - 1) {
+      setCurrentSizeIndex((prev) => prev + 1);
+    } else {
+      handleDrinkCompletion();
+    }
+  };
+
+  const checkAutoAdvance = (shotVal, pumpVal) => {
+    if (shotVal === null || pumpVal === null || !activeSize) return;
+    setIsEvaluating(true);
+    setTotalCardsAttempted((prev) => prev + 1);
+
+    const isShotCorrect = shotVal === activeSize.shots;
+    const isPumpCorrect = pumpVal === activeSize.pumps;
+    const isPass = isShotCorrect && isPumpCorrect;
+
+    if (isPass) {
+      setCorrectCardsCount((prev) => prev + 1);
+    } else {
+      setWrongCardsCount((prev) => prev + 1);
+      setCurrentDrinkHadError(true);
+      setDrinkTracking((prev) => ({
+        ...prev,
+        [currentDrink.id]: {
+          ...prev[currentDrink.id],
+          errorsThisSession: (prev[currentDrink.id]?.errorsThisSession || 0) + 1,
+        },
+      }));
+    }
+
+    setTimeout(() => {
+      handleNextCard();
+    }, isPass ? 550 : 1200);
+  };
+
+  const handleShotClick = (val) => {
+    if (isEvaluating || selectedShot !== null) return;
+    setSelectedShot(val);
+    checkAutoAdvance(val, selectedPump);
+  };
+
+  const handlePumpClick = (val) => {
+    if (isEvaluating || selectedPump !== null) return;
+    setSelectedPump(val);
+    checkAutoAdvance(selectedShot, val);
+  };
+
   const getTopDrinksToStudy = () => {
-    const activeDeck = getQuizDeck();
+    const lockedDeck = sessionDeckRef.current;
     return Object.entries(drinkTracking)
       .map(([id, data]) => {
-        const drink = activeDeck.find((d) => d.id === id);
+        const drink = lockedDeck.find((d) => d.id === id);
         return { name: drink ? drink.name : id, errors: data.errorsThisSession };
       })
       .filter((item) => item.errors > 0)
@@ -248,14 +241,20 @@ const BeginnerQuiz = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  if (isLoading) return <div className={styles.container}><p>Loading drinks catalog...</p></div>;
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <p>Loading drinks catalog...</p>
+      </div>
+    );
+  }
 
   if (gameState === "menu") {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2>Hot Bar Quiz</h2>
-          <p>Master shots & syrup pumps with instant feedback</p>
+          <h2>Hot Bar Essentials Quiz</h2>
+          <p>Master shots &amp; syrup pumps with instant feedback</p>
           <button className={styles.rulesBtn} onClick={() => setIsRulesModalOpen(true)}>
             How This Quiz Works
           </button>
@@ -266,7 +265,7 @@ const BeginnerQuiz = () => {
             <button className={styles.perfectionCard} onClick={() => startQuiz(MODES.PERFECTION)}>
               <div className={styles.modeTitle}>Perfection Mode</div>
               <div className={styles.modeDesc}>
-                Drill until every hot bar drink is passed 100% cleanly without errors.
+                Drill until every Essentials drink is passed 100% cleanly without errors.
               </div>
             </button>
             <div className={styles.timedRow}>
@@ -284,7 +283,7 @@ const BeginnerQuiz = () => {
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
               <h3>How the Quiz Works</h3>
               <ul>
-                <li><strong>One Drink & One Size:</strong> Each card tests shots & pumps for one specific size.</li>
+                <li><strong>One Drink &amp; One Size:</strong> Each card tests shots &amp; pumps for one specific size.</li>
                 <li><strong>Visual Cup Indicators:</strong> Ascending height bars indicate which cup size is active.</li>
                 <li><strong>Instant Feedback:</strong> Tapping an option validates immediately green or red.</li>
                 <li><strong>Smart Retest Queue:</strong> Missed drinks return after 1 intervening drink.</li>
@@ -307,7 +306,9 @@ const BeginnerQuiz = () => {
           <div className={styles.statsGrid}>
             <div className={styles.statBox}>
               <span className={styles.statVal}>
-                {selectedMode === MODES.PERFECTION ? formatTime(elapsedSeconds) : `${correctCardsCount}/${totalCardsAttempted}`}
+                {selectedMode === MODES.PERFECTION
+                  ? formatTime(elapsedSeconds)
+                  : `${correctCardsCount}/${totalCardsAttempted}`}
               </span>
               <span className={styles.statLbl}>
                 {selectedMode === MODES.PERFECTION ? "Time Elapsed" : "Cards Correct"}
@@ -346,8 +347,10 @@ const BeginnerQuiz = () => {
     );
   }
 
+  if (!currentDrink || !activeSize) return null;
+
   const shotOptions = currentDrink.isRistretto ? SHOT_OPTIONS_RISTRETTO : SHOT_OPTIONS_STANDARD;
-  const orderedSizes = [...currentDrink.sizes].sort((a, b) => getSizeBarSpec(a.size).rank - getSizeBarSpec(b.size).rank);
+  const orderedSizes = [...currentDrink.sizeList].sort((a, b) => a.rank - b.rank);
 
   return (
     <div className={styles.quizWrapper}>
@@ -355,23 +358,28 @@ const BeginnerQuiz = () => {
         <button className={styles.exitBtn} onClick={() => setGameState("menu")}>&times; Exit</button>
         <div className={styles.timerBadge}>
           {selectedMode === MODES.PERFECTION
-            ? `${formatTime(elapsedSeconds)}`
+            ? formatTime(elapsedSeconds)
             : selectedMode === MODES.UNLIMITED
             ? `Cards: ${correctCardsCount}`
-            : `${formatTime(timeLeft)}`}
+            : formatTime(timeLeft)}
         </div>
       </div>
       <div className={styles.drinkHeaderCard}>
-        <span className={styles.drinkCategory}>Hot Bar Core Drink</span>
+        <span className={styles.drinkCategory}>{currentDrink.season} &bull; {currentDrink.familyLabel}</span>
         <h2 className={styles.drinkName}>{currentDrink.name}</h2>
         <div className={styles.visualSizeContainer}>
-          {orderedSizes.map((s, idx) => {
-            const { height, label } = getSizeBarSpec(s.size);
-            const isActive = s.size === activeSize.size;
+          {orderedSizes.map((s) => {
+            const isActive = s.sizeKey === activeSize.sizeKey;
             return (
-              <div key={idx} className={`${styles.sizeBarWrapper}${isActive ? styles.activeSizeBarWrapper : ""}`}>
-                <div className={`${styles.sizeBar}${isActive ? styles.activeSizeBar : ""}`} style={{ height: `${height}px` }} />
-                <span className={styles.sizeBarLabel}>{label}</span>
+              <div
+                key={s.sizeKey}
+                className={`${styles.sizeBarWrapper} ${isActive ? styles.activeSizeBarWrapper : ""}`}
+              >
+                <div
+                  className={`${styles.sizeBar} ${isActive ? styles.activeSizeBar : ""}`}
+                  style={{ height: `${s.barHeight}px` }}
+                />
+                <span className={styles.sizeBarLabel}>{s.shortLabel}</span>
               </div>
             );
           })}

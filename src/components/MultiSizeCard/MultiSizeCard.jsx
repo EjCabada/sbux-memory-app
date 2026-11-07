@@ -17,20 +17,25 @@ const MultiSizeCard = ({ item }) => {
 
   if (!item) return null;
 
+  const sizes = item.sizeList || [];
+  const noteText = item.comments || item.notes || "";
+
   return (
     <div className={styles.container}>
       <div className={styles.questionHeader}>
-        <span className={styles.categoryBadge}>{item.station?.replace(/_/g, " ") || "Hot Bar"}</span>
+        <span className={styles.categoryBadge}>
+          {item.station?.replace(/_/g, " ") || "Hot Bar"} &bull; {item.season || "Core"}
+        </span>
         <h2 className={styles.drinkTitle}>{item.name}</h2>
         <p className={styles.questionSubtext}>{item.question}</p>
         <span className={styles.tapInstruction}>Tap each size card to reveal proportions</span>
       </div>
       <div className={styles.cardsGrid}>
-        {item.sizes.map((s, idx) => {
+        {sizes.map((s, idx) => {
           const isFlipped = Boolean(flippedCards[idx]);
           return (
             <div
-              key={idx}
+              key={s.sizeKey || idx}
               className={`${styles.flipCard} ${isFlipped ? styles.flipped : ""}`}
               onClick={() => toggleCard(idx)}
             >
@@ -65,7 +70,7 @@ const MultiSizeCard = ({ item }) => {
           );
         })}
       </div>
-      {item.notes && <div className={styles.notesBox}>{item.notes}</div>}
+      {noteText && <div className={styles.notesBox}>{noteText}</div>}
     </div>
   );
 };

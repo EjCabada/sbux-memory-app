@@ -1,11 +1,106 @@
 .container {
-  max-width: 1000px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 1.5rem;
   color: var(--text-primary);
   text-align: left;
 }
 
+/* JSON Deployment Dashboard */
+.jsonDashboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-green);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.dashboardInfo h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--primary-green);
+}
+
+.dashboardInfo p {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.dashboardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.overrideBadgeActive,
+.overrideBadgeSynced {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.overrideBadgeActive {
+  background: rgba(217, 119, 6, 0.18);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.overrideBadgeSynced {
+  background: rgba(0, 168, 98, 0.15);
+  color: #00a862;
+  border: 1px solid rgba(0, 168, 98, 0.35);
+}
+
+.dashboardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.statusBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 168, 98, 0.15);
+  border: 1px solid #00a862;
+  color: var(--text-primary);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.statusBanner button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.jsonInspectorPre {
+  max-height: 280px;
+  overflow: auto;
+  background: #16181d;
+  color: #a7f3d0;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Navigation Tabs */
 .navTabs {
   display: flex;
   gap: 0.5rem;
@@ -40,7 +135,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .headerRow h2 {
@@ -54,37 +149,61 @@
   font-size: 0.9rem;
 }
 
-.headerActions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.addBtn, .exportBtn {
-  background: var(--primary-green);
-  color: white;
+.addBtn,
+.exportBtn,
+.secondaryBtn,
+.resetSourceBtn {
   border: none;
   padding: 0.55rem 0.95rem;
   border-radius: 8px;
-  font-weight: bold;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.83rem;
   cursor: pointer;
 }
 
-.exportBtn { background: #bba075; }
+.addBtn {
+  background: var(--primary-green);
+  color: white;
+}
 
+.exportBtn {
+  background: #bba075;
+  color: #111;
+}
+
+.secondaryBtn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.resetSourceBtn {
+  background: rgba(217, 83, 79, 0.18);
+  border: 1px solid #d9534f;
+  color: #e06c75;
+}
+
+/* Filters & Table */
 .filterRow {
   margin-bottom: 1rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
 }
 
+.searchInput,
 .filterRow select {
-  padding: 0.4rem 0.8rem;
+  padding: 0.45rem 0.8rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
   background: var(--background-secondary);
   color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.searchInput {
+  min-width: 220px;
 }
 
 .tableWrapper {
@@ -97,43 +216,61 @@
 .drinkTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
-.drinkTable th, .drinkTable td {
-  padding: 0.75rem 1rem;
+.drinkTable th,
+.drinkTable td {
+  padding: 0.7rem 0.9rem;
   border-bottom: 1px solid var(--border-color);
 }
 
 .drinkTable th {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.06);
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-.inactiveRow { opacity: 0.5; }
+.subMeta {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.inactiveRow {
+  opacity: 0.5;
+}
 
 .seasonTag {
-  background: #333;
-  color: #ddd;
+  background: #2d3748;
+  color: #e2e8f0;
   font-size: 0.75rem;
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 4px;
+  white-space: nowrap;
 }
 
-.actionBtnEdit, .actionBtnDel {
+.actionBtnEdit,
+.actionBtnDel {
   border: none;
   padding: 0.35rem 0.65rem;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   font-size: 0.8rem;
-  margin-right: 0.4rem;
+  margin-right: 0.35rem;
 }
 
-.actionBtnEdit { background: #00704a; color: white; }
-.actionBtnDel { background: #d9534f; color: white; }
+.actionBtnEdit {
+  background: #00704a;
+  color: white;
+}
 
-/* Archetypes Tab */
+.actionBtnDel {
+  background: #d9534f;
+  color: white;
+}
+
+/* Tab B & Split Preview Containers */
 .archContainer {
   background: var(--background-secondary);
   border: 1px solid var(--border-color);
@@ -144,8 +281,8 @@
 .archSelectorRow {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin: 1.25rem 0;
+  gap: 0.45rem;
+  margin: 0 0 1.25rem 0;
 }
 
 .archSelectorRow select {
@@ -154,59 +291,121 @@
   border: 1px solid var(--border-color);
   background: var(--background-primary);
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.95rem;
+}
+
+.splitEditorGrid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .splitEditorGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .archEditCard {
   background: var(--background-primary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 1.25rem;
-}
-
-.jsonTextarea {
-  width: 100%;
-  box-sizing: border-box;
-  font-family: monospace;
-  font-size: 0.9rem;
-  padding: 0.75rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background: #1e1e1e;
-  color: #a0c2b5;
-}
-
-.archActionRow {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
-/* Cold Foam Reference */
-.foamGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-  margin-top: 1.25rem;
-}
-
-.foamCard {
-  background: var(--background-primary);
-  border-left: 4px solid var(--primary-green);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px var(--shadow-color);
-}
-
-.foamCard h4 {
-  margin: 0 0 0.5rem 0;
+.archEditCard h3 {
+  margin: 0;
   color: var(--primary-green);
 }
 
-.foamCard p {
-  margin: 0.35rem 0;
-  font-size: 0.88rem;
-  color: var(--text-secondary);
+/* Live Engine Output Preview Panel */
+.previewPanel {
+  background: #18221f;
+  color: #e6f4ef;
+  border: 1px solid #2b4c41;
+  border-radius: 10px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.previewPanel h4 {
+  margin: 0;
+  color: #34d399;
+  font-size: 0.95rem;
+}
+
+.previewSubtext {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.previewSizesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 0.5rem;
+}
+
+.previewSizeBox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.previewSizeBox strong {
+  display: block;
+  color: #fbbf24;
+  margin-bottom: 0.25rem;
+  font-size: 0.78rem;
+}
+
+.previewMetricLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  color: #d1fae5;
+}
+
+.previewWorkflowBox {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.previewWorkflowBox strong {
+  color: #6ee7b7;
+}
+
+.previewWorkflowBox ol {
+  margin: 0.4rem 0 0;
+  padding-left: 1.25rem;
+  line-height: 1.45;
+}
+
+.previewBadgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.3rem;
+}
+
+.previewBadgeRow span {
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #a7f3d0;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
 }
 
 /* Modal */
@@ -216,7 +415,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.78);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -225,51 +424,46 @@
   box-sizing: border-box;
 }
 
-.modalContent {
+.modalContentWide {
   background: #1e1e1e;
   color: white;
   border: 1px solid #444;
   border-radius: 12px;
   padding: 1.5rem;
-  max-width: 600px;
+  max-width: 980px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 92vh;
   overflow-y: auto;
 }
 
-.modalContent h3 {
+.modalContentWide h3 {
   margin-top: 0;
   color: #00a862;
-}
-
-.presetBar {
-  background: #2a2a2a;
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.presetBar select {
-  padding: 0.5rem;
-  border-radius: 6px;
-  background: #1e1e1e;
-  border: 1px solid #00a862;
-  color: white;
 }
 
 .formGrid {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.8rem;
 }
 
 .inlineTwo {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.inlineThree {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+@media (max-width: 640px) {
+  .inlineTwo,
+  .inlineThree {
+    grid-template-columns: 1fr;
+  }
 }
 
 .formGroup {
@@ -279,17 +473,20 @@
 }
 
 .formGroup label {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #bbb;
 }
 
-.formGroup input, .formGroup select, .formGroup textarea {
-  padding: 0.5rem;
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  padding: 0.48rem 0.6rem;
   border-radius: 6px;
   border: 1px solid #555;
   background: #2a2a2a;
   color: white;
   font-family: inherit;
+  font-size: 0.88rem;
 }
 
 .warningBox {
@@ -302,26 +499,33 @@
 }
 
 .sectionDivider {
-  font-weight: bold;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.84rem;
   color: #00a862;
   border-bottom: 1px solid #444;
-  padding-bottom: 0.3rem;
-  margin-top: 0.5rem;
+  padding-bottom: 0.25rem;
+  margin-top: 0.35rem;
+}
+
+.checkboxRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.84rem;
 }
 
 .checkboxGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
 }
 
 .modalBtnRow {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .cancelBtn {
@@ -337,8 +541,8 @@
   background: #00a862;
   border: none;
   color: white;
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 6px;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
 }

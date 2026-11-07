@@ -16,8 +16,9 @@ const Home = () => {
     setSearchTerm(term);
     if (term.length > 1) {
       const filtered = (drinks || [])
-        .filter((recipe) =>
-          recipe.name.toLowerCase().includes(term.toLowerCase())
+        .filter(
+          (recipe) =>
+            recipe.isActive && recipe.name.toLowerCase().includes(term.toLowerCase())
         )
         .slice(0, 5);
       setSuggestions(filtered);
@@ -41,7 +42,7 @@ const Home = () => {
           onClick={() => setIsVersionOpen(true)}
         >
           <span className={styles.versionDot}></span>
-          {CURRENT_VERSION} &bull; What's New?
+          {CURRENT_VERSION} &bull; What&apos;s New?
         </button>
       </div>
       <header className={styles.hero}>
@@ -86,7 +87,7 @@ const Home = () => {
                 <span className={styles.cardTagQuiz}>Timed / Mastery</span>
                 <span className={styles.cardIcon}> </span>
               </div>
-              <h3>Hot Bar Speed Quiz</h3>
+              <h3>Hot Bar Essentials Quiz</h3>
               <p>
                 Rapid-fire shots and pumps test with 1/2/5-min timers, perfection mode, and spaced retesting.
               </p>
@@ -102,7 +103,7 @@ const Home = () => {
               </div>
               <h3>Hot Bar Sequencing</h3>
               <p>
-                Interleaved 10-drink sliding queue. Train the initiate &rarr; upkeep &rarr; pivot routine without single-threading.
+                Interleaved 10-drink sliding queue. Train the initiate &rarr; upkeep &rarr; pivot routine with Oct 2026 sleeve rules.
               </p>
               <div className={styles.cardFooter}>
                 <span>Dual-Slot Sim</span>

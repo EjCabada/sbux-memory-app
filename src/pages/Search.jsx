@@ -17,16 +17,13 @@ const Search = () => {
 
   const filteredRecipes = useMemo(() => {
     return drinks.filter((recipe) => {
+      if (!recipe.isActive) return false;
       const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFilters = () => {
-        if (activeFilters.length === 0) return true;
-        if (filterLogic === "AND") {
-          return activeFilters.every((filter) => recipe.tags?.includes(filter));
-        } else {
-          return activeFilters.some((filter) => recipe.tags?.includes(filter));
-        }
-      };
-      return matchesSearch && matchesFilters();
+      if (!matchesSearch) return false;
+      if (activeFilters.length === 0) return true;
+      return filterLogic === "AND"
+        ? activeFilters.every((filter) => recipe.tags?.includes(filter))
+        : activeFilters.some((filter) => recipe.tags?.includes(filter));
     });
   }, [drinks, searchTerm, activeFilters, filterLogic]);
 
@@ -42,7 +39,13 @@ const Search = () => {
     );
   };
 
-  if (isLoading) return <div className={styles.searchContainer}><p>Loading drinks...</p></div>;
+  if (isLoading) {
+    return (
+      <div className={styles.searchContainer}>
+        <p>Loading drinks...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.searchContainer}>
@@ -59,7 +62,7 @@ const Search = () => {
         {filteredRecipes.length > 0 ? (
           filteredRecipes.map((recipe) => (
             <div
-              key={recipe.id || recipe.name}
+              key={recipe.id}
               className={styles.recipeCard}
               onClick={() => setSelectedRecipe(recipe)}
               tabIndex="0"
