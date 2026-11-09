@@ -9,17 +9,28 @@
   box-sizing: border-box;
 }
 
-/* Mobile-Viewport Fit: No overflow/scroll on mobile screens */
+/* Responsive Desktop & Mobile Viewport Fit */
 .quizWrapper {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 0.85rem;
+  justify-content: center;
+  gap: 1.35rem;
   width: 100%;
-  max-width: 480px;
-  padding: 0.5rem 1rem 0.5rem;
+  max-width: 560px;
+  min-height: calc(100vh - 150px);
+  padding: 1.25rem 1.25rem 1.75rem;
   margin: 0 auto;
   box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .quizWrapper {
+    justify-content: flex-start;
+    min-height: auto;
+    max-width: 480px;
+    gap: 0.9rem;
+    padding: 0.5rem 1rem 0.75rem;
+  }
 }
 
 /* Header & Status */
@@ -51,52 +62,30 @@
 /* Drink Banner Card */
 .drinkHeaderCard {
   background: #1e3932;
-  border-radius: 14px;
-  padding: 1rem 1rem 0.85rem;
+  border-radius: 16px;
+  padding: 1.35rem 1.25rem 1.15rem;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-}
-
-.drinkCategory {
-  color: #a0c2b5;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .drinkName {
   color: #ffffff;
-  font-size: 1.45rem;
-  margin: 0.25rem 0 0.35rem;
+  font-size: 1.55rem;
+  margin: 0 0 0.65rem;
   font-weight: 700;
+  line-height: 1.25;
 }
 
-.containsMiniRow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.3rem;
-  margin-bottom: 0.45rem;
-}
-
-.containsMiniBadge {
-  background: rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #d4e9e2;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.12rem 0.45rem;
-  border-radius: 999px;
-}
-
-/* Ascending Cup Size Bars */
+/* Ascending Cup Size Bars — generous vertical space so Venti/Trenta never overlap text */
 .visualSizeContainer {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 1.25rem;
-  margin: 0.4rem 0 0.85rem;
-  height: 52px;
+  gap: 1.35rem;
+  margin: 0.5rem 0 1rem;
+  min-height: 92px;
+  padding-top: 14px;
+  box-sizing: border-box;
 }
 
 .sizeBarWrapper {

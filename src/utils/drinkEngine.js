@@ -4,7 +4,7 @@
  */
 
 export const CATALOG_SCHEMA_VERSION = 2;
-export const CATALOG_SCHEMA_REVISION = "2.3";
+export const CATALOG_SCHEMA_REVISION = "2.4";
 
 // ============================================================================
 // 1. CUP SIZES & SEED MATHEMATICAL CURVES (USER-EXTENSIBLE IN GUI)
@@ -43,6 +43,12 @@ export const SEED_CURVES = [
   {
     id: "cortadoShots",
     label: "Cortado Short Shots (3)",
+    category: "shots",
+    values: { short: 3 },
+  },
+  {
+    id: "curve_cortado_shots",
+    label: "Cortado Shots (3)",
     category: "shots",
     values: { short: 3 },
   },
@@ -289,7 +295,8 @@ export const BUILD_TEMPLATES = [
   { id: "steamer", label: "Hot Chocolate / Crème Steamer (No Espresso)" },
   { id: "hot_tea_lemonade", label: "Honey Citrus Mint / Steamed Tea Lemonade" },
   { id: "iced_tea", label: "Cold Bar Shaken Iced Tea" },
-  { id: "refresher", label: "Cold Bar Refresher (Base + Inclusions + Shake)" },
+  { id: "refresher", label: "Cold Bar Refresher (Base + Water/Lemonade + Inclusions + Shake)" },
+  { id: "refresher_cannonball", label: "Cannonball / Lemonade-First Refresher (Lemonade + Bases + Ice + Inclusions on Top)" },
   { id: "matcha_iced", label: "Cold Bar Iced Matcha" },
   { id: "frappuccino", label: "Blended Frappuccino" },
   { id: "cold_brew", label: "Cold Brew / Nitro" },
@@ -338,8 +345,11 @@ export const ACTION_META = {
   blend_pitcher: { label: "Blend on #1", locksWand: false, releasesWand: false, isFinishing: false },
   add_whip: { label: "Add Whipped Cream", locksWand: false, releasesWand: false, isFinishing: true },
   add_caramel: { label: "Add Caramel Crosshatch", locksWand: false, releasesWand: false, isFinishing: true },
+  add_caramel_drizzle: { label: "Add Caramel Drizzle (Standard)", locksWand: false, releasesWand: false, isFinishing: true },
   add_cd_topping: { label: "Add Cinnamon Dolce Topping", locksWand: false, releasesWand: false, isFinishing: true },
   add_mocha_drizzle: { label: "Add Mocha Drizzle", locksWand: false, releasesWand: false, isFinishing: true },
+  add_cinnamon_powder: { label: "Add Cinnamon Powder", locksWand: false, releasesWand: false, isFinishing: true },
+  add_line_cup_caramel: { label: "Line Cup with Caramel / Dark Caramel", locksWand: false, releasesWand: false, isFinishing: false },
   add_sleeve: { label: "Add Cup Sleeve", locksWand: false, releasesWand: false, isFinishing: true },
   add_lid: { label: "Add Lid", locksWand: false, releasesWand: false, isFinishing: true },
   connect_handoff: { label: "Connect & Hand-off", locksWand: false, releasesWand: false, isFinishing: true },
@@ -349,16 +359,32 @@ export const ACTION_DICTIONARY = Object.fromEntries(
   Object.entries(ACTION_META).map(([k, v]) => [k, v.label])
 );
 
-export const TOPPING_OPTIONS = [
+export const SEED_TOPPING_OPTIONS = [
   { id: "add_caramel", label: "Caramel Crosshatch" },
+  { id: "add_caramel_drizzle", label: "Caramel Drizzle (Standard)" },
   { id: "add_cd_topping", label: "Cinnamon Dolce Topping" },
   { id: "add_mocha_drizzle", label: "Mocha Drizzle" },
+  { id: "add_cinnamon_powder", label: "Cinnamon Powder" },
 ];
+
+export const TOPPING_OPTIONS = SEED_TOPPING_OPTIONS;
 
 export const isSteamAction = (actionId) => Boolean(ACTION_META[actionId]?.locksWand);
 export const isWandReleaseAction = (actionId) => Boolean(ACTION_META[actionId]?.releasesWand);
 export const isFinishingAction = (actionId) => Boolean(ACTION_META[actionId]?.isFinishing);
-export const getActionLabel = (actionId) => ACTION_META[actionId]?.label || actionId;
+export const getActionLabel = (actionId) => {
+  if (ACTION_META[actionId]) return ACTION_META[actionId].label;
+  if (String(actionId).startsWith("custom_step:")) {
+    return String(actionId).slice("custom_step:".length);
+  }
+  if (String(actionId).startsWith("add_topping_")) {
+    return `Add ${String(actionId)
+      .slice("add_topping_".length)
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())}`;
+  }
+  return actionId;
+};
 
 // ============================================================================
 // 3. SEED RELATIONAL FAMILY BLUEPRINTS (9 STREAMLINED STRUCTURAL FAMILIES)
@@ -481,6 +507,32 @@ export const SEED_FAMILIES = [
     pumpCurve: "blendedPumps",
     extraMetrics: { frap_roast: "frapRoastCurve" },
     buildTemplate: "frappuccino",
+  },
+  {
+    id: "iced_matcha",
+    label: "Iced Matcha",
+    defaultStation: "cold_bar",
+    defaultTemps: ["iced"],
+    baseSizes: ["tall", "grande", "venti_iced"],
+    shotCurve: "none",
+    defaultShotType: "standard",
+    primaryPumpMetric: "syrup_pumps",
+    pumpCurve: "hotBarPumps",
+    extraMetrics: { matcha_scoops: "matchaScoopsCurve" },
+    buildTemplate: "matcha_iced",
+  },
+  {
+    id: "cortados",
+    label: "Cortados",
+    defaultStation: "espresso_bar",
+    defaultTemps: ["hot"],
+    baseSizes: ["short"],
+    shotCurve: "curve_cortado_shots",
+    defaultShotType: "ristretto",
+    primaryPumpMetric: "syrup_pumps",
+    pumpCurve: "hotBarPumps",
+    extraMetrics: {},
+    buildTemplate: "flat_white",
   },
 ];
 
@@ -722,6 +774,18 @@ export function normalizeRawDrink(raw = {}, familiesMap = null) {
   if (raw.extraMetricsOverride && typeof raw.extraMetricsOverride === "object") {
     normalized.extraMetricsOverride = raw.extraMetricsOverride;
   }
+  if (raw.customSteps && typeof raw.customSteps === "object") {
+    const cleanCustomSteps = {};
+    if (Array.isArray(raw.customSteps.hot) && raw.customSteps.hot.length > 0) {
+      cleanCustomSteps.hot = raw.customSteps.hot.map((s) => String(s || "").trim()).filter(Boolean);
+    }
+    if (Array.isArray(raw.customSteps.iced) && raw.customSteps.iced.length > 0) {
+      cleanCustomSteps.iced = raw.customSteps.iced.map((s) => String(s || "").trim()).filter(Boolean);
+    }
+    if (Object.keys(cleanCustomSteps).length > 0) {
+      normalized.customSteps = cleanCustomSteps;
+    }
+  }
 
   return normalized;
 }
@@ -779,6 +843,21 @@ export function computeSizes(drink, blueprint, curvesMap = null, metricsMap = nu
         const appliedDelta = drink.family === "frappuccino" ? 0 : drink.pumpsDelta;
         const count = Math.max(0, basePumps + appliedDelta);
         sizeMetricsObj[blueprint.primaryPumpMetric] = String(count);
+      }
+    }
+
+    // 2b. Refresher Syrup Pumps (when a Refresher also contains a syrup like Mango Syrup)
+    if (
+      drink.family === "refresher" &&
+      drink.includeSyrupStep &&
+      Array.isArray(drink.ingredients?.syrups) &&
+      drink.ingredients.syrups.length > 0 &&
+      !sizeMetricsObj.syrup_pumps
+    ) {
+      const syrupCurve = cMap[activePumpCurve] || cMap.coldBarPumps;
+      const baseSyrupPumps = syrupCurve?.[sizeKey];
+      if (baseSyrupPumps !== undefined) {
+        sizeMetricsObj.syrup_pumps = String(Math.max(0, baseSyrupPumps + drink.pumpsDelta));
       }
     }
 
@@ -854,139 +933,173 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
   // Every hot drink requires a sleeve EXCEPT Short (8oz).
   const needsSleeve = tempMode === "hot" && resolvedSizeKey !== "short";
 
+  const customStepArray =
+    Array.isArray(drink.customSteps?.[tempMode]) && drink.customSteps[tempMode].length > 0
+      ? [...drink.customSteps[tempMode]]
+      : null;
+
   const steps = [];
   let preferredStopPoint = null;
 
-  if (tempMode === "hot") {
-    switch (tpl) {
-      case "chai_latte":
-        steps.push("steam_all_pitcher", "clean_wand", "groom_milk", "free_pour_milk");
-        preferredStopPoint = "steam_all_pitcher";
-        break;
-      case "steamer":
-        steps.push("pump_syrups", "steam_milk", "clean_wand", "groom_milk", "free_pour_milk");
-        preferredStopPoint = "steam_milk";
-        break;
-      case "hot_tea_lemonade":
-        steps.push("add_tea_bags", "pump_honey", "add_hot_water", "steam_lemonade", "clean_wand", "free_pour_milk");
-        preferredStopPoint = "steam_lemonade";
-        break;
-      case "americano":
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_cup", "add_hot_water");
-        preferredStopPoint = "catch_cup";
-        break;
-      case "macchiato":
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_glass", "steam_milk", "clean_wand", "groom_milk", "free_pour_milk", "pour_shots_over");
-        preferredStopPoint = "steam_milk";
-        break;
-      case "cappuccino":
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_cup", "steam_cappuccino", "clean_wand", "groom_milk", "pour_foam");
-        preferredStopPoint = "steam_cappuccino";
-        break;
-      case "flat_white":
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push(
-          "catch_cup",
-          "steam_whole_milk",
-          "clean_wand",
-          "groom_milk",
-          resolvedSizeKey === "short" ? "free_pour_milk" : "pour_foam_dot"
-        );
-        preferredStopPoint = "steam_whole_milk";
-        break;
-      case "espresso_standard":
-      default:
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_cup", "steam_milk", "clean_wand", "groom_milk", "free_pour_milk");
-        preferredStopPoint = "steam_milk";
-        break;
+  if (customStepArray) {
+    for (const s of customStepArray) {
+      if (s === "add_sleeve" && !needsSleeve) continue;
+      steps.push(s);
     }
+    if (tempMode === "hot" && needsSleeve && !steps.includes("add_sleeve")) {
+      const lidIdx = steps.indexOf("add_lid");
+      if (lidIdx >= 0) steps.splice(lidIdx, 0, "add_sleeve");
+      else steps.push("add_sleeve");
+    }
+    preferredStopPoint =
+      steps.find((s) => isSteamAction(s)) ||
+      steps.find((s) => s === "blend_pitcher" || s === "add_ice" || s === "catch_cup" || s === "catch_glass") ||
+      steps[0];
   } else {
-    // ICED / BLENDED WORKFLOWS
-    switch (tpl) {
-      case "shaken_espresso":
-        steps.push(queueAction, "pump_shaker", "catch_glass", "add_ice", "shake_10x", "top_milk");
-        preferredStopPoint = "catch_glass";
-        break;
-      case "chai_latte":
-        steps.push("pump_syrups", "pour_cold_milk", "add_ice");
-        preferredStopPoint = "pump_syrups";
-        break;
-      case "iced_tea":
-        steps.push("pour_tea_shaker", "add_water_lemonade", "pump_liquid_cane", "add_ice", "shake_10x");
-        preferredStopPoint = "add_ice";
-        break;
-      case "refresher":
-        steps.push("pour_refresher_base", "add_water_lemonade", "pump_caffeine", "add_inclusions", "add_ice", "shake_10x");
-        preferredStopPoint = "add_ice";
-        break;
-      case "matcha_iced":
-        steps.push("pour_cold_milk", "add_matcha_shaker", "pump_syrups", "blend_pitcher", "add_ice");
-        preferredStopPoint = "blend_pitcher";
-        break;
-      case "frappuccino":
-        if (blueprint.extraMetrics?.frap_roast) steps.push("pump_frap_roast");
-        steps.push("pour_cold_milk");
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("add_ice", "blend_pitcher");
-        preferredStopPoint = "blend_pitcher";
-        break;
-      case "cold_brew":
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("pour_cold_milk", "add_ice");
-        preferredStopPoint = "add_ice";
-        break;
-      case "americano":
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_cup", "add_cold_water", "add_ice");
-        preferredStopPoint = "catch_cup";
-        break;
-      case "macchiato":
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_glass", "pour_cold_milk", "add_ice", "pour_shots_over");
-        preferredStopPoint = "add_ice";
-        break;
-      default:
-        steps.push(queueAction);
-        if (drink.includeSyrupStep) steps.push("pump_syrups");
-        steps.push("catch_cup", "pour_cold_milk", "add_ice");
-        preferredStopPoint = "catch_cup";
-        break;
+    if (tempMode === "hot") {
+      switch (tpl) {
+        case "chai_latte":
+          steps.push("steam_all_pitcher", "clean_wand", "groom_milk", "free_pour_milk");
+          preferredStopPoint = "steam_all_pitcher";
+          break;
+        case "steamer":
+          steps.push("pump_syrups", "steam_milk", "clean_wand", "groom_milk", "free_pour_milk");
+          preferredStopPoint = "steam_milk";
+          break;
+        case "hot_tea_lemonade":
+          steps.push("add_tea_bags", "pump_honey", "add_hot_water", "steam_lemonade", "clean_wand", "free_pour_milk");
+          preferredStopPoint = "steam_lemonade";
+          break;
+        case "americano":
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_cup", "add_hot_water");
+          preferredStopPoint = "catch_cup";
+          break;
+        case "macchiato":
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_glass", "steam_milk", "clean_wand", "groom_milk", "free_pour_milk", "pour_shots_over");
+          preferredStopPoint = "steam_milk";
+          break;
+        case "cappuccino":
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_cup", "steam_cappuccino", "clean_wand", "groom_milk", "pour_foam");
+          preferredStopPoint = "steam_cappuccino";
+          break;
+        case "flat_white":
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push(
+            "catch_cup",
+            "steam_whole_milk",
+            "clean_wand",
+            "groom_milk",
+            resolvedSizeKey === "short" ? "free_pour_milk" : "pour_foam_dot"
+          );
+          preferredStopPoint = "steam_whole_milk";
+          break;
+        case "espresso_standard":
+        default:
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_cup", "steam_milk", "clean_wand", "groom_milk", "free_pour_milk");
+          preferredStopPoint = "steam_milk";
+          break;
+      }
+    } else {
+      // ICED / BLENDED WORKFLOWS
+      const hasRefresherSyrup =
+        drink.includeSyrupStep &&
+        Array.isArray(drink.ingredients?.syrups) &&
+        drink.ingredients.syrups.length > 0;
+
+      switch (tpl) {
+        case "shaken_espresso":
+          steps.push(queueAction, "pump_shaker", "catch_glass", "add_ice", "shake_10x", "top_milk");
+          preferredStopPoint = "catch_glass";
+          break;
+        case "chai_latte":
+          steps.push("pump_syrups", "pour_cold_milk", "add_ice");
+          preferredStopPoint = "pump_syrups";
+          break;
+        case "iced_tea":
+          steps.push("pour_tea_shaker", "add_water_lemonade", "pump_liquid_cane", "add_ice", "shake_10x");
+          preferredStopPoint = "add_ice";
+          break;
+        case "refresher_cannonball":
+          steps.push("add_water_lemonade", "pour_refresher_base");
+          if (hasRefresherSyrup) steps.push("pump_shaker");
+          steps.push("pump_caffeine", "add_ice", "add_inclusions");
+          preferredStopPoint = "add_ice";
+          break;
+        case "refresher":
+          steps.push("pour_refresher_base", "add_water_lemonade");
+          if (hasRefresherSyrup) steps.push("pump_shaker");
+          steps.push("pump_caffeine", "add_inclusions", "add_ice", "shake_10x");
+          preferredStopPoint = "add_ice";
+          break;
+        case "matcha_iced":
+          steps.push("pour_cold_milk", "add_matcha_shaker", "pump_syrups", "blend_pitcher", "add_ice");
+          preferredStopPoint = "blend_pitcher";
+          break;
+        case "frappuccino":
+          if (blueprint.extraMetrics?.frap_roast) steps.push("pump_frap_roast");
+          steps.push("pour_cold_milk");
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("add_ice", "blend_pitcher");
+          preferredStopPoint = "blend_pitcher";
+          break;
+        case "cold_brew":
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("pour_cold_milk", "add_ice");
+          preferredStopPoint = "add_ice";
+          break;
+        case "americano":
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_cup", "add_cold_water", "add_ice");
+          preferredStopPoint = "catch_cup";
+          break;
+        case "macchiato":
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_glass", "pour_cold_milk", "add_ice", "pour_shots_over");
+          preferredStopPoint = "add_ice";
+          break;
+        default:
+          steps.push(queueAction);
+          if (drink.includeSyrupStep) steps.push("pump_syrups");
+          steps.push("catch_cup", "pour_cold_milk", "add_ice");
+          preferredStopPoint = "catch_cup";
+          break;
+      }
     }
-  }
 
-  // Cold Foam Rule:
-  // 1. Start foaming at the VERY BEGINNING of the drink (before queueing shots).
-  if (drink.hasColdFoam) {
-    steps.unshift("blend_cold_foam");
-  }
-
-  // Whip & Toppings
-  if (drink.hasWhip) steps.push("add_whip");
-  for (const toppingId of drink.toppings) {
-    if (ACTION_META[toppingId] && !steps.includes(toppingId)) {
-      steps.push(toppingId);
+    // Cold Foam Rule:
+    // 1. Start foaming at the VERY BEGINNING of the drink (before queueing shots).
+    if (drink.hasColdFoam) {
+      steps.unshift("blend_cold_foam");
     }
-  }
 
-  // Packaging & Cold Foam Pour Towards the End (right before add_lid)
-  if (needsSleeve) {
-    steps.push("add_sleeve");
+    // Whip & Toppings
+    if (drink.hasWhip) steps.push("add_whip");
+    for (const toppingId of drink.toppings) {
+      if (toppingId && !steps.includes(toppingId)) {
+        steps.push(toppingId);
+      }
+    }
+
+    // Packaging & Cold Foam Pour Towards the End (right before add_lid)
+    if (needsSleeve) {
+      steps.push("add_sleeve");
+    }
+    if (drink.hasColdFoam) {
+      steps.push("add_cold_foam");
+    }
+    steps.push("add_lid", "connect_handoff");
   }
-  if (drink.hasColdFoam) {
-    steps.push("add_cold_foam");
-  }
-  steps.push("add_lid", "connect_handoff");
 
   // Hard Invariant: stopPoint MUST exist in steps
   const stopPoint = steps.includes(preferredStopPoint) ? preferredStopPoint : steps[0];
@@ -995,6 +1108,14 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
   const stepLabels = steps.map((actId) => {
     if (actId === "blend_cold_foam" && drink.coldFoamRecipe) {
       return `${getActionLabel(actId)} (${drink.coldFoamRecipe})`;
+    }
+    if (
+      (actId === "pump_shaker" || actId === "pump_syrups") &&
+      Array.isArray(drink.ingredients?.syrups) &&
+      drink.ingredients.syrups.length > 0 &&
+      drink.family === "refresher"
+    ) {
+      return `${getActionLabel(actId)} (${drink.ingredients.syrups.join(" + ")})`;
     }
     return getActionLabel(actId);
   });
@@ -1040,6 +1161,9 @@ export function generateSequencingOrder(drink, tempMode = "hot", explicitSizeKey
 
     if (targetIndex === 0 && wf.requiresSteamedMilk) choiceSet.add("steam_milk");
     if (isSteamAction(targetAction)) choiceSet.add("free_pour_milk");
+    if (targetIndex === 0 && wf.steps.includes("blend_pitcher")) choiceSet.add("blend_pitcher");
+    if (targetIndex === 0 && wf.steps.includes("shake_10x")) choiceSet.add("shake_10x");
+    if (targetAction === "blend_pitcher") choiceSet.add("add_lid");
 
     // Oct 2026 Sleeve Decision Point: Always pair add_sleeve & add_lid on hot drinks
     // so Short (8oz) tests skipping the sleeve while Tall/Grande/Venti Hot require it.
@@ -1055,7 +1179,8 @@ export function generateSequencingOrder(drink, tempMode = "hot", explicitSizeKey
   return {
     id: `${drink.id}_${tempMode}_${chosenSizeKey}`,
     drinkId: drink.id,
-    name: `${tempMode === "iced" && !drink.name.toLowerCase().includes("iced") ? "Iced " : ""}${drink.name}`,
+    station: drink.station,
+    name: `${tempMode === "iced" && !drink.name.toLowerCase().includes("iced") && drink.station === "espresso_bar" ? "Iced " : ""}${drink.name}`,
     temp: tempMode === "hot" ? "Hot" : "Iced",
     sizeKey: chosenSizeKey,
     size: wf.sizeLabel,
@@ -1066,6 +1191,7 @@ export function generateSequencingOrder(drink, tempMode = "hot", explicitSizeKey
     coldFoamLabel: drink.coldFoamLabel,
     coldFoamRecipe: drink.coldFoamRecipe,
     requiresSteamedMilk: wf.requiresSteamedMilk,
+    requiresBlender: wf.steps.includes("blend_pitcher") || wf.steps.includes("blend_cold_foam"),
     stopPoint: wf.stopPoint,
     steps: wf.steps.map((actionId, idx) => ({
       actionId,
@@ -1249,6 +1375,7 @@ export function parseUnifiedCatalogPayload(payload) {
   const isCurrentRevision =
     (payload?.schemaRevision === "2.1" ||
       payload?.schemaRevision === "2.2" ||
+      payload?.schemaRevision === "2.3" ||
       payload?.schemaRevision === CATALOG_SCHEMA_REVISION) &&
     Array.isArray(payload?.families) &&
     payload.families.length > 0;

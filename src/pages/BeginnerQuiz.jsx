@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
 import styles from "./BeginnerQuiz.module.css";
 
@@ -13,11 +13,29 @@ const MODES = {
 const SHOT_OPTIONS_STANDARD = ["0", "1", "2", "3", "4"];
 const SHOT_OPTIONS_RISTRETTO = ["0", "1R", "2R", "3R", "4R"];
 const PUMP_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
+const SMALL_COUNT_OPTIONS = ["0", "1", "2", "3", "4"];
 
 const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
-const BeginnerQuiz = () => {
+function getKeypadOptionsForMetric(metricKey, isRistretto) {
+  if (metricKey === "shots") {
+    return isRistretto ? SHOT_OPTIONS_RISTRETTO : SHOT_OPTIONS_STANDARD;
+  }
+  if (
+    metricKey === "frap_roast" ||
+    metricKey === "matcha_scoops" ||
+    metricKey === "fruit_inclusions" ||
+    metricKey === "tea_bags"
+  ) {
+    return SMALL_COUNT_OPTIONS;
+  }
+  return PUMP_OPTIONS;
+}
+
+const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
   const { isLoading, getBalancedQuizPool } = useDrinkCatalog();
+  const isColdBar = stationMode === "cold_bar";
+
   const [selectedMode, setSelectedMode] = useState(null);
   const [gameState, setGameState] = useState("menu");
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
@@ -25,8 +43,7 @@ const BeginnerQuiz = () => {
   const [currentDrink, setCurrentDrink] = useState(null);
   const [shuffledSizes, setShuffledSizes] = useState([]);
   const [currentSizeIndex, setCurrentSizeIndex] = useState(0);
-  const [selectedShot, setSelectedShot] = useState(null);
-  const [selectedPump, setSelectedPump] = useState(null);
+  const [selectedValues, setSelectedValues] = useState({});
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [drinkTracking, setDrinkTracking] = useState({});
   const [currentDrinkHadError, setCurrentDrinkHadError] = useState(false);
@@ -42,6 +59,15 @@ const BeginnerQuiz = () => {
   const [correctCardsCount, setCorrectCardsCount] = useState(0);
   const [wrongCardsCount, setWrongCardsCount] = useState(0);
 
+  // Reset to menu when switching between Hot Bar and Cold Bar quiz routes
+  useEffect(() => {
+    clearInterval(timerIntervalRef.current);
+    setGameState("menu");
+    setCurrentDrink(null);
+    setSelectedValues({});
+    setIsEvaluating(false);
+  }, [stationMode]);
+
   const endQuiz = useCallback(() => {
     clearInterval(timerIntervalRef.current);
     setGameState("summary");
@@ -52,15 +78,18 @@ const BeginnerQuiz = () => {
     setShuffledSizes(shuffle(drink.sizeList));
     setCurrentSizeIndex(0);
     setCurrentDrinkHadError(false);
-    setSelectedShot(null);
-    setSelectedPump(null);
+    setSelectedValues({});
     setIsEvaluating(false);
   }, []);
 
   const startQuiz = (mode) => {
     const freshDeck = getBalancedQuizPool({
       count: 12,
-      filterFn: (d) => d.isActive && d.curriculum?.isFundamental && d.sizeList.length > 0,
+      filterFn: (d) =>
+        d.isActive &&
+        d.curriculum?.isFundamental &&
+        d.sizeList.length > 0 &&
+        (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar"),
     });
     if (!freshDeck.length) return;
 
@@ -114,6 +143,21 @@ const BeginnerQuiz = () => {
   }, [gameState, selectedMode, endQuiz]);
 
   const activeSize = shuffledSizes[currentSizeIndex];
+
+  // Dynamically derive the quiz metrics for the current drink & cup size
+  const activeQuizMetrics = useMemo(() => {
+    if (!currentDrink || !activeSize) return [];
+    if (!isColdBar) {
+      return [
+        { key: "shots", label: "Shots", value: String(activeSize.shots ?? "0") },
+        { key: "syrup_pumps", label: "Syrup Pumps", value: String(activeSize.pumps ?? "0") },
+      ];
+    }
+    if (Array.isArray(activeSize.metrics) && activeSize.metrics.length > 0) {
+      return activeSize.metrics.filter((m) => m.key !== "shots");
+    }
+    return [{ key: "syrup_pumps", label: "Syrup Pumps", value: String(activeSize.pumps ?? "0") }];
+  }, [currentDrink, activeSize, isColdBar]);
 
   const handleDrinkCompletion = () => {
     const drinkId = currentDrink.id;
@@ -173,8 +217,7 @@ const BeginnerQuiz = () => {
   };
 
   const handleNextCard = () => {
-    setSelectedShot(null);
-    setSelectedPump(null);
+    setSelectedValues({});
     setIsEvaluating(false);
     if (currentSizeIndex < shuffledSizes.length - 1) {
       setCurrentSizeIndex((prev) => prev + 1);
@@ -183,14 +226,18 @@ const BeginnerQuiz = () => {
     }
   };
 
-  const checkAutoAdvance = (shotVal, pumpVal) => {
-    if (shotVal === null || pumpVal === null || !activeSize) return;
+  const handleMetricSelect = (metricKey, val) => {
+    if (isEvaluating || selectedValues[metricKey] !== undefined || !activeSize) return;
+    const nextSelected = { ...selectedValues, [metricKey]: val };
+    setSelectedValues(nextSelected);
+
+    const allAnswered = activeQuizMetrics.every((m) => nextSelected[m.key] !== undefined);
+    if (!allAnswered) return;
+
     setIsEvaluating(true);
     setTotalCardsAttempted((prev) => prev + 1);
 
-    const isShotCorrect = shotVal === activeSize.shots;
-    const isPumpCorrect = pumpVal === activeSize.pumps;
-    const isPass = isShotCorrect && isPumpCorrect;
+    const isPass = activeQuizMetrics.every((m) => nextSelected[m.key] === String(m.value));
 
     if (isPass) {
       setCorrectCardsCount((prev) => prev + 1);
@@ -209,18 +256,6 @@ const BeginnerQuiz = () => {
     setTimeout(() => {
       handleNextCard();
     }, isPass ? 550 : 1200);
-  };
-
-  const handleShotClick = (val) => {
-    if (isEvaluating || selectedShot !== null) return;
-    setSelectedShot(val);
-    checkAutoAdvance(val, selectedPump);
-  };
-
-  const handlePumpClick = (val) => {
-    if (isEvaluating || selectedPump !== null) return;
-    setSelectedPump(val);
-    checkAutoAdvance(selectedShot, val);
   };
 
   const getTopDrinksToStudy = () => {
@@ -253,8 +288,12 @@ const BeginnerQuiz = () => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2>Hot Bar Essentials Quiz</h2>
-          <p>Master shots &amp; syrup pumps with instant feedback</p>
+          <h2>{isColdBar ? "Cold Bar & Blended Essentials Quiz" : "Hot Bar Essentials Quiz"}</h2>
+          <p>
+            {isColdBar
+              ? "Master Frap Roast & pumps, Matcha scoops & syrup, Refresher caffeine & inclusions, and Cold Brew pumps"
+              : "Master espresso shots & syrup pumps with instant feedback"}
+          </p>
           <button className={styles.rulesBtn} onClick={() => setIsRulesModalOpen(true)}>
             How This Quiz Works
           </button>
@@ -265,7 +304,7 @@ const BeginnerQuiz = () => {
             <button className={styles.perfectionCard} onClick={() => startQuiz(MODES.PERFECTION)}>
               <div className={styles.modeTitle}>Perfection Mode</div>
               <div className={styles.modeDesc}>
-                Drill until every Essentials drink is passed 100% cleanly without errors.
+                Drill until every {isColdBar ? "Cold Bar" : "Hot Bar"} Essentials drink is passed 100% cleanly without errors.
               </div>
             </button>
             <div className={styles.timedRow}>
@@ -283,10 +322,18 @@ const BeginnerQuiz = () => {
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
               <h3>How the Quiz Works</h3>
               <ul>
-                <li><strong>One Drink &amp; One Size:</strong> Each card tests shots &amp; pumps for one specific size.</li>
-                <li><strong>Visual Cup Indicators:</strong> Ascending height bars indicate which cup size is active.</li>
-                <li><strong>Instant Feedback:</strong> Tapping an option validates immediately green or red.</li>
-                <li><strong>Smart Retest Queue:</strong> Missed drinks return after 1 intervening drink.</li>
+                <li>
+                  <strong>One Drink &amp; One Size:</strong> Each card tests the core proportions for one specific cup size.
+                </li>
+                <li>
+                  <strong>Visual Cup Indicators:</strong> Ascending height bars indicate which cup size is active.
+                </li>
+                <li>
+                  <strong>Instant Feedback:</strong> Tapping all required numbers validates immediately green or red.
+                </li>
+                <li>
+                  <strong>Smart Retest Queue:</strong> Missed drinks return after 1 intervening drink.
+                </li>
               </ul>
               <button className={styles.modalCloseBtn} onClick={() => setIsRulesModalOpen(false)}>Got It!</button>
             </div>
@@ -349,7 +396,6 @@ const BeginnerQuiz = () => {
 
   if (!currentDrink || !activeSize) return null;
 
-  const shotOptions = currentDrink.isRistretto ? SHOT_OPTIONS_RISTRETTO : SHOT_OPTIONS_STANDARD;
   const orderedSizes = [...currentDrink.sizeList].sort((a, b) => a.rank - b.rank);
 
   return (
@@ -364,18 +410,10 @@ const BeginnerQuiz = () => {
             : formatTime(timeLeft)}
         </div>
       </div>
+
+      {/* Clean Header Card: ONLY Drink Name + Visual Cup Bars + Active Size Badge */}
       <div className={styles.drinkHeaderCard}>
-        <span className={styles.drinkCategory}>{currentDrink.season} &bull; {currentDrink.familyLabel}</span>
         <h2 className={styles.drinkName}>{currentDrink.name}</h2>
-        {currentDrink.containsList && currentDrink.containsList.length > 0 && (
-          <div className={styles.containsMiniRow}>
-            {currentDrink.containsList.map((c, idx) => (
-              <span key={idx} className={styles.containsMiniBadge}>
-                {c.value}
-              </span>
-            ))}
-          </div>
-        )}
         <div className={styles.visualSizeContainer}>
           {orderedSizes.map((s) => {
             const isActive = s.sizeKey === activeSize.sizeKey;
@@ -395,63 +433,48 @@ const BeginnerQuiz = () => {
         </div>
         <div className={styles.sizeBadge}>{activeSize.size}</div>
       </div>
+
       <div className={styles.inputArea}>
-        <div className={styles.selectorGroup}>
-          <div className={styles.groupLabel}>
-            <span>Shots</span>
-            {isEvaluating && (
-              <span className={selectedShot === activeSize.shots ? styles.okLabel : styles.errLabel}>
-                {selectedShot === activeSize.shots ? "Correct" : `Answer: ${activeSize.shots}`}
-              </span>
-            )}
-          </div>
-          <div className={styles.keypadRow}>
-            {shotOptions.map((val) => {
-              const isSelected = selectedShot === val;
-              const isCorrect = val === activeSize.shots;
-              let btnClass = styles.keyBtn;
-              if (isEvaluating) {
-                if (isCorrect) btnClass += ` ${styles.correctKey}`;
-                else if (isSelected && !isCorrect) btnClass += ` ${styles.wrongKey}`;
-              } else if (isSelected) {
-                btnClass += ` ${styles.selectedKey}`;
-              }
-              return (
-                <button key={val} className={btnClass} onClick={() => handleShotClick(val)} disabled={isEvaluating}>
-                  {val}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        <div className={styles.selectorGroup}>
-          <div className={styles.groupLabel}>
-            <span>Syrup Pumps</span>
-            {isEvaluating && (
-              <span className={selectedPump === activeSize.pumps ? styles.okLabel : styles.errLabel}>
-                {selectedPump === activeSize.pumps ? "Correct" : `Answer: ${activeSize.pumps}`}
-              </span>
-            )}
-          </div>
-          <div className={styles.keypadRow}>
-            {PUMP_OPTIONS.map((val) => {
-              const isSelected = selectedPump === val;
-              const isCorrect = val === activeSize.pumps;
-              let btnClass = styles.keyBtn;
-              if (isEvaluating) {
-                if (isCorrect) btnClass += ` ${styles.correctKey}`;
-                else if (isSelected && !isCorrect) btnClass += ` ${styles.wrongKey}`;
-              } else if (isSelected) {
-                btnClass += ` ${styles.selectedKey}`;
-              }
-              return (
-                <button key={val} className={btnClass} onClick={() => handlePumpClick(val)} disabled={isEvaluating}>
-                  {val}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {activeQuizMetrics.map((metric) => {
+          const keypadOptions = getKeypadOptionsForMetric(metric.key, currentDrink.isRistretto);
+          const selectedVal = selectedValues[metric.key];
+          const expectedVal = String(metric.value);
+          return (
+            <div key={metric.key} className={styles.selectorGroup}>
+              <div className={styles.groupLabel}>
+                <span>{metric.label}</span>
+                {isEvaluating && (
+                  <span className={selectedVal === expectedVal ? styles.okLabel : styles.errLabel}>
+                    {selectedVal === expectedVal ? "Correct" : `Answer: ${expectedVal}`}
+                  </span>
+                )}
+              </div>
+              <div className={styles.keypadRow}>
+                {keypadOptions.map((val) => {
+                  const isSelected = selectedVal === val;
+                  const isCorrect = val === expectedVal;
+                  let btnClass = styles.keyBtn;
+                  if (isEvaluating) {
+                    if (isCorrect) btnClass += ` ${styles.correctKey}`;
+                    else if (isSelected && !isCorrect) btnClass += ` ${styles.wrongKey}`;
+                  } else if (isSelected) {
+                    btnClass += ` ${styles.selectedKey}`;
+                  }
+                  return (
+                    <button
+                      key={val}
+                      className={btnClass}
+                      onClick={() => handleMetricSelect(metric.key, val)}
+                      disabled={isEvaluating}
+                    >
+                      {val}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

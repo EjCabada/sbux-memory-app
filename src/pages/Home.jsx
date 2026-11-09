@@ -112,6 +112,62 @@ const Home = () => {
             </Link>
           </div>
         </section>
+
+        <section className={styles.curriculumSection}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionTitleGroup}>
+              <span className={styles.weekBadge}>Active Training</span>
+              <h2>Week 3: Cold Bar &amp; Blended</h2>
+            </div>
+            <p className={styles.sectionSubtext}>
+              Frappuccinos (Frap Roast &amp; pumps), Iced Matcha (scoops &amp; syrup), Refreshers, and Cold Brews with Cold Foam.
+            </p>
+          </div>
+          <div className={styles.cardsGrid}>
+            <Link to="/quiz/cold-flashcards" className={styles.curriculumCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTag}>Study Mode</span>
+                <span className={styles.cardIcon}> </span>
+              </div>
+              <h3>Cold Bar Flashcards</h3>
+              <p>
+                Flip multi-size cards (Tl, Gr, Vt Icd, Tr) to drill Frap Roast, Matcha scoops, Refresher inclusions, and Cold Foam.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Multi-Size Drill</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
+            <Link to="/quiz/cold-beginner" className={styles.curriculumCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTagQuiz}>Timed / Mastery</span>
+                <span className={styles.cardIcon}> </span>
+              </div>
+              <h3>Cold Bar Essentials Quiz</h3>
+              <p>
+                Rapid-fire proportions quiz for Frap Roast &amp; pumps, Matcha scoops &amp; syrup, Refresher caffeine &amp; fruit, and Cold Brews.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Instant Feedback</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
+            <Link to="/quiz/cold-sequencing" className={styles.curriculumCard}>
+              <div className={styles.cardHeader}>
+                <span className={styles.cardTagQuiz}>Workflow Drill</span>
+                <span className={styles.cardIcon}> </span>
+              </div>
+              <h3>Cold Bar Sequencing</h3>
+              <p>
+                Interleaved 10-drink Cold Bar &amp; Blended rush queue with Cold Foam first, blender/shaker stop points, and finishing steps.
+              </p>
+              <div className={styles.cardFooter}>
+                <span>Dual-Slot Sim</span>
+                <span className={styles.arrowIcon}>&rarr;</span>
+              </div>
+            </Link>
+          </div>
+        </section>
         <section className={styles.curriculumSection}>
           <div className={styles.sectionHeader}>
             <div className={styles.sectionTitleGroup}>

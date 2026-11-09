@@ -21,8 +21,10 @@ const shuffleArray = (array) => {
   return arr;
 };
 
-const SequencingQuiz = () => {
+const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
   const { drinks, familiesMap, isLoading } = useDrinkCatalog();
+  const isColdBar = stationMode === "cold_bar";
+
   const [gameState, setGameState] = useState("menu");
   const [activeQueue, setActiveQueue] = useState([]);
   const [slotAIdx, setSlotAIdx] = useState(0);
@@ -41,10 +43,22 @@ const SequencingQuiz = () => {
   });
   const timerRef = useRef(null);
 
+  useEffect(() => {
+    clearInterval(timerRef.current);
+    setGameState("menu");
+    setActiveQueue([]);
+    setFeedback(null);
+  }, [stationMode]);
+
   const buildOrderCatalog = () => {
     const orders = [];
     drinks
-      .filter((d) => d.isActive && d.curriculum?.allowInSequencing)
+      .filter(
+        (d) =>
+          d.isActive &&
+          d.curriculum?.allowInSequencing &&
+          (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar")
+      )
       .forEach((d) => {
         if (d.temps.includes("hot")) {
           const hotOrder = generateSequencingOrder(d, "hot", null, familiesMap);
@@ -82,6 +96,7 @@ const SequencingQuiz = () => {
         hasSteamedMilk: false,
         isShotsPulling: false,
         isSyrupPumped: false,
+        isBlending: false,
       };
     });
 
@@ -181,7 +196,7 @@ const SequencingQuiz = () => {
         setFaults((prev) => ({ ...prev, stopPointViolations: prev.stopPointViolations + 1 }));
         setFeedback({
           type: "warning",
-          msg: `Prep Drink #${slotBIdx + 1} (${drinkB.name}) before resuming Drink #${slotAIdx + 1}!`,
+          msg: `Prep Drink #${slotBIdx + 1} (${drinkB.name}) to its Stop Point before finishing Drink #${slotAIdx + 1}!`,
         });
         return;
       }
@@ -245,6 +260,12 @@ const SequencingQuiz = () => {
             isCompleted: isDrinkDone,
             isShotsPulling: meta.startsShots ? true : meta.catchesShots ? false : cur.isShotsPulling,
             isSyrupPumped: meta.pumpsSyrup ? true : cur.isSyrupPumped,
+            isBlending:
+              actionId === "blend_pitcher" || actionId === "blend_cold_foam"
+                ? true
+                : isFinishingAction(actionId)
+                ? false
+                : cur.isBlending,
           },
         };
       });
@@ -285,16 +306,30 @@ const SequencingQuiz = () => {
     return (
       <div className={styles.container}>
         <div className={styles.menuCard}>
-          <h2>Hot Bar Sequencing</h2>
-          <p>Master the dual-drink interleaved routine across 10 randomized orders.</p>
+          <h2>{isColdBar ? "Cold Bar & Blended Sequencing" : "Hot Bar Sequencing"}</h2>
+          <p>
+            {isColdBar
+              ? "Master interleaved Cold Bar & Blended workflows (Frappuccinos, Refreshers, Iced Matcha, and Cold Brews with Cold Foam)."
+              : "Master the dual-drink interleaved routine across 10 randomized orders."}
+          </p>
           <ul className={styles.ruleList}>
             <li><strong>Initiation Lock:</strong> Drink #1 must reach its Stop Point before Drink #2 starts.</li>
-            <li><strong>Pre-Steam Lock:</strong> Prep Drink #2 to steam before finishing Drink #1.</li>
-            <li><strong>Keep Wand Active:</strong> Start Drink #2 milk/lemonade steaming before pouring Drink #1.</li>
-            <li><strong>Oct 2026 Sleeve Standard:</strong> Sleeve EVERY hot drink EXCEPT <strong>Short (8oz)</strong>.</li>
+            {isColdBar ? (
+              <>
+                <li><strong>Cold Foam First:</strong> Start Cold Foam spinning at the very beginning of any Cold Foam drink.</li>
+                <li><strong>Blender &amp; Shaker Stop Points:</strong> Start Frappuccinos/Matchas blending or Refreshers prepped with ice before switching to Drink #2.</li>
+                <li><strong>Finish &amp; Handoff:</strong> Complete whip, drizzles, cold foam pour, lid, and handoff on Drink #1 once Drink #2 is at its Stop Point.</li>
+              </>
+            ) : (
+              <>
+                <li><strong>Pre-Steam Lock:</strong> Prep Drink #2 to steam before finishing Drink #1.</li>
+                <li><strong>Keep Wand Active:</strong> Start Drink #2 milk/lemonade steaming before pouring Drink #1.</li>
+                <li><strong>Oct 2026 Sleeve Standard:</strong> Sleeve EVERY hot drink EXCEPT <strong>Short (8oz)</strong>.</li>
+              </>
+            )}
           </ul>
           <button className={styles.startBtn} onClick={startQuiz}>
-            Start 10-Drink Rush Drill
+            Start 10-Drink {isColdBar ? "Cold Bar" : "Hot Bar"} Rush Drill
           </button>
         </div>
       </div>
@@ -329,8 +364,8 @@ const SequencingQuiz = () => {
             <strong>Audit Breakdown:</strong>
             <ul className={styles.faultList}>
               <li>Stop-Point / Cadence Violations: {faults.stopPointViolations}</li>
-              <li>Wand Resource Faults: {faults.wandResourceViolations}</li>
-              <li>Sleeve Packaging Errors (Oct 2026 Rule): {faults.sleeveErrors}</li>
+              {!isColdBar && <li>Wand Resource Faults: {faults.wandResourceViolations}</li>}
+              {!isColdBar && <li>Sleeve Packaging Errors (Oct 2026 Rule): {faults.sleeveErrors}</li>}
               <li>Step Sequence Faults: {faults.wrongSteps}</li>
             </ul>
           </div>
@@ -380,6 +415,9 @@ const SequencingQuiz = () => {
               {steamWandUser === drinkA.queueKey && (
                 <span className={styles.indicatorPillSteaming}>Steaming</span>
               )}
+              {drinkProgress[drinkA.queueKey]?.isBlending && (
+                <span className={styles.indicatorPillSteaming}>Blending</span>
+              )}
               {drinkProgress[drinkA.queueKey]?.isShotsPulling && (
                 <span className={styles.indicatorPillShots}>Shots</span>
               )}
@@ -412,6 +450,9 @@ const SequencingQuiz = () => {
             <div className={styles.badgeRow}>
               {steamWandUser === drinkB.queueKey && (
                 <span className={styles.indicatorPillSteaming}>Steaming</span>
+              )}
+              {drinkProgress[drinkB.queueKey]?.isBlending && (
+                <span className={styles.indicatorPillSteaming}>Blending</span>
               )}
               {drinkProgress[drinkB.queueKey]?.isShotsPulling && (
                 <span className={styles.indicatorPillShots}>Shots</span>

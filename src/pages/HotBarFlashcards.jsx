@@ -1,37 +1,48 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
 import MultiSizeCard from "../components/MultiSizeCard/MultiSizeCard.jsx";
 import styles from "./Quiz.module.css";
 
 const MASTERY_THRESHOLD = 2;
-const STORAGE_KEY = "srs-mastery-hotbar-v2";
 
-const loadMasteryMap = () => {
+const loadMasteryMap = (storageKey) => {
   try {
-    const saved = sessionStorage.getItem(STORAGE_KEY);
+    const saved = sessionStorage.getItem(storageKey);
     return saved ? JSON.parse(saved) : {};
   } catch {
     return {};
   }
 };
 
-const HotBarFlashcards = () => {
+const HotBarFlashcards = ({ stationMode = "hot_bar" }) => {
   const { drinks, isLoading } = useDrinkCatalog();
-  const [masteryMap, setMasteryMap] = useState(loadMasteryMap);
+  const isColdBar = stationMode === "cold_bar";
+  const storageKey = isColdBar ? "srs-mastery-coldbar-v2" : "srs-mastery-hotbar-v2";
+
+  const [masteryMap, setMasteryMap] = useState(() => loadMasteryMap(storageKey));
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
-  const hotBarDrinks = useMemo(
-    () => drinks.filter((d) => d.isActive && d.station === "espresso_bar"),
-    [drinks]
+  useEffect(() => {
+    setMasteryMap(loadMasteryMap(storageKey));
+    setCurrentCardIndex(0);
+  }, [storageKey]);
+
+  const stationDrinks = useMemo(
+    () =>
+      drinks.filter(
+        (d) =>
+          d.isActive && (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar")
+      ),
+    [drinks, isColdBar]
   );
 
   const deck = useMemo(
     () =>
-      hotBarDrinks.map((d) => ({
+      stationDrinks.map((d) => ({
         ...d,
         masteryLevel: masteryMap[d.id] || 0,
       })),
-    [hotBarDrinks, masteryMap]
+    [stationDrinks, masteryMap]
   );
 
   const activeDeck = useMemo(
@@ -50,7 +61,7 @@ const HotBarFlashcards = () => {
 
     const nextMap = { ...masteryMap, [currentCard.id]: nextLevel };
     setMasteryMap(nextMap);
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(nextMap));
+    sessionStorage.setItem(storageKey, JSON.stringify(nextMap));
 
     if (cardWasMastered) {
       const nextLen = activeDeck.length - 1;
@@ -62,7 +73,7 @@ const HotBarFlashcards = () => {
 
   const resetProgress = () => {
     setMasteryMap({});
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(storageKey);
     setCurrentCardIndex(0);
   };
 
@@ -79,14 +90,18 @@ const HotBarFlashcards = () => {
 
   return (
     <div className={styles.quizContainer}>
-      <h2>Hot Bar Multi-Size Flashcards</h2>
-      <p>Tap each size card to test shots and pumps before grading.</p>
+      <h2>{isColdBar ? "Cold Bar & Blended Flashcards" : "Hot Bar Multi-Size Flashcards"}</h2>
+      <p>
+        {isColdBar
+          ? "Tap each size card to test Frap Roast, Matcha scoops, Refresher caffeine & inclusions, and syrup pumps."
+          : "Tap each size card to test shots and pumps before grading."}
+      </p>
       <div className={styles.flashcardArea}>
         {currentCard ? (
           <MultiSizeCard item={currentCard} />
         ) : (
           <div className={styles.allDone}>
-            <h3>All Hot Bar drinks mastered!</h3>
+            <h3>All {isColdBar ? "Cold Bar & Blended" : "Hot Bar"} drinks mastered!</h3>
             <p>Reset progress to drill again.</p>
           </div>
         )}

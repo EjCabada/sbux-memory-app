@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
 import {
+  ACTION_DICTIONARY,
   ALL_SIZE_KEYS,
   BUILD_TEMPLATES,
   COLD_FOAM_MAP,
@@ -8,6 +9,8 @@ import {
   SIZE_SPECS,
   TOPPING_OPTIONS,
   compileDrink,
+  generateWorkflow,
+  getActionLabel,
   getDefaultIngredientsForDrink,
   normalizeCurve,
   normalizeFamilyBlueprint,
@@ -114,6 +117,9 @@ const DrinkManager = () => {
   const [newSyrupInput, setNewSyrupInput] = useState("");
   const [selectedToppingToAdd, setSelectedToppingToAdd] = useState("");
   const [newToppingInput, setNewToppingInput] = useState("");
+  const [newFinishingToggleInput, setNewFinishingToggleInput] = useState("");
+  const [stepToAddByTemp, setStepToAddByTemp] = useState({ hot: "", iced: "" });
+  const [customStepTextByTemp, setCustomStepTextByTemp] = useState({ hot: "", iced: "" });
 
   // Tab B Editor State
   const [selectedFamilyId, setSelectedFamilyId] = useState("latte");
@@ -372,6 +378,118 @@ const DrinkManager = () => {
         ? prev.toppings.filter((t) => t !== toppingId)
         : [...prev.toppings, toppingId];
       return { ...prev, toppings: nextToppings };
+    });
+  };
+
+  const handleAddCustomFinishingToggle = () => {
+    const label = String(newFinishingToggleInput || "").trim();
+    if (!label) return;
+    const slug = `add_topping_${label
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_|_$/g, "")}`;
+    addIngredientOption("toppings", label);
+    setEditingDrink((prev) => {
+      const nextToppings = prev.toppings.includes(slug) ? prev.toppings : [...prev.toppings, slug];
+      const currentIngToppings = prev.ingredients?.toppings || [];
+      const nextIngToppings = currentIngToppings.some((t) => t.toLowerCase() === label.toLowerCase())
+        ? currentIngToppings
+        : [...currentIngToppings, label];
+      return {
+        ...prev,
+        toppings: nextToppings,
+        ingredients: {
+          ...(prev.ingredients || {}),
+          toppings: nextIngToppings,
+        },
+      };
+    });
+    setNewFinishingToggleInput("");
+  };
+
+  // --- Drink-Specific Build Step Override Handlers (only saved when non-default) ---
+  const handleEnableCustomBuildForTemp = (tempMode) => {
+    setEditingDrink((prev) => {
+      const withoutCustom = { ...prev, customSteps: undefined };
+      const defaultWf = generateWorkflow(withoutCustom, tempMode, null, familiesMap);
+      const baseSteps = defaultWf?.steps ? [...defaultWf.steps] : ["add_lid", "connect_handoff"];
+      return {
+        ...prev,
+        customSteps: {
+          ...(prev.customSteps || {}),
+          [tempMode]: baseSteps,
+        },
+      };
+    });
+  };
+
+  const handleResetBuildToDefault = (tempMode = null) => {
+    setEditingDrink((prev) => {
+      if (!tempMode) {
+        const next = { ...prev };
+        delete next.customSteps;
+        delete next.buildOverride;
+        return next;
+      }
+      const nextCustom = { ...(prev.customSteps || {}) };
+      delete nextCustom[tempMode];
+      const next = { ...prev };
+      if (Object.keys(nextCustom).length > 0) {
+        next.customSteps = nextCustom;
+      } else {
+        delete next.customSteps;
+      }
+      return next;
+    });
+  };
+
+  const handleMoveCustomStep = (tempMode, index, direction) => {
+    setEditingDrink((prev) => {
+      const list = [...(prev.customSteps?.[tempMode] || [])];
+      const targetIdx = index + direction;
+      if (targetIdx < 0 || targetIdx >= list.length) return prev;
+      const [item] = list.splice(index, 1);
+      list.splice(targetIdx, 0, item);
+      return {
+        ...prev,
+        customSteps: {
+          ...(prev.customSteps || {}),
+          [tempMode]: list,
+        },
+      };
+    });
+  };
+
+  const handleRemoveCustomStep = (tempMode, index) => {
+    setEditingDrink((prev) => {
+      const list = (prev.customSteps?.[tempMode] || []).filter((_, idx) => idx !== index);
+      return {
+        ...prev,
+        customSteps: {
+          ...(prev.customSteps || {}),
+          [tempMode]: list,
+        },
+      };
+    });
+  };
+
+  const handleAddCustomStep = (tempMode, actionIdOrCustom) => {
+    if (!actionIdOrCustom) return;
+    setEditingDrink((prev) => {
+      const list = [...(prev.customSteps?.[tempMode] || [])];
+      const lidIdx = list.indexOf("add_lid");
+      if (lidIdx >= 0) {
+        list.splice(lidIdx, 0, actionIdOrCustom);
+      } else {
+        list.push(actionIdOrCustom);
+      }
+      return {
+        ...prev,
+        customSteps: {
+          ...(prev.customSteps || {}),
+          [tempMode]: list,
+        },
+      };
     });
   };
 
@@ -1440,16 +1558,203 @@ const DrinkManager = () => {
 
                 <div className={styles.sectionDivider}>Sequencing Simulator Finishing Actions</div>
                 <div className={styles.checkboxGrid}>
-                  {TOPPING_OPTIONS.map((top) => (
+                  {[
+                    ...TOPPING_OPTIONS,
+                    ...(editingDrink.toppings || [])
+                      .filter((tId) => !TOPPING_OPTIONS.some((opt) => opt.id === tId))
+                      .map((tId) => ({ id: tId, label: getActionLabel(tId) })),
+                  ].map((top) => (
                     <label key={top.id}>
                       <input
                         type="checkbox"
                         checked={editingDrink.toppings.includes(top.id)}
                         onChange={() => handleToggleDrinkTopping(top.id)}
                       />
-                      {top.label} (Action Step)
+                      {top.label}
                     </label>
                   ))}
+                </div>
+                <div className={styles.customInputGroup} style={{ marginTop: "0.4rem" }}>
+                  <input
+                    type="text"
+                    placeholder="Add custom finishing drizzle/topping toggle (e.g. Dark Caramel Drizzle)..."
+                    value={newFinishingToggleInput}
+                    onChange={(e) => setNewFinishingToggleInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCustomFinishingToggle();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={styles.smallAddBtn}
+                    onClick={handleAddCustomFinishingToggle}
+                  >
+                    + Add Action Toggle
+                  </button>
+                </div>
+
+                {/* ========================================================= */}
+                {/* DRINK-SPECIFIC BUILD WORKFLOW OVERRIDE (DEFAULT VS CUSTOM) */}
+                {/* ========================================================= */}
+                <div className={styles.sectionDivider}>
+                  <span>Build Workflow Steps (Default vs. Drink-Specific Override)</span>
+                  {(editingDrink.customSteps || editingDrink.buildOverride) && (
+                    <button
+                      type="button"
+                      className={styles.inlineLinkBtn}
+                      onClick={() => handleResetBuildToDefault()}
+                    >
+                      Reset to Default Family Build
+                    </button>
+                  )}
+                </div>
+
+                <div className={styles.ingredientsBuilderBox}>
+                  <div className={styles.formGroup}>
+                    <label>Build Template Preset (only saved if overridden):</label>
+                    <select
+                      value={editingDrink.buildOverride || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEditingDrink((prev) => {
+                          const next = { ...prev };
+                          if (val) next.buildOverride = val;
+                          else delete next.buildOverride;
+                          return next;
+                        });
+                      }}
+                    >
+                      <option value="">
+                        Use Family Default ({familiesMap[editingDrink.family]?.buildTemplate || "espresso_standard"})
+                      </option>
+                      {BUILD_TEMPLATES.map((tpl) => (
+                        <option key={tpl.id} value={tpl.id}>
+                          {tpl.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {editingDrink.temps.map((tempMode) => {
+                    const customList = editingDrink.customSteps?.[tempMode];
+                    const isCustomized = Array.isArray(customList) && customList.length > 0;
+                    return (
+                      <div key={tempMode} className={styles.customBuildTempBox}>
+                        <div className={styles.customBuildHeader}>
+                          <strong>
+                            {tempMode === "hot" ? "Hot" : "Iced"} Step-by-Step Build:{" "}
+                            {isCustomized ? "(Custom Drink Override Active)" : "(Using Default Build)"}
+                          </strong>
+                          {!isCustomized ? (
+                            <button
+                              type="button"
+                              className={styles.smallAddBtn}
+                              onClick={() => handleEnableCustomBuildForTemp(tempMode)}
+                            >
+                              Customize {tempMode === "hot" ? "Hot" : "Iced"} Steps
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.cancelBtn}
+                              onClick={() => handleResetBuildToDefault(tempMode)}
+                            >
+                              Use Default {tempMode === "hot" ? "Hot" : "Iced"} Steps
+                            </button>
+                          )}
+                        </div>
+
+                        {isCustomized && (
+                          <>
+                            <ol className={styles.customStepsList}>
+                              {customList.map((stepId, idx) => (
+                                <li key={`${stepId}_${idx}`} className={styles.customStepRow}>
+                                  <span className={styles.customStepLabel}>
+                                    {idx + 1}. {getActionLabel(stepId)}
+                                  </span>
+                                  <div className={styles.customStepBtns}>
+                                    <button
+                                      type="button"
+                                      disabled={idx === 0}
+                                      onClick={() => handleMoveCustomStep(tempMode, idx, -1)}
+                                      title="Move Up"
+                                    >
+                                      &uarr;
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={idx === customList.length - 1}
+                                      onClick={() => handleMoveCustomStep(tempMode, idx, 1)}
+                                      title="Move Down"
+                                    >
+                                      &darr;
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveCustomStep(tempMode, idx)}
+                                      title="Remove Step"
+                                    >
+                                      &times;
+                                    </button>
+                                  </div>
+                                </li>
+                              ))}
+                            </ol>
+                            <div className={styles.quickAddRow}>
+                              <select
+                                value={stepToAddByTemp[tempMode] || ""}
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    handleAddCustomStep(tempMode, e.target.value);
+                                    setStepToAddByTemp((prev) => ({ ...prev, [tempMode]: "" }));
+                                  }
+                                }}
+                              >
+                                <option value="">+ Insert Standard Bar Action...</option>
+                                {Object.entries(ACTION_DICTIONARY).map(([actId, lbl]) => (
+                                  <option key={actId} value={actId}>
+                                    {lbl} ({actId})
+                                  </option>
+                                ))}
+                              </select>
+                              <div className={styles.customInputGroup}>
+                                <input
+                                  type="text"
+                                  placeholder="Or type custom build step..."
+                                  value={customStepTextByTemp[tempMode] || ""}
+                                  onChange={(e) =>
+                                    setCustomStepTextByTemp((prev) => ({
+                                      ...prev,
+                                      [tempMode]: e.target.value,
+                                    }))
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className={styles.smallAddBtn}
+                                  onClick={() => {
+                                    const txt = (customStepTextByTemp[tempMode] || "").trim();
+                                    if (txt) {
+                                      handleAddCustomStep(tempMode, `custom_step:${txt}`);
+                                      setCustomStepTextByTemp((prev) => ({
+                                        ...prev,
+                                        [tempMode]: "",
+                                      }));
+                                    }
+                                  }}
+                                >
+                                  + Add Step
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className={styles.sectionDivider}>Curriculum Flags</div>
