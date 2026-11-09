@@ -18,6 +18,7 @@ const MultiSizeCard = ({ item }) => {
   if (!item) return null;
 
   const sizes = item.sizeList || [];
+  const containsList = item.containsList || [];
   const noteText = item.comments || item.notes || "";
 
   return (
@@ -30,6 +31,21 @@ const MultiSizeCard = ({ item }) => {
         <p className={styles.questionSubtext}>{item.question}</p>
         <span className={styles.tapInstruction}>Tap each size card to reveal proportions</span>
       </div>
+
+      {containsList.length > 0 && (
+        <div className={styles.containsSection}>
+          <div className={styles.containsHeader}>What It Contains</div>
+          <div className={styles.containsBadgeGrid}>
+            {containsList.map((entry, i) => (
+              <div key={i} className={styles.containsPill}>
+                <span className={styles.containsCategory}>{entry.category}:</span>
+                <span className={styles.containsValue}>{entry.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className={styles.cardsGrid}>
         {sizes.map((s, idx) => {
           const isFlipped = Boolean(flippedCards[idx]);
@@ -70,7 +86,11 @@ const MultiSizeCard = ({ item }) => {
           );
         })}
       </div>
-      {noteText && <div className={styles.notesBox}>{noteText}</div>}
+      {noteText && (
+        <div className={styles.notesBox}>
+          <strong>Barista Note:</strong> {noteText}
+        </div>
+      )}
     </div>
   );
 };

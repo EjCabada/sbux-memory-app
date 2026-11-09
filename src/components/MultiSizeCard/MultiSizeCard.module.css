@@ -43,6 +43,52 @@
   color: #a0a0a0;
 }
 
+.containsSection {
+  width: 100%;
+  background: rgba(30, 57, 50, 0.55);
+  border: 1px solid rgba(0, 168, 98, 0.45);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  box-sizing: border-box;
+}
+
+.containsHeader {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #34d399;
+  margin-bottom: 0.45rem;
+  text-align: left;
+}
+
+.containsBadgeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.containsPill {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.containsCategory {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.containsValue {
+  color: #ffffff;
+  font-weight: 700;
+}
+
 .cardsGrid {
   display: grid;
   grid-template-columns: 1fr;

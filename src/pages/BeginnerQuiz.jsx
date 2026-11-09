@@ -367,6 +367,15 @@ const BeginnerQuiz = () => {
       <div className={styles.drinkHeaderCard}>
         <span className={styles.drinkCategory}>{currentDrink.season} &bull; {currentDrink.familyLabel}</span>
         <h2 className={styles.drinkName}>{currentDrink.name}</h2>
+        {currentDrink.containsList && currentDrink.containsList.length > 0 && (
+          <div className={styles.containsMiniRow}>
+            {currentDrink.containsList.map((c, idx) => (
+              <span key={idx} className={styles.containsMiniBadge}>
+                {c.value}
+              </span>
+            ))}
+          </div>
+        )}
         <div className={styles.visualSizeContainer}>
           {orderedSizes.map((s) => {
             const isActive = s.sizeKey === activeSize.sizeKey;

@@ -18,7 +18,9 @@
   color: white;
   border-radius: 12px;
   width: 90vw;
-  max-width: 500px;
+  max-width: 540px;
+  max-height: 88vh;
+  overflow-y: auto;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -55,10 +57,56 @@
 .detailsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.85rem;
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   font-size: 0.9rem;
+}
+
+.sectionSubheader {
+  color: #00a862;
+  margin: 0.85rem 0 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.containsSection {
+  background: rgba(0, 168, 98, 0.12);
+  border: 1px solid rgba(0, 168, 98, 0.4);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.containsSection h4 {
+  margin: 0 0 0.4rem 0;
+  color: #34d399;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.containsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.86rem;
+}
+
+.containsItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.containsCategory {
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+.containsValue {
+  color: #ffffff;
+  font-weight: 700;
+  text-align: right;
 }
 
 .detailItem strong {

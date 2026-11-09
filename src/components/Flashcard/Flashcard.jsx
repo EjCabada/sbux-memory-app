@@ -22,6 +22,7 @@ const Flashcard = ({ recipe, basicCard }) => {
 
   const hotSteps = recipe?.workflows?.hot?.stepLabels || [];
   const icedSteps = recipe?.workflows?.iced?.stepLabels || [];
+  const containsList = recipe?.containsList || [];
 
   const renderRecipeBack = () => (
     <>
@@ -34,7 +35,7 @@ const Flashcard = ({ recipe, basicCard }) => {
             setActiveTab("components");
           }}
         >
-          Ratios
+          Ingredients &amp; Ratios
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === "steps" ? styles.activeTab : ""}`}
@@ -53,22 +54,39 @@ const Flashcard = ({ recipe, basicCard }) => {
               setActiveTab("comments");
             }}
           >
-            Comments
+            Notes
           </button>
         )}
       </div>
       <div className={styles.tabContent}>
-        {activeTab === "components" && recipe.sizeList && (
-          <div className={styles.detailsGrid}>
-            {recipe.sizeList.map((s) => (
-              <div key={s.sizeKey} className={styles.sizeDetail}>
-                <strong>{s.size}:</strong>
-                <p>
-                  {s.metrics.map((m) => `${m.label}: ${m.value}`).join(" | ")}
-                </p>
+        {activeTab === "components" && (
+          <>
+            {containsList.length > 0 && (
+              <div className={styles.containsBox}>
+                <h4>What It Contains</h4>
+                <div className={styles.containsList}>
+                  {containsList.map((item, idx) => (
+                    <div key={idx} className={styles.containsRow}>
+                      <span className={styles.containsLabel}>{item.category}:</span>
+                      <span className={styles.containsVal}>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+            {recipe.sizeList && (
+              <div className={styles.detailsGrid}>
+                {recipe.sizeList.map((s) => (
+                  <div key={s.sizeKey} className={styles.sizeDetail}>
+                    <strong>{s.size}:</strong>
+                    <p>
+                      {s.metrics.map((m) => `${m.label}: ${m.value}`).join(" | ")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
         {activeTab === "steps" && (
           <div className={styles.stepsContainer}>

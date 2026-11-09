@@ -370,7 +370,12 @@ const SequencingQuiz = () => {
               <span className={styles.tempBadge}>{drinkA.temp}</span>
             </div>
             <div className={styles.drinkName}>{drinkA.name}</div>
-            <div className={styles.drinkSize}>{drinkA.size}</div>
+            <div className={styles.drinkSize}>
+              {drinkA.size}
+              {drinkA.hasColdFoam && drinkA.coldFoamRecipe
+                ? ` • Foam: ${drinkA.coldFoamRecipe}`
+                : ""}
+            </div>
             <div className={styles.badgeRow}>
               {steamWandUser === drinkA.queueKey && (
                 <span className={styles.indicatorPillSteaming}>Steaming</span>
@@ -398,7 +403,12 @@ const SequencingQuiz = () => {
               <span className={styles.tempBadge}>{drinkB.temp}</span>
             </div>
             <div className={styles.drinkName}>{drinkB.name}</div>
-            <div className={styles.drinkSize}>{drinkB.size}</div>
+            <div className={styles.drinkSize}>
+              {drinkB.size}
+              {drinkB.hasColdFoam && drinkB.coldFoamRecipe
+                ? ` • Foam: ${drinkB.coldFoamRecipe}`
+                : ""}
+            </div>
             <div className={styles.badgeRow}>
               {steamWandUser === drinkB.queueKey && (
                 <span className={styles.indicatorPillSteaming}>Steaming</span>

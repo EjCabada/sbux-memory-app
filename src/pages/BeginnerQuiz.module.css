@@ -67,8 +67,26 @@
 .drinkName {
   color: #ffffff;
   font-size: 1.45rem;
-  margin: 0.25rem 0 0.5rem;
+  margin: 0.25rem 0 0.35rem;
   font-weight: 700;
+}
+
+.containsMiniRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-bottom: 0.45rem;
+}
+
+.containsMiniBadge {
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #d4e9e2;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
 }
 
 /* Ascending Cup Size Bars */

@@ -3,38 +3,51 @@ import { useDrinkCatalog } from "../context/DrinkContext.jsx";
 import {
   ALL_SIZE_KEYS,
   BUILD_TEMPLATES,
-  CURVE_OPTIONS,
-  EXTRA_METRIC_KEYS,
-  METRIC_LABELS,
+  COLD_FOAM_MAP,
+  COLD_FOAM_PRESETS,
   SIZE_SPECS,
   TOPPING_OPTIONS,
   compileDrink,
+  getDefaultIngredientsForDrink,
+  normalizeCurve,
   normalizeFamilyBlueprint,
 } from "../utils/drinkEngine.js";
 import styles from "./DrinkManager.module.css";
 
 const SUGGESTED_SEASONS = ["Core", "Fall 2025", "Winter 2026", "Spring 2026", "Summer 2026", "Fall 2026"];
 
-const createBlankDrink = (defaultFamily) => ({
-  id: `drink_${Date.now()}`,
-  name: "",
-  family: defaultFamily?.id || "latte",
-  station: defaultFamily?.defaultStation || "espresso_bar",
-  season: "Core",
-  isActive: true,
-  temps: defaultFamily?.defaultTemps ? [...defaultFamily.defaultTemps] : ["hot", "iced"],
-  shotType: defaultFamily?.defaultShotType || "standard",
-  shotsDelta: 0,
-  pumpsDelta: 0,
-  hasWhip: Boolean(defaultFamily?.defaultHasWhip),
-  includeSyrupStep: defaultFamily?.includeSyrupStep !== undefined ? defaultFamily.includeSyrupStep : true,
-  toppings: [],
-  curriculum: {
-    isFundamental: true,
-    allowInSequencing: true,
-  },
-  comments: "",
-});
+const createBlankDrink = (defaultFamily) => {
+  const famId = defaultFamily?.id || "latte";
+  const defaultIng = getDefaultIngredientsForDrink(famId);
+  return {
+    id: `drink_${Date.now()}`,
+    name: "",
+    family: famId,
+    station: defaultFamily?.defaultStation || "espresso_bar",
+    season: "Core",
+    isActive: true,
+    temps: defaultFamily?.defaultTemps ? [...defaultFamily.defaultTemps] : ["hot", "iced"],
+    shotType: defaultFamily?.defaultShotType || "standard",
+    pumpsDelta: 0,
+    hasWhip: false,
+    hasColdFoam: false,
+    coldFoamType: "vsc",
+    coldFoamRecipe: COLD_FOAM_MAP.vsc.recipe,
+    includeSyrupStep: famId !== "cappuccino" && famId !== "flat_white",
+    ingredients: {
+      roast: defaultIng.roast,
+      milk: defaultIng.milk,
+      syrups: [],
+      toppings: [],
+    },
+    toppings: [],
+    curriculum: {
+      isFundamental: true,
+      allowInSequencing: true,
+    },
+    comments: "",
+  };
+};
 
 const createBlankFamily = () => ({
   id: "",
@@ -43,15 +56,25 @@ const createBlankFamily = () => ({
   defaultTemps: ["hot", "iced"],
   baseSizes: ["tall", "grande", "venti_hot", "venti_iced"],
   shotCurve: "espressoShots",
-  baseShotsDelta: 0,
   defaultShotType: "standard",
   primaryPumpMetric: "syrup_pumps",
   pumpCurve: "hotBarPumps",
-  basePumpsDelta: 0,
   extraMetrics: {},
   buildTemplate: "espresso_standard",
-  includeSyrupStep: true,
-  defaultHasWhip: false,
+});
+
+const createBlankCurveDraft = (category = "pumps") => ({
+  id: "",
+  label: "",
+  category,
+  values: {
+    short: "",
+    tall: 2,
+    grande: 3,
+    venti_hot: 4,
+    venti_iced: 4,
+    trenta: "",
+  },
 });
 
 const DrinkManager = () => {
@@ -59,13 +82,21 @@ const DrinkManager = () => {
     rawDrinks,
     families,
     familiesMap,
+    curves,
+    curvesMap,
+    metrics,
+    metricsMap,
+    ingredientOptions,
     isLoading,
     hasLocalOverrides,
     upsertDrink,
+    addIngredientOption,
     deleteDrink,
     toggleDrinkFlag,
     upsertFamily,
     deleteFamily,
+    upsertCurve,
+    upsertMetric,
     exportUnifiedCatalogJSON,
     resetCatalogToSource,
   } = useDrinkCatalog();
@@ -79,19 +110,33 @@ const DrinkManager = () => {
   // Tab A Modal State
   const [editingDrink, setEditingDrink] = useState(null);
   const [isDrinkModalOpen, setIsDrinkModalOpen] = useState(false);
+  const [selectedSyrupToAdd, setSelectedSyrupToAdd] = useState("");
+  const [newSyrupInput, setNewSyrupInput] = useState("");
+  const [selectedToppingToAdd, setSelectedToppingToAdd] = useState("");
+  const [newToppingInput, setNewToppingInput] = useState("");
 
   // Tab B Editor State
   const [selectedFamilyId, setSelectedFamilyId] = useState("latte");
   const [familyDraft, setFamilyDraft] = useState(() =>
-    normalizeFamilyBlueprint(families[0] || createBlankFamily())
+    normalizeFamilyBlueprint(families[0] || createBlankFamily(), curvesMap)
   );
   const [isCreatingNewFamily, setIsCreatingNewFamily] = useState(false);
   const [statusBanner, setStatusBanner] = useState(null);
+
+  // Tab B Custom Curve & Parameter Builder State
+  const [isCurveBuilderOpen, setIsCurveBuilderOpen] = useState(false);
+  const [curveDraft, setCurveDraft] = useState(() => createBlankCurveDraft("pumps"));
+  const [isMetricBuilderOpen, setIsMetricBuilderOpen] = useState(false);
+  const [metricDraft, setMetricDraft] = useState({ key: "", label: "" });
 
   const seasonOptions = useMemo(() => {
     const set = new Set([...SUGGESTED_SEASONS, ...rawDrinks.map((d) => d.season).filter(Boolean)]);
     return Array.from(set);
   }, [rawDrinks]);
+
+  const extraMetricOptions = useMemo(() => {
+    return metrics.filter((m) => m.key !== "shots" && m.key !== "syrup_pumps");
+  }, [metrics]);
 
   const filteredDrinks = useMemo(() => {
     return rawDrinks.filter((d) => {
@@ -111,18 +156,18 @@ const DrinkManager = () => {
   // Live Engine Output Preview for Tab A Modal
   const liveCompiledDrink = useMemo(() => {
     if (!editingDrink) return null;
-    return compileDrink(editingDrink, familiesMap);
-  }, [editingDrink, familiesMap]);
+    return compileDrink(editingDrink, familiesMap, curvesMap, metricsMap);
+  }, [editingDrink, familiesMap, curvesMap, metricsMap]);
 
   // Live Engine Output Preview for Tab B Family Editor
   const liveFamilyPreview = useMemo(() => {
     if (!familyDraft) return null;
-    const normalizedFam = normalizeFamilyBlueprint(familyDraft);
+    const normalizedFam = normalizeFamilyBlueprint(familyDraft, curvesMap);
     const previewMap = { ...familiesMap, [normalizedFam.id]: normalizedFam };
     const sampleRaw = createBlankDrink(normalizedFam);
     sampleRaw.name = `${normalizedFam.label || "Sample"} (Baseline Preview)`;
-    return compileDrink(sampleRaw, previewMap);
-  }, [familyDraft, familiesMap]);
+    return compileDrink(sampleRaw, previewMap, curvesMap, metricsMap);
+  }, [familyDraft, familiesMap, curvesMap, metricsMap]);
 
   if (isLoading) {
     return (
@@ -142,7 +187,7 @@ const DrinkManager = () => {
     link.download = "drinks.json";
     link.click();
     URL.revokeObjectURL(url);
-    setStatusBanner("Downloaded unified drinks.json (schema v2: families + drinks) ready for GitHub Pages.");
+    setStatusBanner("Downloaded unified drinks.json (schema v2.3: ingredients + curves + metrics + families + drinks).");
   };
 
   const handleCopyUnifiedJSON = async () => {
@@ -153,7 +198,7 @@ const DrinkManager = () => {
   const handleResetToSource = () => {
     if (window.confirm("Discard local browser edits and reload public/data/drinks.json?")) {
       resetCatalogToSource();
-      setStatusBanner("Restored catalog and family blueprints from public/data/drinks.json.");
+      setStatusBanner("Restored catalog, ingredient registries, curves, and family blueprints from public/data/drinks.json.");
     }
   };
 
@@ -161,30 +206,154 @@ const DrinkManager = () => {
   const handleOpenAddDrink = () => {
     const defaultFam = families[0];
     setEditingDrink(createBlankDrink(defaultFam));
+    setSelectedSyrupToAdd("");
+    setNewSyrupInput("");
+    setSelectedToppingToAdd("");
+    setNewToppingInput("");
     setIsDrinkModalOpen(true);
   };
 
   const handleOpenEditDrink = (rawDrink) => {
+    const hasColdFoam = Boolean(rawDrink.hasColdFoam);
+    const foamType = hasColdFoam && COLD_FOAM_MAP[rawDrink.coldFoamType] ? rawDrink.coldFoamType : "vsc";
+    const foamRecipe = hasColdFoam
+      ? rawDrink.coldFoamRecipe || COLD_FOAM_MAP[foamType]?.recipe || ""
+      : COLD_FOAM_MAP.vsc.recipe;
+    const defaultIng = getDefaultIngredientsForDrink(rawDrink.family, rawDrink);
+    const ing = rawDrink.ingredients || {};
+
     setEditingDrink({
       ...rawDrink,
+      pumpsDelta: rawDrink.family === "frappuccino" ? 0 : Number(rawDrink.pumpsDelta) || 0,
+      hasWhip: Boolean(rawDrink.hasWhip),
+      hasColdFoam,
+      coldFoamType: foamType,
+      coldFoamRecipe: foamRecipe,
+      ingredients: {
+        roast: ing.roast || defaultIng.roast,
+        milk: ing.milk || defaultIng.milk,
+        syrups: Array.isArray(ing.syrups) ? [...ing.syrups] : [],
+        toppings: Array.isArray(ing.toppings) ? [...ing.toppings] : [],
+      },
       temps: [...rawDrink.temps],
       toppings: [...(rawDrink.toppings || [])],
       curriculum: { ...rawDrink.curriculum },
     });
+    setSelectedSyrupToAdd("");
+    setNewSyrupInput("");
+    setSelectedToppingToAdd("");
+    setNewToppingInput("");
     setIsDrinkModalOpen(true);
   };
 
   const handleDrinkFamilyChange = (newFamId) => {
     const fam = familiesMap[newFamId];
     if (!fam) return;
+    const defaultIng = getDefaultIngredientsForDrink(newFamId);
     setEditingDrink((prev) => ({
       ...prev,
       family: newFamId,
       station: fam.defaultStation,
       temps: [...fam.defaultTemps],
       shotType: fam.defaultShotType,
-      hasWhip: fam.defaultHasWhip,
-      includeSyrupStep: fam.includeSyrupStep,
+      pumpsDelta: newFamId === "frappuccino" ? 0 : prev.pumpsDelta,
+      includeSyrupStep: newFamId !== "cappuccino" && newFamId !== "flat_white",
+      ingredients: {
+        ...(prev.ingredients || {}),
+        roast: prev.ingredients?.roast || defaultIng.roast,
+        milk: prev.ingredients?.milk || defaultIng.milk,
+        syrups: prev.ingredients?.syrups || [],
+        toppings: prev.ingredients?.toppings || [],
+      },
+    }));
+  };
+
+  // --- Malleable Ingredients ("What It Contains") Handlers ---
+  const handleIngredientFieldChange = (field, val) => {
+    setEditingDrink((prev) => ({
+      ...prev,
+      ingredients: {
+        ...(prev.ingredients || {}),
+        [field]: val,
+      },
+    }));
+  };
+
+  const handleAddSyrupToDrink = (syrupName) => {
+    const trimmed = String(syrupName || "").trim();
+    if (!trimmed) return;
+    addIngredientOption("syrups", trimmed);
+    setEditingDrink((prev) => {
+      const current = prev.ingredients?.syrups || [];
+      if (current.some((s) => s.toLowerCase() === trimmed.toLowerCase())) return prev;
+      return {
+        ...prev,
+        includeSyrupStep: true,
+        ingredients: {
+          ...(prev.ingredients || {}),
+          syrups: [...current, trimmed],
+        },
+      };
+    });
+  };
+
+  const handleRemoveSyrupFromDrink = (syrupName) => {
+    setEditingDrink((prev) => ({
+      ...prev,
+      ingredients: {
+        ...(prev.ingredients || {}),
+        syrups: (prev.ingredients?.syrups || []).filter((s) => s !== syrupName),
+      },
+    }));
+  };
+
+  const handleAddToppingIngredientToDrink = (toppingName) => {
+    const trimmed = String(toppingName || "").trim();
+    if (!trimmed) return;
+    addIngredientOption("toppings", trimmed);
+    setEditingDrink((prev) => {
+      const current = prev.ingredients?.toppings || [];
+      if (current.some((t) => t.toLowerCase() === trimmed.toLowerCase())) return prev;
+      return {
+        ...prev,
+        ingredients: {
+          ...(prev.ingredients || {}),
+          toppings: [...current, trimmed],
+        },
+      };
+    });
+  };
+
+  const handleRemoveToppingIngredientFromDrink = (toppingName) => {
+    setEditingDrink((prev) => ({
+      ...prev,
+      ingredients: {
+        ...(prev.ingredients || {}),
+        toppings: (prev.ingredients?.toppings || []).filter((t) => t !== toppingName),
+      },
+    }));
+  };
+
+  const handleColdFoamToggle = (checked) => {
+    setEditingDrink((prev) => {
+      const nextType = prev.coldFoamType && prev.coldFoamType !== "none" ? prev.coldFoamType : "vsc";
+      const nextRecipe =
+        prev.coldFoamRecipe || COLD_FOAM_MAP[nextType]?.recipe || COLD_FOAM_MAP.vsc.recipe;
+      return {
+        ...prev,
+        hasColdFoam: checked,
+        coldFoamType: checked ? nextType : "none",
+        coldFoamRecipe: checked ? nextRecipe : "",
+      };
+    });
+  };
+
+  const handleColdFoamPresetChange = (presetId) => {
+    const preset = COLD_FOAM_MAP[presetId];
+    setEditingDrink((prev) => ({
+      ...prev,
+      coldFoamType: presetId,
+      coldFoamRecipe: preset ? preset.recipe : prev.coldFoamRecipe,
     }));
   };
 
@@ -262,10 +431,68 @@ const DrinkManager = () => {
     });
   };
 
+  const handleOpenCurveBuilder = (category = "pumps", existingCurveId = null) => {
+    if (existingCurveId && existingCurveId !== "none") {
+      const found = curves.find((c) => c.id === existingCurveId);
+      if (found) {
+        setCurveDraft({
+          id: found.id,
+          label: found.label,
+          category: found.category || category,
+          values: {
+            short: found.values.short ?? "",
+            tall: found.values.tall ?? "",
+            grande: found.values.grande ?? "",
+            venti_hot: found.values.venti_hot ?? "",
+            venti_iced: found.values.venti_iced ?? "",
+            trenta: found.values.trenta ?? "",
+          },
+        });
+        setIsCurveBuilderOpen(true);
+        return;
+      }
+    }
+    setCurveDraft(createBlankCurveDraft(category));
+    setIsCurveBuilderOpen(true);
+  };
+
+  const handleSaveCustomCurve = () => {
+    if (!curveDraft.label.trim()) return;
+    const rawId =
+      curveDraft.id.trim() ||
+      curveDraft.label
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_");
+    const saved = upsertCurve(normalizeCurve({ ...curveDraft, id: rawId }));
+
+    if (saved.category === "shots") {
+      setFamilyDraft((prev) => ({ ...prev, shotCurve: saved.id }));
+    } else if (saved.category === "pumps") {
+      setFamilyDraft((prev) => ({ ...prev, pumpCurve: saved.id }));
+    }
+    setIsCurveBuilderOpen(false);
+    setStatusBanner(`Saved progression curve "${saved.label}" (${saved.id}).`);
+  };
+
+  const handleSaveCustomMetric = () => {
+    if (!metricDraft.label.trim()) return;
+    const rawKey =
+      metricDraft.key.trim() ||
+      metricDraft.label
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_]+/g, "_");
+    const saved = upsertMetric({ key: rawKey, label: metricDraft.label.trim() });
+    setMetricDraft({ key: "", label: "" });
+    setIsMetricBuilderOpen(false);
+    setStatusBanner(`Added parameter "${saved.label}" (${saved.key}). Assign a curve below!`);
+  };
+
   const handleSaveFamilyBlueprint = (e) => {
     e.preventDefault();
     if (!familyDraft.id.trim() || !familyDraft.label.trim()) return;
-    const normalized = normalizeFamilyBlueprint(familyDraft);
+    const normalized = normalizeFamilyBlueprint(familyDraft, curvesMap);
     upsertFamily(normalized);
     setIsCreatingNewFamily(false);
     setSelectedFamilyId(normalized.id);
@@ -286,19 +513,24 @@ const DrinkManager = () => {
     setStatusBanner("Deleted family blueprint.");
   };
 
+  const shotCurves = curves.filter((c) => c.category === "shots");
+  const pumpAndParamCurves = curves.filter((c) => c.category !== "shots");
+
   return (
     <div className={styles.container}>
       {/* JSON DEPLOYMENT DASHBOARD */}
       <div className={styles.jsonDashboard}>
         <div className={styles.dashboardInfo}>
           <div className={styles.dashboardTitleRow}>
-            <h3>Unified Relational Catalog (Schema v2)</h3>
+            <h3>Unified Relational Catalog (Schema v2.3)</h3>
             <span className={hasLocalOverrides ? styles.overrideBadgeActive : styles.overrideBadgeSynced}>
               {hasLocalOverrides ? "Local Browser Edits Active" : "Synced with public/data/drinks.json"}
             </span>
           </div>
           <p>
-            <strong>{rawDrinks.length}</strong> Drinks &bull; <strong>{families.length}</strong> Family Blueprints &bull; Oct 2026 Sleeve Standard Active
+            <strong>{rawDrinks.length}</strong> Drinks &bull; <strong>{families.length}</strong> Families &bull;{" "}
+            <strong>{ingredientOptions.syrups.length}</strong> Syrups &bull;{" "}
+            <strong>{curves.length}</strong> Curves
           </p>
         </div>
         <div className={styles.dashboardActions}>
@@ -360,7 +592,7 @@ const DrinkManager = () => {
           <div className={styles.headerRow}>
             <div>
               <h2>Drink Catalog</h2>
-              <p>Assign drinks to dynamic families, toggle Essentials &amp; Sequencing flags, and manage seasonal lineups.</p>
+              <p>Configure drink ingredients (&ldquo;What It Contains&rdquo;), syrups, cold foams, and curriculum flags.</p>
             </div>
             <button className={styles.addBtn} onClick={handleOpenAddDrink}>
               + New Drink
@@ -394,7 +626,7 @@ const DrinkManager = () => {
               <thead>
                 <tr>
                   <th>Active</th>
-                  <th>Drink Name</th>
+                  <th>Drink Name &amp; What It Contains</th>
                   <th>Family Blueprint</th>
                   <th>Season</th>
                   <th>Essentials (isFundamental)</th>
@@ -403,56 +635,66 @@ const DrinkManager = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredDrinks.map((d) => (
-                  <tr key={d.id} className={!d.isActive ? styles.inactiveRow : ""}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={d.isActive}
-                        onChange={() => toggleDrinkFlag(d.id, "isActive")}
-                      />
-                    </td>
-                    <td>
-                      <strong>{d.name}</strong>
-                      <div className={styles.subMeta}>
-                        {d.temps.join("/")} &bull; {d.station.replace(/_/g, " ")}
-                      </div>
-                    </td>
-                    <td>
-                      <code>{d.family}</code>
-                    </td>
-                    <td>
-                      <span className={styles.seasonTag}>{d.season}</span>
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={Boolean(d.curriculum?.isFundamental)}
-                        onChange={() => toggleDrinkFlag(d.id, "isFundamental")}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={Boolean(d.curriculum?.allowInSequencing)}
-                        onChange={() => toggleDrinkFlag(d.id, "allowInSequencing")}
-                      />
-                    </td>
-                    <td>
-                      <button className={styles.actionBtnEdit} onClick={() => handleOpenEditDrink(d)}>
-                        Edit
-                      </button>
-                      <button
-                        className={styles.actionBtnDel}
-                        onClick={() => {
-                          if (window.confirm(`Delete "${d.name}"?`)) deleteDrink(d.id);
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {filteredDrinks.map((d) => {
+                  const ing = d.ingredients || {};
+                  const summaryParts = [
+                    ing.roast,
+                    ing.milk,
+                    ...(ing.syrups || []),
+                    ...(ing.toppings || []),
+                  ].filter(Boolean);
+                  return (
+                    <tr key={d.id} className={!d.isActive ? styles.inactiveRow : ""}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={d.isActive}
+                          onChange={() => toggleDrinkFlag(d.id, "isActive")}
+                        />
+                      </td>
+                      <td>
+                        <strong>{d.name}</strong>
+                        <div className={styles.subMeta}>
+                          {summaryParts.join(" • ")}
+                          {d.hasColdFoam && d.coldFoamRecipe ? ` • Foam: ${d.coldFoamRecipe}` : ""}
+                        </div>
+                      </td>
+                      <td>
+                        <code>{d.family}</code>
+                      </td>
+                      <td>
+                        <span className={styles.seasonTag}>{d.season}</span>
+                      </td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(d.curriculum?.isFundamental)}
+                          onChange={() => toggleDrinkFlag(d.id, "isFundamental")}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(d.curriculum?.allowInSequencing)}
+                          onChange={() => toggleDrinkFlag(d.id, "allowInSequencing")}
+                        />
+                      </td>
+                      <td>
+                        <button className={styles.actionBtnEdit} onClick={() => handleOpenEditDrink(d)}>
+                          Edit
+                        </button>
+                        <button
+                          className={styles.actionBtnDel}
+                          onClick={() => {
+                            if (window.confirm(`Delete "${d.name}"?`)) deleteDrink(d.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -466,13 +708,141 @@ const DrinkManager = () => {
         <div className={styles.archContainer}>
           <div className={styles.headerRow}>
             <div>
-              <h2>Family Blueprint Editor</h2>
-              <p>Create new drink families or adjust corporate pump/shot baselines. Linked drinks recompile automatically.</p>
+              <h2>Family Blueprint &amp; Curve Editor</h2>
+              <p>Create new drink families, define custom shot/pump progressions, or register new ingredient parameters.</p>
             </div>
-            <button className={styles.addBtn} onClick={handleStartNewFamily}>
-              + New Family Blueprint
-            </button>
+            <div className={styles.dashboardActions}>
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={() => handleOpenCurveBuilder("pumps")}
+              >
+                + New Shot / Pump Curve
+              </button>
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={() => setIsMetricBuilderOpen((prev) => !prev)}
+              >
+                + New Parameter
+              </button>
+              <button className={styles.addBtn} onClick={handleStartNewFamily}>
+                + New Family Blueprint
+              </button>
+            </div>
           </div>
+
+          {/* INLINE CUSTOM CURVE BUILDER */}
+          {isCurveBuilderOpen && (
+            <div className={styles.builderPanel}>
+              <div className={styles.builderHeader}>
+                <h4>Create / Edit Progression Curve (Shots, Pumps, or Scoops per Size)</h4>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setIsCurveBuilderOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+              <div className={styles.inlineThree}>
+                <div className={styles.formGroup}>
+                  <label>Curve Category:</label>
+                  <select
+                    value={curveDraft.category}
+                    onChange={(e) => setCurveDraft({ ...curveDraft, category: e.target.value })}
+                  >
+                    <option value="shots">Shot Curve (Espresso / Ristretto)</option>
+                    <option value="pumps">Pump Curve (Syrups / Sauces / Base)</option>
+                    <option value="parameter">Ingredient Curve (Scoops / Bags / Packets)</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Display Label:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Half-Sweet Pumps (1 / 2 / 2 / 3)"
+                    value={curveDraft.label}
+                    onChange={(e) => setCurveDraft({ ...curveDraft, label: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Curve ID (optional slug):</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. halfSweetPumps"
+                    value={curveDraft.id}
+                    onChange={(e) => setCurveDraft({ ...curveDraft, id: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className={styles.sizeInputsGrid}>
+                {ALL_SIZE_KEYS.map((sKey) => (
+                  <div key={sKey} className={styles.formGroup}>
+                    <label>{SIZE_SPECS[sKey].shortLabel}:</label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="—"
+                      value={curveDraft.values[sKey] ?? ""}
+                      onChange={(e) =>
+                        setCurveDraft({
+                          ...curveDraft,
+                          values: { ...curveDraft.values, [sKey]: e.target.value },
+                        })
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className={styles.modalBtnRow}>
+                <button type="button" className={styles.saveBtn} onClick={handleSaveCustomCurve}>
+                  Save Progression Curve
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* INLINE CUSTOM PARAMETER (METRIC) BUILDER */}
+          {isMetricBuilderOpen && (
+            <div className={styles.builderPanel}>
+              <div className={styles.builderHeader}>
+                <h4>Register New Ingredient Parameter (e.g. Salt Packets, Protein Scoops, Pearls)</h4>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setIsMetricBuilderOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+              <div className={styles.inlineThree}>
+                <div className={styles.formGroup}>
+                  <label>Parameter Display Label:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Salt Packets"
+                    value={metricDraft.label}
+                    onChange={(e) => setMetricDraft({ ...metricDraft, label: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Parameter Key (slug):</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. salt_packets"
+                    value={metricDraft.key}
+                    onChange={(e) => setMetricDraft({ ...metricDraft, key: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup} style={{ justifyContent: "flex-end" }}>
+                  <button type="button" className={styles.saveBtn} onClick={handleSaveCustomMetric}>
+                    Save Parameter
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {!isCreatingNewFamily && (
             <div className={styles.archSelectorRow}>
@@ -569,8 +939,17 @@ const DrinkManager = () => {
                 ))}
               </div>
 
-              <div className={styles.sectionDivider}>Shot &amp; Primary Pump Baselines</div>
-              <div className={styles.inlineThree}>
+              <div className={styles.sectionDivider}>
+                <span>Shot &amp; Primary Pump Curves</span>
+                <button
+                  type="button"
+                  className={styles.inlineLinkBtn}
+                  onClick={() => handleOpenCurveBuilder("shots", familyDraft.shotCurve)}
+                >
+                  Edit / Add Curve
+                </button>
+              </div>
+              <div className={styles.inlineTwo}>
                 <div className={styles.formGroup}>
                   <label>Shot Curve:</label>
                   <select
@@ -578,17 +957,10 @@ const DrinkManager = () => {
                     onChange={(e) => setFamilyDraft({ ...familyDraft, shotCurve: e.target.value })}
                   >
                     <option value="none">None (0 Shots)</option>
-                    <option value="espressoShots">Espresso (1/1/2/2/3)</option>
-                    <option value="americanoShots">Americano (1/2/3/4/4)</option>
+                    {shotCurves.map((c) => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
                   </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Base Shots Delta:</label>
-                  <input
-                    type="number"
-                    value={familyDraft.baseShotsDelta}
-                    onChange={(e) => setFamilyDraft({ ...familyDraft, baseShotsDelta: Number(e.target.value) })}
-                  />
                 </div>
                 <div className={styles.formGroup}>
                   <label>Default Shot Type:</label>
@@ -602,16 +974,21 @@ const DrinkManager = () => {
                 </div>
               </div>
 
-              <div className={styles.inlineThree}>
+              <div className={styles.inlineTwo}>
                 <div className={styles.formGroup}>
                   <label>Primary Pump Parameter:</label>
                   <select
                     value={familyDraft.primaryPumpMetric}
                     onChange={(e) => setFamilyDraft({ ...familyDraft, primaryPumpMetric: e.target.value })}
                   >
-                    <option value="syrup_pumps">syrup_pumps</option>
-                    <option value="caffeine_pumps">caffeine_pumps</option>
                     <option value="none">None</option>
+                    {metrics
+                      .filter((m) => m.key !== "shots")
+                      .map((m) => (
+                        <option key={m.key} value={m.key}>
+                          {m.label} ({m.key})
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className={styles.formGroup}>
@@ -620,55 +997,39 @@ const DrinkManager = () => {
                     value={familyDraft.pumpCurve}
                     onChange={(e) => setFamilyDraft({ ...familyDraft, pumpCurve: e.target.value })}
                   >
-                    {CURVE_OPTIONS.map((c) => (
+                    <option value="none">None (0 Pumps)</option>
+                    {pumpAndParamCurves.map((c) => (
                       <option key={c.id} value={c.id}>{c.label}</option>
                     ))}
                   </select>
                 </div>
-                <div className={styles.formGroup}>
-                  <label>Base Pumps Delta:</label>
-                  <input
-                    type="number"
-                    value={familyDraft.basePumpsDelta}
-                    onChange={(e) => setFamilyDraft({ ...familyDraft, basePumpsDelta: Number(e.target.value) })}
-                  />
-                </div>
               </div>
 
-              <div className={styles.sectionDivider}>Extended Cold Bar &amp; Tea Parameters</div>
+              <div className={styles.sectionDivider}>
+                <span>Extended Parameters (Scoops, Inclusions, Bags, Custom)</span>
+                <button
+                  type="button"
+                  className={styles.inlineLinkBtn}
+                  onClick={() => setIsMetricBuilderOpen(true)}
+                >
+                  + Add Parameter
+                </button>
+              </div>
               <div className={styles.inlineTwo}>
-                {EXTRA_METRIC_KEYS.map((metricKey) => (
-                  <div key={metricKey} className={styles.formGroup}>
-                    <label>{METRIC_LABELS[metricKey]} ({metricKey}):</label>
+                {extraMetricOptions.map((metric) => (
+                  <div key={metric.key} className={styles.formGroup}>
+                    <label>{metric.label} ({metric.key}):</label>
                     <select
-                      value={familyDraft.extraMetrics?.[metricKey] || "none"}
-                      onChange={(e) => handleExtraMetricChange(metricKey, e.target.value)}
+                      value={familyDraft.extraMetrics?.[metric.key] || "none"}
+                      onChange={(e) => handleExtraMetricChange(metric.key, e.target.value)}
                     >
-                      {CURVE_OPTIONS.map((c) => (
+                      <option value="none">None (0)</option>
+                      {curves.map((c) => (
                         <option key={c.id} value={c.id}>{c.label}</option>
                       ))}
                     </select>
                   </div>
                 ))}
-              </div>
-
-              <div className={styles.checkboxRow}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={familyDraft.includeSyrupStep}
-                    onChange={(e) => setFamilyDraft({ ...familyDraft, includeSyrupStep: e.target.checked })}
-                  />
-                  Include Syrup Step in Default Workflow
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={familyDraft.defaultHasWhip}
-                    onChange={(e) => setFamilyDraft({ ...familyDraft, defaultHasWhip: e.target.checked })}
-                  />
-                  Whipped Cream by Default
-                </label>
               </div>
 
               <div className={styles.modalBtnRow}>
@@ -800,7 +1161,7 @@ const DrinkManager = () => {
                     </select>
                   </div>
                   <div className={styles.formGroup}>
-                    <label>Shot Type:</label>
+                    <label>Shot Style (Standard vs Ristretto):</label>
                     <select
                       value={editingDrink.shotType}
                       onChange={(e) => setEditingDrink({ ...editingDrink, shotType: e.target.value })}
@@ -811,26 +1172,198 @@ const DrinkManager = () => {
                   </div>
                 </div>
 
-                <div className={styles.inlineTwo}>
-                  <div className={styles.formGroup}>
-                    <label>Shots Delta (vs Family):</label>
-                    <input
-                      type="number"
-                      value={editingDrink.shotsDelta}
-                      onChange={(e) => setEditingDrink({ ...editingDrink, shotsDelta: Number(e.target.value) })}
-                    />
+                {/* ========================================================= */}
+                {/* WHAT IT CONTAINS (MALLEABLE INGREDIENTS BUILDER)          */}
+                {/* ========================================================= */}
+                <div className={styles.sectionDivider}>
+                  <span>What It Contains (Recipe Card Ingredients)</span>
+                </div>
+
+                <div className={styles.ingredientsBuilderBox}>
+                  <div className={styles.inlineTwo}>
+                    <div className={styles.formGroup}>
+                      <label>Espresso Roast / Tea / Base:</label>
+                      <input
+                        type="text"
+                        list="roast-options-list"
+                        placeholder="e.g. Blonde Espresso, Signature Espresso"
+                        value={editingDrink.ingredients?.roast || ""}
+                        onChange={(e) => handleIngredientFieldChange("roast", e.target.value)}
+                      />
+                      <datalist id="roast-options-list">
+                        {ingredientOptions.roasts.map((r) => (
+                          <option key={r} value={r} />
+                        ))}
+                      </datalist>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Default Milk / Liquid Base:</label>
+                      <input
+                        type="text"
+                        list="milk-options-list"
+                        placeholder="e.g. 2% Milk, Oatmilk, Whole Milk"
+                        value={editingDrink.ingredients?.milk || ""}
+                        onChange={(e) => handleIngredientFieldChange("milk", e.target.value)}
+                      />
+                      <datalist id="milk-options-list">
+                        {ingredientOptions.milks.map((m) => (
+                          <option key={m} value={m} />
+                        ))}
+                      </datalist>
+                    </div>
                   </div>
+
+                  {/* SYRUPS / SAUCES MULTI-BUILDER */}
                   <div className={styles.formGroup}>
-                    <label>Pumps Delta (vs Family):</label>
-                    <input
-                      type="number"
-                      value={editingDrink.pumpsDelta}
-                      onChange={(e) => setEditingDrink({ ...editingDrink, pumpsDelta: Number(e.target.value) })}
-                    />
+                    <label>Syrups / Sauces in Drink (supports multiple):</label>
+                    <div className={styles.chipList}>
+                      {(editingDrink.ingredients?.syrups || []).length === 0 ? (
+                        <span className={styles.emptyChipHint}>No syrups/sauces added (Unsweetened)</span>
+                      ) : (
+                        (editingDrink.ingredients?.syrups || []).map((syrup) => (
+                          <span key={syrup} className={styles.ingredientChip}>
+                            {syrup}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSyrupFromDrink(syrup)}
+                              title="Remove syrup"
+                            >
+                              &times;
+                            </button>
+                          </span>
+                        ))
+                      )}
+                    </div>
+                    <div className={styles.quickAddRow}>
+                      <select
+                        value={selectedSyrupToAdd}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleAddSyrupToDrink(e.target.value);
+                            setSelectedSyrupToAdd("");
+                          }
+                        }}
+                      >
+                        <option value="">+ Quick-Add Existing Syrup / Sauce...</option>
+                        {ingredientOptions.syrups.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                      <div className={styles.customInputGroup}>
+                        <input
+                          type="text"
+                          placeholder="Or type new Starbucks syrup..."
+                          value={newSyrupInput}
+                          onChange={(e) => setNewSyrupInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddSyrupToDrink(newSyrupInput);
+                              setNewSyrupInput("");
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className={styles.smallAddBtn}
+                          onClick={() => {
+                            handleAddSyrupToDrink(newSyrupInput);
+                            setNewSyrupInput("");
+                          }}
+                        >
+                          + Add Syrup
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* TOPPINGS / POWDERS / DRIZZLES MULTI-BUILDER */}
+                  <div className={styles.formGroup}>
+                    <label>Toppings / Powders / Drizzles (e.g. Cinnamon Powder, Caramel Drizzle):</label>
+                    <div className={styles.chipList}>
+                      {(editingDrink.ingredients?.toppings || []).length === 0 ? (
+                        <span className={styles.emptyChipHint}>No specialty toppings/powders</span>
+                      ) : (
+                        (editingDrink.ingredients?.toppings || []).map((top) => (
+                          <span key={top} className={styles.ingredientChipTopping}>
+                            {top}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveToppingIngredientFromDrink(top)}
+                              title="Remove topping"
+                            >
+                              &times;
+                            </button>
+                          </span>
+                        ))
+                      )}
+                    </div>
+                    <div className={styles.quickAddRow}>
+                      <select
+                        value={selectedToppingToAdd}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleAddToppingIngredientToDrink(e.target.value);
+                            setSelectedToppingToAdd("");
+                          }
+                        }}
+                      >
+                        <option value="">+ Quick-Add Existing Topping / Powder...</option>
+                        {ingredientOptions.toppings.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                      <div className={styles.customInputGroup}>
+                        <input
+                          type="text"
+                          placeholder="Or type new topping / powder..."
+                          value={newToppingInput}
+                          onChange={(e) => setNewToppingInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddToppingIngredientToDrink(newToppingInput);
+                              setNewToppingInput("");
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className={styles.smallAddBtn}
+                          onClick={() => {
+                            handleAddToppingIngredientToDrink(newToppingInput);
+                            setNewToppingInput("");
+                          }}
+                        >
+                          + Add Topping
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className={styles.sectionDivider}>Temperatures, Modifiers &amp; Toppings</div>
+                {editingDrink.family !== "frappuccino" && (
+                  <div className={styles.formGroup}>
+                    <label>Syrup Pumps Curve Adjustment:</label>
+                    <select
+                      value={editingDrink.pumpsDelta}
+                      onChange={(e) =>
+                        setEditingDrink({ ...editingDrink, pumpsDelta: Number(e.target.value) })
+                      }
+                    >
+                      <option value={0}>Standard Family Curve (0)</option>
+                      <option value={-1}>Reduced Sweetness (-1 Pump - Macchiato Rule)</option>
+                      <option value={1}>Extra Pump (+1)</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className={styles.sectionDivider}>Temperatures, Cold Foam &amp; Build Modifiers</div>
                 <div className={styles.checkboxGrid}>
                   <label>
                     <input
@@ -851,10 +1384,18 @@ const DrinkManager = () => {
                   <label>
                     <input
                       type="checkbox"
-                      checked={editingDrink.hasWhip}
+                      checked={Boolean(editingDrink.hasWhip)}
                       onChange={(e) => setEditingDrink({ ...editingDrink, hasWhip: e.target.checked })}
                     />
-                    Whipped Cream
+                    Whipped Cream (hasWhip)
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(editingDrink.hasColdFoam)}
+                      onChange={(e) => handleColdFoamToggle(e.target.checked)}
+                    />
+                    Cold Foam (hasColdFoam)
                   </label>
                   <label>
                     <input
@@ -868,6 +1409,36 @@ const DrinkManager = () => {
                   </label>
                 </div>
 
+                {editingDrink.hasColdFoam && (
+                  <div className={styles.foamConfigBox}>
+                    <div className={styles.formGroup}>
+                      <label>Cold Foam Type / Preset:</label>
+                      <select
+                        value={editingDrink.coldFoamType || "vsc"}
+                        onChange={(e) => handleColdFoamPresetChange(e.target.value)}
+                      >
+                        {COLD_FOAM_PRESETS.map((preset) => (
+                          <option key={preset.id} value={preset.id}>
+                            {preset.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Foam Composition (What goes in the foaming pitcher):</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 100mL Sweet Cream + 2 pumps Caramel + 2 Salt packets"
+                        value={editingDrink.coldFoamRecipe || ""}
+                        onChange={(e) =>
+                          setEditingDrink({ ...editingDrink, coldFoamRecipe: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.sectionDivider}>Sequencing Simulator Finishing Actions</div>
                 <div className={styles.checkboxGrid}>
                   {TOPPING_OPTIONS.map((top) => (
                     <label key={top.id}>
@@ -876,7 +1447,7 @@ const DrinkManager = () => {
                         checked={editingDrink.toppings.includes(top.id)}
                         onChange={() => handleToggleDrinkTopping(top.id)}
                       />
-                      {top.label}
+                      {top.label} (Action Step)
                     </label>
                   ))}
                 </div>
@@ -915,7 +1486,7 @@ const DrinkManager = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Barista Notes / Exceptions:</label>
+                  <label>Barista Technique Notes (e.g. 7x7 crosshatch, aerate 6-8s):</label>
                   <textarea
                     rows="2"
                     value={editingDrink.comments}
@@ -945,6 +1516,20 @@ const DrinkManager = () => {
                     Family: <code>{liveCompiledDrink.family}</code> &bull; Auto-Tags:{" "}
                     {liveCompiledDrink.tags.join(", ")}
                   </p>
+
+                  {liveCompiledDrink.containsList && liveCompiledDrink.containsList.length > 0 && (
+                    <div className={styles.previewContainsBox}>
+                      <strong>What It Contains:</strong>
+                      <div className={styles.previewContainsGrid}>
+                        {liveCompiledDrink.containsList.map((item, idx) => (
+                          <div key={idx} className={styles.previewContainsItem}>
+                            <span>{item.category}:</span> <b>{item.value}</b>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className={styles.previewSizesGrid}>
                     {liveCompiledDrink.sizeList.map((s) => (
                       <div key={s.sizeKey} className={styles.previewSizeBox}>

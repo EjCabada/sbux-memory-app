@@ -499,12 +499,213 @@
 }
 
 .sectionDivider {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-weight: 700;
   font-size: 0.84rem;
   color: #00a862;
   border-bottom: 1px solid #444;
   padding-bottom: 0.25rem;
   margin-top: 0.35rem;
+}
+
+.inlineLinkBtn {
+  background: transparent;
+  border: 1px solid rgba(0, 168, 98, 0.45);
+  color: #34d399;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.inlineLinkBtn:hover {
+  background: rgba(0, 168, 98, 0.15);
+}
+
+.builderPanel {
+  background: rgba(0, 168, 98, 0.08);
+  border: 1px solid rgba(0, 168, 98, 0.4);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.builderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.builderHeader h4 {
+  margin: 0;
+  color: #34d399;
+  font-size: 0.92rem;
+}
+
+.sizeInputsGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 720px) {
+  .sizeInputsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.foamConfigBox {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.foamPreviewBanner {
+  background: rgba(251, 191, 36, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #fde68a;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+}
+
+.ingredientsBuilderBox {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 28px;
+  align-items: center;
+}
+
+.emptyChipHint {
+  font-size: 0.76rem;
+  color: #888;
+  font-style: italic;
+}
+
+.ingredientChip,
+.ingredientChipTopping {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ingredientChip {
+  background: rgba(0, 168, 98, 0.2);
+  border: 1px solid rgba(0, 168, 98, 0.5);
+  color: #a7f3d0;
+}
+
+.ingredientChipTopping {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+}
+
+.ingredientChip button,
+.ingredientChipTopping button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.quickAddRow {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 640px) {
+  .quickAddRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.customInputGroup {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.customInputGroup input {
+  flex: 1;
+}
+
+.smallAddBtn {
+  background: #00704a;
+  border: 1px solid #00a862;
+  color: white;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.previewContainsBox {
+  background: rgba(0, 168, 98, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.previewContainsBox strong {
+  display: block;
+  color: #6ee7b7;
+  margin-bottom: 0.35rem;
+}
+
+.previewContainsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.previewContainsItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.previewContainsItem span {
+  color: #a7f3d0;
+}
+
+.previewContainsItem b {
+  color: #ffffff;
+  text-align: right;
 }
 
 .checkboxRow {
