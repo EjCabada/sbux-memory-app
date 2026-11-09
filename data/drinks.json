@@ -1,545 +1,1603 @@
-[
-  {
-    "id": "caffe_latte",
-    "name": "Caffè Latte",
-    "family": "latte",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "",
-    "sizes": {
-      "tall": { "shots": "1", "pumps": "3" },
-      "grande": { "shots": "2", "pumps": "4" },
-      "venti_hot": { "shots": "2", "pumps": "5" },
-      "venti_iced": { "shots": "3", "pumps": "6" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_milk",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_cup",
-        "steam_milk",
-        "clean_wand",
-        "groom_milk",
-        "free_pour_milk",
-        "add_lid",
-        "connect_handoff"
-      ]
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_cup",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_cup",
-        "pour_cold_milk",
-        "add_ice",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "caramel_macchiato",
-    "name": "Caramel Macchiato",
-    "family": "macchiato",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "",
-    "sizes": {
-      "tall": { "shots": "1", "pumps": "2" },
-      "grande": { "shots": "2", "pumps": "3" },
-      "venti_hot": { "shots": "2", "pumps": "4" },
-      "venti_iced": { "shots": "3", "pumps": "5" }
-    },
-    "hot": {
-      "needsSleeve": true,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_milk",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_glass",
-        "steam_milk",
-        "clean_wand",
-        "groom_milk",
-        "free_pour_milk",
-        "pour_shots_over",
-        "add_caramel",
-        "add_sleeve",
-        "add_lid",
-        "connect_handoff"
-      ]
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "add_ice",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_glass",
-        "pour_cold_milk",
-        "add_ice",
-        "pour_shots_over",
-        "add_caramel",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "cappuccino",
-    "name": "Cappuccino",
-    "family": "cappuccino",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "A wetter cappuccino has more steamed milk, a drier one has more foam.",
-    "sizes": {
-      "tall": { "shots": "1", "pumps": "3" },
-      "grande": { "shots": "2", "pumps": "4" },
-      "venti_hot": { "shots": "2", "pumps": "5" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_cappuccino",
-      "steps": [
-        "queue_shots",
-        "catch_cup",
-        "steam_cappuccino",
-        "clean_wand",
-        "groom_milk",
-        "pour_foam",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "caffe_americano",
-    "name": "Caffè Americano",
-    "family": "americano",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "",
-    "sizes": {
-      "tall": { "shots": "2", "pumps": "3" },
-      "grande": { "shots": "3", "pumps": "4" },
-      "venti_hot": { "shots": "4", "pumps": "5" },
-      "venti_iced": { "shots": "4", "pumps": "6" }
-    },
-    "hot": {
-      "needsSleeve": true,
-      "hasHotWater": true,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_cup",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_cup",
-        "add_hot_water",
-        "add_sleeve",
-        "add_lid",
-        "connect_handoff"
-      ]
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_cup",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_cup",
-        "add_cold_water",
-        "add_ice",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "flat_white",
-    "name": "Flat White",
-    "family": "flat_white",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": true,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "Uses whole milk and ristretto shots by default.",
-    "sizes": {
-      "tall": { "shots": "2R", "pumps": "3" },
-      "grande": { "shots": "3R", "pumps": "4" },
-      "venti_hot": { "shots": "3R", "pumps": "5" },
-      "venti_iced": { "shots": "4R", "pumps": "6" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_whole_milk",
-      "steps": [
-        "queue_ristretto",
-        "catch_cup",
-        "steam_whole_milk",
-        "clean_wand",
-        "groom_milk",
-        "pour_foam_dot",
-        "add_lid",
-        "connect_handoff"
-      ]
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_cup",
-      "steps": [
-        "queue_ristretto",
-        "catch_cup",
-        "pour_cold_milk",
-        "add_ice",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "caffe_mocha",
-    "name": "Caffè Mocha",
-    "family": "mocha",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "Includes mocha sauce, steamed milk, and whipped cream.",
-    "sizes": {
-      "tall": { "shots": "1", "pumps": "3" },
-      "grande": { "shots": "2", "pumps": "4" },
-      "venti_hot": { "shots": "2", "pumps": "5" },
-      "venti_iced": { "shots": "3", "pumps": "6" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_milk",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_cup",
-        "steam_milk",
-        "clean_wand",
-        "groom_milk",
-        "free_pour_milk",
-        "add_whip",
-        "add_lid",
-        "connect_handoff"
-      ]
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_cup",
-      "steps": [
-        "queue_shots",
-        "pump_syrups",
-        "catch_cup",
-        "pour_cold_milk",
-        "add_ice",
-        "add_whip",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "iced_shaken_espresso",
-    "name": "Iced Shaken Espresso",
-    "family": "shaken_espresso",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["core drinks", "espresso bar"],
-    "comments": "Default is made with Classic syrup and 2% milk.",
-    "sizes": {
-      "tall": { "shots": "2", "pumps": "1" },
-      "grande": { "shots": "3", "pumps": "2" },
-      "venti_iced": { "shots": "4", "pumps": "3" }
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_glass",
-      "steps": [
-        "queue_shots",
-        "pump_shaker",
-        "catch_glass",
-        "add_ice",
-        "shake_10x",
-        "top_milk",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "brown_sugar_shaken_espresso",
-    "name": "Brown Sugar Oatmilk Shaken Espresso",
-    "family": "shaken_espresso",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": false,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": false
-    },
-    "tags": ["core drinks", "espresso bar"],
-    "comments": "Made with Blonde espresso, Oatmilk, and Cinnamon powder.",
-    "sizes": {
-      "tall": { "shots": "2", "pumps": "1" },
-      "grande": { "shots": "3", "pumps": "2" },
-      "venti_iced": { "shots": "4", "pumps": "3" }
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_glass",
-      "steps": [
-        "queue_shots",
-        "pump_shaker",
-        "catch_glass",
-        "add_ice",
-        "shake_10x",
-        "top_milk",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "cortado",
-    "name": "Cortado",
-    "family": "cortado",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": true,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": false
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "Served in a Short size only, made with Blonde ristretto shots and whole milk.",
-    "sizes": {
-      "short": { "shots": "3R", "pumps": "2" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_whole_milk",
-      "steps": [
-        "queue_ristretto",
-        "catch_cup",
-        "steam_whole_milk",
-        "clean_wand",
-        "groom_milk",
-        "free_pour_milk",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "chai_tea_latte",
-    "name": "Chai Tea Latte",
-    "family": "tea_latte",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": true
-    },
-    "tags": ["cold bar", "espresso bar", "core drinks"],
-    "comments": "Standard builds include Classic sweetener pumps.",
-    "sizes": {
-      "tall": { "shots": "0", "pumps": "3" },
-      "grande": { "shots": "0", "pumps": "4" },
-      "venti_hot": { "shots": "0", "pumps": "5" },
-      "venti_iced": { "shots": "0", "pumps": "6" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_all_pitcher",
-      "steps": [
-        "steam_all_pitcher",
-        "clean_wand",
-        "groom_milk",
-        "free_pour_milk",
-        "add_lid",
-        "connect_handoff"
-      ]
-    },
-    "iced": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": false,
-      "stopPoint": "catch_cup",
-      "steps": [
-        "pump_syrups",
-        "pour_cold_milk",
-        "add_ice",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
-  {
-    "id": "hot_chocolate",
-    "name": "Hot Chocolate",
-    "family": "hot_chocolate",
-    "station": "espresso_bar",
-    "season": "core",
-    "isActive": true,
-    "isRistretto": false,
-    "curriculum": {
-      "isFundamental": true,
-      "allowInSpeedQuiz": true,
-      "allowInSequencing": false
-    },
-    "tags": ["espresso bar", "core drinks"],
-    "comments": "Mocha sauce, steamed milk, whipped cream, and mocha drizzle.",
-    "sizes": {
-      "tall": { "shots": "0", "pumps": "3" },
-      "grande": { "shots": "0", "pumps": "4" },
-      "venti_hot": { "shots": "0", "pumps": "5" }
-    },
-    "hot": {
-      "needsSleeve": false,
-      "hasHotWater": false,
-      "requiresSteamedMilk": true,
-      "stopPoint": "steam_milk",
-      "steps": [
-        "pump_syrups",
-        "steam_milk",
-        "clean_wand",
-        "groom_milk",
-        "free_pour_milk",
-        "add_whip",
-        "add_lid",
-        "connect_handoff"
-      ]
-    }
-  },
 {
-  "id": "honey_citrus_mint_tea",
-  "name": "Honey Citrus Mint Tea",
-  "family": "tea_latte",
-  "station": "espresso_bar",
-  "season": "core",
-  "isActive": true,
-  "curriculum": {
-    "isFundamental": false,
-    "allowInSpeedQuiz": true,
-    "allowInSequencing": false
-  },
-  "tags": ["espresso bar", "core drinks", "hot tea"],
-  "comments": "camamile mint blossom tea (1 bag total for Short). Half hot water, half steamed lemonade.",
-  "sizes": {
-    "short": { "tea_bags": "1", "pumps": "1", "shots": "0" },
-    "tall": { "tea_bags": "2", "pumps": "1", "shots": "0" },
-    "grande": { "tea_bags": "2", "pumps": "2", "shots": "0" },
-    "venti_hot": { "tea_bags": "2", "pumps": "2", "shots": "0" }
-  },
-  "hot": {
-    "needsSleeve": true,
-    "hasHotWater": true,
-    "requiresSteamedMilk": true,
-    "stopPoint": "steam_milk",
-    "steps": [
-      "add_tea_bags",
-      "pump_honey",
-      "add_hot_water",
-      "steam_lemonade",
-      "clean_wand",
-      "free_pour_milk",
-      "add_sleeve",
-      "add_lid",
-      "connect_handoff"
+  "schemaVersion": 2,
+  "schemaRevision": "2.3",
+  "ingredientOptions": {
+    "roasts": [
+      "Signature Espresso",
+      "Blonde Espresso",
+      "Decaf Espresso",
+      "Frap Roast",
+      "Cold Brew",
+      "Nitro Cold Brew",
+      "Chai Concentrate",
+      "Chamomile Mint Blossom Tea",
+      "Earl Grey Tea",
+      "Matcha Green Tea",
+      "Strawberry Açaí Base",
+      "Mango Dragonfruit Base",
+      "Pineapple Passionfruit Base",
+      "None (Crème / Steamer)",
+      "Blonde"
+    ],
+    "milks": [
+      "2% Milk",
+      "Whole Milk",
+      "Oatmilk",
+      "Almondmilk",
+      "Soymilk",
+      "Coconutmilk",
+      "Nonfat Milk",
+      "Vanilla Sweet Cream",
+      "Breve (Half & Half)",
+      "Water",
+      "Water + Steamed Lemonade",
+      "Lemonade",
+      "None",
+      "Protein Milk",
+      "-"
+    ],
+    "syrups": [
+      "Classic Syrup",
+      "Vanilla Syrup",
+      "Brown Sugar Syrup",
+      "Caramel Syrup",
+      "Cinnamon Dolce Syrup",
+      "Hazelnut Syrup",
+      "Peppermint Syrup",
+      "Mocha Sauce",
+      "White Chocolate Mocha Sauce",
+      "Dark Caramel Sauce",
+      "Pumpkin Sauce",
+      "Honey Blend",
+      "Liquid Cane Sugar",
+      "Apple Brown Sugar",
+      "pistachio Sauce",
+      "Lavender Powder",
+      "Caramel Brulée Sauce pumps",
+      "Sugar Cookie Syrup",
+      "Pumpkin Spice Syrup",
+      "Pecan Syrup pumps",
+      "Gingerbread Syrup",
+      "Chai"
+    ],
+    "toppings": [
+      "Cinnamon Powder (2 shakes)",
+      "Caramel Drizzle",
+      "Mocha Drizzle",
+      "Cinnamon Dolce Sprinkles",
+      "Pumpkin Spice Topping",
+      "Chocolate Curls",
+      "Cookie Crumble Topping",
+      "Caramel Crunch Topping",
+      "Freeze-Dried Strawberries",
+      "Dragonfruit Inclusions",
+      "Caramel Brulée Topping",
+      "Red and Green Sprinkle Topping",
+      "Pecan Crunch Topping",
+      "Salted Brown-Buttery Topping",
+      "Cocoa Cookie Dusting"
     ]
-  }
+  },
+  "curves": [
+    {
+      "id": "espressoShots",
+      "label": "Standard Espresso Shots (1 / 1 / 2 / 2 / 3)",
+      "category": "shots",
+      "values": {
+        "short": 1,
+        "tall": 1,
+        "grande": 2,
+        "venti_hot": 2,
+        "venti_iced": 3
+      }
+    },
+    {
+      "id": "flatWhiteShots",
+      "label": "Flat White / Shaken Shots (2 / 2 / 3 / 3 / 4)",
+      "category": "shots",
+      "values": {
+        "short": 2,
+        "tall": 2,
+        "grande": 3,
+        "venti_hot": 3,
+        "venti_iced": 4
+      }
+    },
+    {
+      "id": "americanoShots",
+      "label": "Americano Shots (1 / 2 / 3 / 4 / 4)",
+      "category": "shots",
+      "values": {
+        "short": 1,
+        "tall": 2,
+        "grande": 3,
+        "venti_hot": 4,
+        "venti_iced": 4
+      }
+    },
+    {
+      "id": "cortadoShots",
+      "label": "Cortado Short Shots (3)",
+      "category": "shots",
+      "values": {
+        "short": 3
+      }
+    },
+    {
+      "id": "hotBarPumps",
+      "label": "Hot Bar Full Pumps (2 / 3 / 4 / 5 / 6)",
+      "category": "pumps",
+      "values": {
+        "short": 2,
+        "tall": 3,
+        "grande": 4,
+        "venti_hot": 5,
+        "venti_iced": 6,
+        "trenta": 7
+      }
+    },
+    {
+      "id": "coldBarPumps",
+      "label": "Cold Bar / Shaken Pumps (1 / 2 / 3 / 4)",
+      "category": "pumps",
+      "values": {
+        "short": 1,
+        "tall": 1,
+        "grande": 2,
+        "venti_iced": 3,
+        "trenta": 4
+      }
+    },
+    {
+      "id": "blendedPumps",
+      "label": "Frappuccino / Blended Pumps (2 / 3 / 4)",
+      "category": "pumps",
+      "values": {
+        "short": 1,
+        "tall": 2,
+        "grande": 3,
+        "venti_hot": 4,
+        "venti_iced": 4,
+        "trenta": 5
+      }
+    },
+    {
+      "id": "energyPumps",
+      "label": "Energy Progression (4 / 5 / 6 / 7)",
+      "category": "pumps",
+      "values": {
+        "short": 3,
+        "tall": 4,
+        "grande": 5,
+        "venti_iced": 6,
+        "trenta": 7
+      }
+    },
+    {
+      "id": "hotTeaPumps",
+      "label": "Hot Tea Honey Progression (1 / 1 / 2 / 2)",
+      "category": "pumps",
+      "values": {
+        "short": 1,
+        "tall": 1,
+        "grande": 2,
+        "venti_hot": 2
+      }
+    },
+    {
+      "id": "frapRoastCurve",
+      "label": "Frap Roast Pumps (2 / 3 / 4)",
+      "category": "parameter",
+      "values": {
+        "tall": 2,
+        "grande": 3,
+        "venti_iced": 4
+      }
+    },
+    {
+      "id": "matchaScoopsCurve",
+      "label": "Matcha Scoops (2 / 3 / 4)",
+      "category": "parameter",
+      "values": {
+        "short": 1,
+        "tall": 2,
+        "grande": 3,
+        "venti_hot": 4,
+        "venti_iced": 4
+      }
+    },
+    {
+      "id": "fruitInclusionsCurve",
+      "label": "Fruit Inclusions (1 / 1 / 1 / 2)",
+      "category": "parameter",
+      "values": {
+        "tall": 1,
+        "grande": 1,
+        "venti_iced": 1,
+        "trenta": 2
+      }
+    },
+    {
+      "id": "hotTeaBagsCurve",
+      "label": "Steeped Tea Bags (1 / 2 / 2 / 2)",
+      "category": "parameter",
+      "values": {
+        "short": 1,
+        "tall": 2,
+        "grande": 2,
+        "venti_hot": 2
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "key": "shots",
+      "label": "Shots"
+    },
+    {
+      "key": "syrup_pumps",
+      "label": "Syrup Pumps"
+    },
+    {
+      "key": "frap_roast",
+      "label": "Frap Roast"
+    },
+    {
+      "key": "caffeine_pumps",
+      "label": "Caffeine Pumps"
+    },
+    {
+      "key": "fruit_inclusions",
+      "label": "Fruit Inclusions"
+    },
+    {
+      "key": "matcha_scoops",
+      "label": "Matcha Scoops"
+    },
+    {
+      "key": "tea_bags",
+      "label": "Tea Bags"
+    }
+  ],
+  "families": [
+    {
+      "id": "latte",
+      "label": "Standard Espresso Latte",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "hot",
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_hot",
+        "venti_iced"
+      ],
+      "shotCurve": "espressoShots",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "hotBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "espresso_standard"
+    },
+    {
+      "id": "macchiato",
+      "label": "Espresso Macchiato (Layered)",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "hot",
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_hot",
+        "venti_iced"
+      ],
+      "shotCurve": "espressoShots",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "hotBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "macchiato"
+    },
+    {
+      "id": "cappuccino",
+      "label": "Cappuccino (High Foam)",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "hot"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_hot"
+      ],
+      "shotCurve": "espressoShots",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "hotBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "cappuccino"
+    },
+    {
+      "id": "americano",
+      "label": "Caffè Americano (Water Base)",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "hot",
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_hot",
+        "venti_iced"
+      ],
+      "shotCurve": "americanoShots",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "hotBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "americano"
+    },
+    {
+      "id": "flat_white",
+      "label": "Flat White (+1 Ristretto, Whole Milk)",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "hot",
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_hot",
+        "venti_iced"
+      ],
+      "shotCurve": "flatWhiteShots",
+      "defaultShotType": "ristretto",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "hotBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "flat_white"
+    },
+    {
+      "id": "shaken_espresso",
+      "label": "Iced Shaken Espresso (+1 Shot, 1-2-3 Pumps)",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_iced"
+      ],
+      "shotCurve": "flatWhiteShots",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "coldBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "shaken_espresso"
+    },
+    {
+      "id": "cold_brew",
+      "label": "Cold Brew / Nitro (1-2-3-4)",
+      "defaultStation": "cold_bar",
+      "defaultTemps": [
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_iced",
+        "trenta"
+      ],
+      "shotCurve": "none",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "coldBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "cold_brew"
+    },
+    {
+      "id": "refresher",
+      "label": "Refresher (1-2-3-4 Caffeine + Fruit)",
+      "defaultStation": "cold_bar",
+      "defaultTemps": [
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_iced",
+        "trenta"
+      ],
+      "shotCurve": "none",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "caffeine_pumps",
+      "pumpCurve": "coldBarPumps",
+      "extraMetrics": {
+        "fruit_inclusions": "fruitInclusionsCurve"
+      },
+      "buildTemplate": "refresher"
+    },
+    {
+      "id": "frappuccino",
+      "label": "Frappuccino Blended Beverage (2-3-4)",
+      "defaultStation": "blended",
+      "defaultTemps": [
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_iced"
+      ],
+      "shotCurve": "none",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "blendedPumps",
+      "extraMetrics": {
+        "frap_roast": "frapRoastCurve"
+      },
+      "buildTemplate": "frappuccino"
+    }
+  ],
+  "drinks": [
+    {
+      "id": "caffe_latte",
+      "name": "Caffè Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "caramel_macchiato",
+      "name": "Caramel Macchiato",
+      "family": "macchiato",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": -1,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [],
+        "toppings": [
+          "Caramel Crosshatch"
+        ]
+      },
+      "toppings": [
+        "add_caramel"
+      ],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Vanilla syrup (-1 pump from standard), shots poured over top, caramel crosshatch."
+    },
+    {
+      "id": "cappuccino",
+      "name": "Cappuccino",
+      "family": "cappuccino",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": false,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "A wetter cappuccino has more steamed milk, a drier one has more foam."
+    },
+    {
+      "id": "caffe_americano",
+      "name": "Caffè Americano",
+      "family": "americano",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "Water",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "flat_white",
+      "name": "Flat White",
+      "family": "flat_white",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "ristretto",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": false,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "Whole Milk",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Uses whole milk and ristretto shots (+1 shot over standard latte) by default."
+    },
+    {
+      "id": "caffe_mocha",
+      "name": "Caffè Mocha",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Includes mocha sauce, steamed milk, and whipped cream."
+    },
+    {
+      "id": "iced_shaken_espresso",
+      "name": "Iced Shaken Espresso",
+      "family": "shaken_espresso",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Default is made with Classic syrup and 2% milk."
+    },
+    {
+      "id": "brown_sugar_shaken_espresso",
+      "name": "Brown Sugar Oatmilk Shaken Espresso",
+      "family": "shaken_espresso",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Blonde Espresso",
+        "milk": "Oatmilk",
+        "syrups": [
+          "Brown Sugar Syrup"
+        ],
+        "toppings": [
+          "Cinnamon Powder (2 shakes)"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Made with Blonde espresso, Oatmilk, and Cinnamon powder (Shaken)."
+    },
+    {
+      "id": "cortado",
+      "name": "Cortado",
+      "family": "flat_white",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "ristretto",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": false,
+      "ingredients": {
+        "roast": "Blonde",
+        "milk": "Whole Milk",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Served in a Short (8oz) size only — Blonde ristretto shots, whole milk, no sleeve.",
+      "allowedSizes": [
+        "short"
+      ],
+      "shotCurveOverride": "cortadoShots"
+    },
+    {
+      "id": "chai_tea_latte",
+      "name": "Chai Tea Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "None (Crème / Steamer)",
+        "milk": "2% Milk",
+        "syrups": [
+          "Classic Syrup",
+          "Chai"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Chai concentrate pumps follow standard hot/iced bar progression.",
+      "hasEspresso": false,
+      "buildOverride": "chai_latte"
+    },
+    {
+      "id": "hot_chocolate",
+      "name": "Hot Chocolate",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "None (Crème / Steamer)",
+        "milk": "2% Milk",
+        "syrups": [],
+        "toppings": [
+          "Mocha Drizzle"
+        ]
+      },
+      "toppings": [
+        "add_mocha_drizzle"
+      ],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": false
+      },
+      "comments": "Mocha sauce, steamed milk, whipped cream, and mocha drizzle.",
+      "hasEspresso": false,
+      "buildOverride": "steamer"
+    },
+    {
+      "id": "honey_citrus_mint_tea",
+      "name": "Honey Citrus Mint Tea",
+      "family": "americano",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "None (Crème / Steamer)",
+        "milk": "Water",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Chamomile Mint Blossom tea (1 bag Short, 2 bags Tall/Grande/Venti). Half hot water, half steamed lemonade.",
+      "allowedSizes": [
+        "short",
+        "tall",
+        "grande",
+        "venti_hot"
+      ],
+      "hasEspresso": false,
+      "buildOverride": "hot_tea_lemonade",
+      "pumpCurveOverride": "hotTeaPumps",
+      "extraMetricsOverride": {
+        "tea_bags": "hotTeaBagsCurve"
+      }
+    },
+    {
+      "id": "hazelnut_oatmilk_shaken_espresso",
+      "name": "Hazelnut Oatmilk Shaken Espresso",
+      "family": "shaken_espresso",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Blonde Espresso",
+        "milk": "Oatmilk",
+        "syrups": [
+          "Hazelnut Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": "Hazelnut syrup, Blonde Shots and Oatmilk."
+    },
+    {
+      "id": "caramel_brul_e_latte",
+      "name": "Caramel Brulée Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Winter",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Caramel Brulée Sauce pumps"
+        ],
+        "toppings": [
+          "Caramel Brulée Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "sugar_cookie_latte",
+      "name": "Sugar Cookie Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Winter",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Sugar Cookie Syrup"
+        ],
+        "toppings": [
+          "Red and Green Sprinkle Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "pumpkin_spice_latte",
+      "name": "Pumpkin Spice Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Fall",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Pumpkin Spice Syrup"
+        ],
+        "toppings": [
+          "Pumpkin Spice Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "pecan_crunch_latte",
+      "name": "Pecan Crunch Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Fall",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Blonde Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Pecan Syrup pumps"
+        ],
+        "toppings": [
+          "Pecan Crunch Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": "(Iced Comes with cold foam!)"
+    },
+    {
+      "id": "pistachio_latte",
+      "name": "Pistachio Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Pistachio Sauce"
+        ],
+        "toppings": [
+          "Salted Brown-Buttery Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "vanilla_protein_latte",
+      "name": "Vanilla Protein Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "Protein Milk",
+        "syrups": [
+          "Vanilla Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "cinnamon_dolce_latte",
+      "name": "Cinnamon Dolce Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Cinnamon Dolce Syrup"
+        ],
+        "toppings": [
+          "Cinnamon Dolce Sprinkles"
+        ]
+      },
+      "toppings": [
+        "add_cd_topping"
+      ],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "peppermint_mocha",
+      "name": "Peppermint Mocha",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Mocha Sauce"
+        ],
+        "toppings": [
+          "Chocolate Curls"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "white_chocolate_mocha",
+      "name": "White Chocolate Mocha",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "White Chocolate Mocha Sauce"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "brown_sugar_oatmilk_cortado",
+      "name": "Brown Sugar Oatmilk Cortado",
+      "family": "flat_white",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "ristretto",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Blonde Espresso",
+        "milk": "Oatmilk",
+        "syrups": [
+          "Brown Sugar Syrup"
+        ],
+        "toppings": [
+          "Cinnamon Powder (2 shakes)"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": "Only Served 8oz",
+      "shotCurveOverride": "cortadoShots"
+    },
+    {
+      "id": "pecan_cortado",
+      "name": "Pecan Cortado",
+      "family": "flat_white",
+      "station": "espresso_bar",
+      "season": "Fall",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "ristretto",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Blonde Espresso",
+        "milk": "Whole Milk",
+        "syrups": [
+          "Pecan Syrup pumps"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "pistachio_cortado",
+      "name": "Pistachio Cortado",
+      "family": "flat_white",
+      "station": "espresso_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "hot"
+      ],
+      "shotType": "ristretto",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Blonde Espresso",
+        "milk": "Whole Milk",
+        "syrups": [
+          "pistachio Sauce"
+        ],
+        "toppings": [
+          "Salted Brown-Buttery Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "gingerbread_latte",
+      "name": "Gingerbread Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Winter",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Gingerbread Syrup"
+        ],
+        "toppings": [
+          "Pumpkin Spice Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "tiramisu_velvet_latte",
+      "name": "Tiramisu Velvet Latte",
+      "family": "latte",
+      "station": "espresso_bar",
+      "season": "Winter 2026",
+      "isActive": true,
+      "temps": [
+        "hot",
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": true,
+      "coldFoamType": "custom",
+      "coldFoamRecipe": "100mL Sweet Cream + Velvet Macarpone",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Signature Espresso",
+        "milk": "2% Milk",
+        "syrups": [
+          "Vanilla Syrup"
+        ],
+        "toppings": [
+          "Cocoa Cookie Dusting"
+        ]
+      },
+      "toppings": [
+        "add_mocha_drizzle"
+      ],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": "Has 10 shakes of tiramisu (cocoa cookie dusting) on top."
+    },
+    {
+      "id": "cold_brew_testing",
+      "name": "Cold Brew",
+      "family": "cold_brew",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Cold Brew",
+        "milk": "None",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "vanilla_sweet_cream_cold_brew",
+      "name": "Vanilla Sweet Cream Cold Brew",
+      "family": "cold_brew",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Cold Brew",
+        "milk": "Vanilla Sweet Cream",
+        "syrups": [
+          "Vanilla Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Sweet Cream cascades down into the drink"
+    },
+    {
+      "id": "salted_caramel_cream_cold_brew",
+      "name": "Salted Caramel Cream Cold Brew",
+      "family": "cold_brew",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": true,
+      "coldFoamType": "salted_caramel",
+      "coldFoamRecipe": "100mL Sweet Cream + 2 pumps Caramel + 2 Salt packets",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Cold Brew",
+        "milk": "-",
+        "syrups": [
+          "Vanilla Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "pumpkin_cream_cold_brew",
+      "name": "Pumpkin Cream Cold Brew",
+      "family": "cold_brew",
+      "station": "cold_bar",
+      "season": "Fall",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": true,
+      "coldFoamType": "pumpkin",
+      "coldFoamRecipe": "100mL Sweet Cream + 2 pumps Pumpkin sauce",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Cold Brew",
+        "milk": "-",
+        "syrups": [
+          "Vanilla Syrup"
+        ],
+        "toppings": [
+          "Pumpkin Spice Topping"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "chocolate_cream_cold_brew",
+      "name": "Chocolate Cream Cold Brew",
+      "family": "cold_brew",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": true,
+      "coldFoamType": "chocolate",
+      "coldFoamRecipe": "100mL Sweet Cream + 2 scoops Chocolate Malt powder",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Cold Brew",
+        "milk": "None",
+        "syrups": [
+          "Vanilla Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": ""
+    },
+    {
+      "id": "caramel_frappuccino",
+      "name": "Caramel Frappuccino",
+      "family": "frappuccino",
+      "station": "blended",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Frap Roast",
+        "milk": "Whole Milk",
+        "syrups": [
+          "Caramel Syrup"
+        ],
+        "toppings": [
+          "Caramel Drizzle"
+        ]
+      },
+      "toppings": [
+        "add_caramel"
+      ],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "caramel_ribbon_crunch_frappuccino",
+      "name": "Caramel Ribbon Crunch Frappuccino",
+      "family": "frappuccino",
+      "station": "blended",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": true,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Frap Roast",
+        "milk": "Whole Milk",
+        "syrups": [
+          "Dark Caramel Sauce"
+        ],
+        "toppings": [
+          "Caramel Crunch Topping",
+          "Caramel Drizzle"
+        ]
+      },
+      "toppings": [
+        "add_caramel"
+      ],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": "Whip and Dark caramel in the bottom, topped with whip regular caramel drizzle and caramel crunch toppings."
+    }
+  ]
 }
-]
