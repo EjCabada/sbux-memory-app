@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "schemaRevision": "2.3",
+  "schemaRevision": "2.4",
   "ingredientOptions": {
     "roasts": [
       "Signature Espresso",
@@ -34,7 +34,8 @@
       "Lemonade",
       "None",
       "Protein Milk",
-      "-"
+      "-",
+      "Water / Lemonade"
     ],
     "syrups": [
       "Classic Syrup",
@@ -58,7 +59,8 @@
       "Pumpkin Spice Syrup",
       "Pecan Syrup pumps",
       "Gingerbread Syrup",
-      "Chai"
+      "Chai",
+      "Mango Syrup"
     ],
     "toppings": [
       "Cinnamon Powder (2 shakes)",
@@ -444,6 +446,44 @@
         "frap_roast": "frapRoastCurve"
       },
       "buildTemplate": "frappuccino"
+    },
+    {
+      "id": "iced_matcha",
+      "label": "Iced Matcha",
+      "defaultStation": "cold_bar",
+      "defaultTemps": [
+        "iced"
+      ],
+      "baseSizes": [
+        "tall",
+        "grande",
+        "venti_iced"
+      ],
+      "shotCurve": "none",
+      "defaultShotType": "standard",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "matchaScoopsCurve",
+      "extraMetrics": {
+        "matcha_scoops": "matchaScoopsCurve"
+      },
+      "buildTemplate": "matcha_iced"
+    },
+    {
+      "id": "cortados",
+      "label": "Cortados",
+      "defaultStation": "espresso_bar",
+      "defaultTemps": [
+        "hot"
+      ],
+      "baseSizes": [
+        "short"
+      ],
+      "shotCurve": "flatWhiteShots",
+      "defaultShotType": "ristretto",
+      "primaryPumpMetric": "syrup_pumps",
+      "pumpCurve": "hotBarPumps",
+      "extraMetrics": {},
+      "buildTemplate": "flat_white"
     }
   ],
   "drinks": [
@@ -703,7 +743,7 @@
     {
       "id": "cortado",
       "name": "Cortado",
-      "family": "flat_white",
+      "family": "cortados",
       "station": "espresso_bar",
       "season": "Core",
       "isActive": true,
@@ -716,7 +756,7 @@
       "hasColdFoam": false,
       "coldFoamType": "none",
       "coldFoamRecipe": "",
-      "includeSyrupStep": false,
+      "includeSyrupStep": true,
       "ingredients": {
         "roast": "Blonde",
         "milk": "Whole Milk",
@@ -1196,7 +1236,7 @@
     {
       "id": "brown_sugar_oatmilk_cortado",
       "name": "Brown Sugar Oatmilk Cortado",
-      "family": "flat_white",
+      "family": "cortados",
       "station": "espresso_bar",
       "season": "Core",
       "isActive": true,
@@ -1225,13 +1265,12 @@
         "isFundamental": false,
         "allowInSequencing": false
       },
-      "comments": "Only Served 8oz",
-      "shotCurveOverride": "cortadoShots"
+      "comments": "Only Served 8oz"
     },
     {
       "id": "pecan_cortado",
       "name": "Pecan Cortado",
-      "family": "flat_white",
+      "family": "cortados",
       "station": "espresso_bar",
       "season": "Fall",
       "isActive": true,
@@ -1263,7 +1302,7 @@
     {
       "id": "pistachio_cortado",
       "name": "Pistachio Cortado",
-      "family": "flat_white",
+      "family": "cortados",
       "station": "espresso_bar",
       "season": "Core",
       "isActive": true,
@@ -1554,7 +1593,7 @@
         ]
       },
       "toppings": [
-        "add_caramel"
+        "add_caramel_drizzle"
       ],
       "curriculum": {
         "isFundamental": true,
@@ -1591,13 +1630,182 @@
         ]
       },
       "toppings": [
-        "add_caramel"
+        "add_caramel_drizzle"
       ],
       "curriculum": {
         "isFundamental": false,
         "allowInSequencing": false
       },
       "comments": "Whip and Dark caramel in the bottom, topped with whip regular caramel drizzle and caramel crunch toppings."
+    },
+    {
+      "id": "strawberry_acai_refresher",
+      "name": "Strawberry Acai Refresher (Testing)",
+      "family": "refresher",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Strawberry Açaí Base",
+        "milk": "Water / Lemonade",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "iced_matcha",
+      "name": "Iced Matcha",
+      "family": "iced_matcha",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Matcha Green Tea",
+        "milk": "2% Milk",
+        "syrups": [
+          "Classic Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": ""
+    },
+    {
+      "id": "mango_dragonfruit",
+      "name": "Mango Dragonfruit",
+      "family": "refresher",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Mango Dragonfruit Base",
+        "milk": "Water / Lemonade",
+        "syrups": [],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "Dragonfruit pieces"
+    },
+    {
+      "id": "mango_strawberry_refresher",
+      "name": "Mango Strawberry Refresher",
+      "family": "refresher",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "ingredients": {
+        "roast": "Strawberry Açaí Base",
+        "milk": "Water / Lemonade",
+        "syrups": [
+          "Mango Syrup"
+        ],
+        "toppings": []
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": true,
+        "allowInSequencing": true
+      },
+      "comments": "contains strawberry inclusions. "
+    },
+    {
+      "id": "cannonball_drink",
+      "name": "Cannonball Drink",
+      "family": "refresher",
+      "station": "cold_bar",
+      "season": "Core",
+      "isActive": true,
+      "temps": [
+        "iced"
+      ],
+      "shotType": "standard",
+      "pumpsDelta": 0,
+      "hasWhip": false,
+      "hasColdFoam": false,
+      "coldFoamType": "none",
+      "coldFoamRecipe": "",
+      "includeSyrupStep": true,
+      "buildOverride": "refresher_cannonball",
+      "customSteps": {
+        "iced": [
+          "add_water_lemonade",
+          "pour_refresher_base",
+          "pump_caffeine",
+          "add_ice",
+          "add_inclusions",
+          "add_lid",
+          "connect_handoff"
+        ]
+      },
+      "ingredients": {
+        "roast": "Strawberry Açaí + Mango Dragonfruit Base",
+        "milk": "Lemonade",
+        "syrups": [],
+        "toppings": [
+          "Freeze-Dried Strawberries",
+          "Dragonfruit Inclusions"
+        ]
+      },
+      "toppings": [],
+      "curriculum": {
+        "isFundamental": false,
+        "allowInSequencing": false
+      },
+      "comments": "Lemonade is Base, followed by half strawberry half mango dragonfruit and topped off with both inclusions"
     }
   ]
 }
