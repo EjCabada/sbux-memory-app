@@ -1,124 +1,206 @@
 .modalBackdrop {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.75);
+  height: 100dvh;
+  background-color: rgba(12, 22, 19, 0.68);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 3000;
   padding: 1rem;
-  box-sizing: border-box;
+  animation: backdropFadeIn 200ms ease-out;
 }
 
 .modalContent {
-  background-color: #1e1e1e;
-  border: 1px solid #444;
-  border-radius: 14px;
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+  border-radius: 20px;
   width: 100%;
-  max-width: 480px;
-  max-height: 85vh; /* Lock height to viewport */
+  max-width: 520px;
+  max-height: 84dvh;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  color: #fff;
-  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.35);
   text-align: left;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  box-sizing: border-box;
+  animation: modalPopIn 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.closeButton {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: #ccc;
-  cursor: pointer;
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modalHeader {
-  border-bottom: 1px solid #333;
-  padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.4rem 1rem;
+  background: var(--sbux-dark-green);
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
-.scrollContainer {
-  overflow-y: auto; /* Make inner content scrollable */
-  padding-right: 0.25rem;
-  flex-grow: 1;
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.headerSub {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: #c5dad2;
 }
 
 .closeButton {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.14);
   border: none;
-  font-size: 1.5rem;
-  color: #ccc;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #ffffff;
   cursor: pointer;
-  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
 }
 
-.versionSectionHeader {
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.scrollContainer {
+  overflow-y: auto;
+  padding: 1rem 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.releaseCard {
+  background: var(--surface-muted);
+  border-radius: 14px;
+  padding: 0.2rem 0.9rem;
+}
+
+.releaseCardLatest {
+  background: rgba(0, 112, 74, 0.1);
+}
+
+.releaseHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 1px solid #333;
-  padding: 0.75rem 0;
-  margin-top: 1rem;
+  padding: 0.7rem 0;
   cursor: pointer;
   text-align: left;
+  color: var(--text-primary);
+  gap: 0.75rem;
 }
 
-.versionSectionHeader:hover opacity {
-  opacity: 0.8;
-}
-
-.versionTitleGroup {
+.releaseMeta {
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
 }
 
-.toggleIcon {
-  font-size: 0.85rem;
-  color: #888;
-  font-weight: bold;
+.releaseTitleRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.releaseTitle {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.releaseDate {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
 }
 
 .versionTag {
-  background-color: #00a862;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  margin-left: 0.5rem;
+  background-color: var(--sbux-gold);
+  color: #172621;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.16rem 0.55rem;
+  border-radius: 999px;
 }
 
 .versionTagMuted {
-  background-color: #555;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  margin-left: 0.5rem;
+  background-color: rgba(128, 128, 128, 0.2);
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.16rem 0.55rem;
+  border-radius: 999px;
+}
+
+.chevron {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .featuresList {
   list-style: disc;
-  padding-left: 1.25rem;
-  color: #ddd;
-  line-height: 1.6;
-  font-size: 0.88rem;
-  margin: 0.5rem 0 1rem 0;
+  padding: 0 0 0.75rem 1.2rem;
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  animation: accordionOpen 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes accordionOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalBackdrop,
+  .modalContent,
+  .featuresList {
+    animation: none;
+  }
 }

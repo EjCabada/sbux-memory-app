@@ -1,126 +1,144 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import styles from "./VersionModal.module.css";
 
-const CURRENT_VERSION = "v2.2.0-hotbar";
-const RELEASE_DATE = "August 2026";
-const CHANGES = [
-  "Hot Bar Sequencing Drill: Dual-slot sliding queue simulator for training real-time barista pipelining and cadence.",
-  "Initiation & Stop-Point Locks: Enforces workflow timing, requiring Drink #1 to reach its stop point before initiating Drink #2.",
-  "Exchange Like-for-Like Steam Wand Cadence: Manages steam wand resources and prevents conflicts across active orders.",
-  "Context-Aware Packaging Rules: Enforces dynamic sleeve requirements for Venti Hot and hot water drinks (Americanos)."
-];
+const CURRENT_VERSION = "v3.0.0";
 
-const PREVIOUS_VERSION = "v2.1.0-hotbar";
-const PREVIOUS_DATE = "August 2026";
-const PREVIOUS_CHANGES = [
-  "Timed & Perfection Hot Bar Quiz: 1 min, 2 min, 5 min, and 100% mastery drill modes.",
-  "Per-Drink Random Size Testing: Test Tl, Gr, Vt Ht, and Vt Icd sequentially in random order.",
-  "Immediate Feedback Keypad: Tap shot/pump buttons with instant green/red validation.",
-  "Spaced Retest Queue: Failed drinks retested after 1 buffer drink, or immediately on repeat errors.",
-  "Post-Quiz Diagnosis: Displays top 3 drinks to study based on error counts."
-];
-
-const OLD_VERSION = "v2.0.0-beta";
-const OLD_DATE = "August 2026";
-const OLD_CHANGES = [
-  "Hot Bar Training Focus: Core drinks, cortados, and hot chocolate added.",
-  "New Multi-Card Flashcards: Flip individual size cards (Tl, Gr, Vt Ht, Vt Icd).",
-  "Mobile-First Responsive Layout: Vertical stacked cards on phones, grid on desktop.",
-  "Spaced repetition tracking per drink."
+const RELEASES = [
+  {
+    key: "v3_0_0",
+    version: "v3.0.0",
+    title: "Reserve Redesign, Active Recall & Auto-Sync",
+    date: "November 2026",
+    isLatest: true,
+    changes: [
+      "Reserve Mobile-First UI: New borderless layout with a segmented Hot Bar / Cold Bar / Full Build switcher and thumb-zone mobile navigation.",
+      "Essentials Flashcards: Hot Bar and Cold Bar flashcards now open on the Essentials deck with instant toggles for All Drinks and Missed Drinks.",
+      "What's in the Cup? Quiz Mode: Active-recall mode in Essentials Quizzes to test Roast/Base, Milk, Syrups, Toppings, and Cold Foam ingredients.",
+      "Cross-Session Weak-Spot Tracker: Missed drinks automatically queue for review across sessions until passed twice in a row.",
+      "Zero-Touch Auto-Sync: Baristas automatically receive updated drinks.json menus on reload without clearing browser storage or losing personal study stats.",
+    ],
+  },
+  {
+    key: "v2_5_0",
+    version: "v2.5.0",
+    title: "Cold Bar Suite & Dynamic Recipe Engine",
+    date: "October – November 2026",
+    isLatest: false,
+    changes: [
+      "Cold Bar Training Suite: Added Cold Bar Essentials Quiz, Cold Bar Multi-Size Flashcards, and Cold Bar Sequencing (Frappuccino, Matcha, Refresher, and Cold Brew).",
+      "Cold Foam & Blender Cadence: Trains Cold Foam-first blender prep at the start of orders plus cold bar stop points.",
+      "What It Contains & Custom Builds: Added structured ingredient tags (roast, milk, multiple syrups, toppings, drizzles, and Cold Foam recipes) plus custom per-drink build overrides.",
+      "Dynamic Recipe & Family Engine: Replaced hardcoded step lists with mathematical shot/pump curves, extended cold bar metrics, and the October 2026 Hot Sleeve rule (all hot drinks except Short).",
+    ],
+  },
+  {
+    key: "v2_2_0",
+    version: "v2.2.0-hotbar",
+    title: "Hot Bar Sequencing Drill",
+    date: "August 2026",
+    isLatest: false,
+    changes: [
+      "Dual-slot sliding queue simulator for training two-drink espresso bar pipelining and stop-point cadence.",
+      "Steam wand exchange lock management across active beverage orders.",
+    ],
+  },
+  {
+    key: "v2_1_0",
+    version: "v2.1.0-hotbar",
+    title: "Timed & Perfection Hot Bar Quizzes",
+    date: "August 2026",
+    isLatest: false,
+    changes: [
+      "1 min, 2 min, 5 min, and 100% Perfection drill modes with instant green/red feedback.",
+      "Random cup size testing and post-quiz weak-spot breakdown.",
+    ],
+  },
+  {
+    key: "v2_0_0",
+    version: "v2.0.0-beta",
+    title: "Multi-Card Flashcards & Core Espresso Deck",
+    date: "August 2026",
+    isLatest: false,
+    changes: [
+      "Flip individual cup size cards (Short, Tall, Grande, Venti) on responsive mobile/desktop grids.",
+    ],
+  },
 ];
 
 const VersionModal = ({ onClose }) => {
-  // Current version expanded by default, older versions collapsed by default on mobile
-  const [expandedSections, setExpandedSections] = useState({
-    current: true,
-    previous: false,
-    old: false,
-  });
+  const [expandedKey, setExpandedKey] = useState("v3_0_0");
 
-  const toggleSection = (key) => {
-    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const toggleRelease = (key) => {
+    setExpandedKey((prev) => (prev === key ? null : key));
   };
 
-  return (
+  return createPortal(
     <div className={styles.modalBackdrop} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>
-          &times;
-        </button>
+        <div className={styles.modalHeader}>
+          <div>
+            <h2>What&apos;s New</h2>
+            <p className={styles.headerSub}>Barista Training Changelog</p>
+          </div>
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+            aria-label="Close release notes"
+          >
+            &times;
+          </button>
+        </div>
 
         <div className={styles.scrollContainer}>
-          {/* Current Version */}
-          <button
-            className={styles.versionSectionHeader}
-            onClick={() => toggleSection("current")}
-          >
-            <div className={styles.versionTitleGroup}>
-              <h3>
-                What's New <span className={styles.versionTag}>{CURRENT_VERSION}</span>
-              </h3>
-              <small style={{ color: "#888" }}>Released: {RELEASE_DATE}</small>
-            </div>
-            <span className={styles.toggleIcon}>
-              {expandedSections.current ? "▲ Collapse" : "▼ Expand"}
-            </span>
-          </button>
-          {expandedSections.current && (
-            <ul className={styles.featuresList}>
-              {CHANGES.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          )}
+          {RELEASES.map((release) => {
+            const isOpen = expandedKey === release.key;
+            return (
+              <div
+                key={release.key}
+                className={`${styles.releaseCard} ${release.isLatest ? styles.releaseCardLatest : ""}`}
+              >
+                <button
+                  type="button"
+                  className={styles.releaseHeader}
+                  onClick={() => toggleRelease(release.key)}
+                >
+                  <div className={styles.releaseMeta}>
+                    <div className={styles.releaseTitleRow}>
+                      <span className={release.isLatest ? styles.versionTag : styles.versionTagMuted}>
+                        {release.version}
+                      </span>
+                      <span className={styles.releaseTitle}>{release.title}</span>
+                    </div>
+                    <span className={styles.releaseDate}>{release.date}</span>
+                  </div>
+                  <span className={styles.chevron}>{isOpen ? "−" : "+"}</span>
+                </button>
 
-          {/* Previous Version */}
-          <button
-            className={styles.versionSectionHeader}
-            onClick={() => toggleSection("previous")}
-          >
-            <div className={styles.versionTitleGroup}>
-              <h3>
-                Previous <span className={styles.versionTagMuted}>{PREVIOUS_VERSION}</span>
-              </h3>
-              <small style={{ color: "#888" }}>Released: {PREVIOUS_DATE}</small>
-            </div>
-            <span className={styles.toggleIcon}>
-              {expandedSections.previous ? "▲ Collapse" : "▼ Expand"}
-            </span>
-          </button>
-          {expandedSections.previous && (
-            <ul className={styles.featuresList}>
-              {PREVIOUS_CHANGES.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          )}
-
-          {/* Legacy Version */}
-          <button
-            className={styles.versionSectionHeader}
-            onClick={() => toggleSection("old")}
-          >
-            <div className={styles.versionTitleGroup}>
-              <h3>
-                Legacy <span className={styles.versionTagMuted}>{OLD_VERSION}</span>
-              </h3>
-              <small style={{ color: "#888" }}>Released: {OLD_DATE}</small>
-            </div>
-            <span className={styles.toggleIcon}>
-              {expandedSections.old ? "▲ Collapse" : "▼ Expand"}
-            </span>
-          </button>
-          {expandedSections.old && (
-            <ul className={styles.featuresList}>
-              {OLD_CHANGES.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          )}
+                {isOpen && (
+                  <ul className={styles.featuresList}>
+                    {release.changes.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

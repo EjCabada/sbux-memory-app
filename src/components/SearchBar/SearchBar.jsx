@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./SearchBar.module.css";
 
 function SearchBar({
@@ -8,10 +8,17 @@ function SearchBar({
   suggestions,
   onSuggestionClick,
 }) {
+  const [isFocused, setIsFocused] = useState(false);
+
   const handleChange = (event) => {
-    // This function is used by both versions of the search bar
     if (typeof onSearchChange === "function") {
       onSearchChange(event.target.value);
+    }
+  };
+
+  const handleClear = () => {
+    if (typeof onSearchChange === "function") {
+      onSearchChange("");
     }
   };
 
@@ -22,30 +29,43 @@ function SearchBar({
     }
   };
 
-  // This determines if we should show the suggestions dropdown
-  const showSuggestions = suggestions && suggestions.length > 0;
+  const showSuggestions = isFocused && Array.isArray(suggestions) && suggestions.length > 0;
 
   return (
     <div className={styles.searchBarContainer}>
-      <form onSubmit={handleSubmit} autoComplete="off">
+      <form onSubmit={handleSubmit} autoComplete="off" className={styles.searchForm}>
         <input
           type="text"
           placeholder="Search for a drink recipe..."
           value={searchTerm}
           onChange={handleChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           className={styles.searchInput}
         />
+        {searchTerm && (
+          <button
+            type="button"
+            className={styles.clearBtn}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleClear}
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        )}
       </form>
       {showSuggestions && (
         <ul className={styles.suggestionsList}>
-          {suggestions.map((recipe) => (
+          {suggestions.map((recipe, idx) => (
             <li
               key={recipe.id}
+              style={{ animationDelay: `${idx * 30}ms` }}
               className={styles.suggestionItem}
-              // Use onMouseDown to trigger before the input's blur event
               onMouseDown={() => onSuggestionClick(recipe.name)}
             >
-              {recipe.name}
+              <span>{recipe.name}</span>
+              <span className={styles.suggestionArrow}>&rarr;</span>
             </li>
           ))}
         </ul>

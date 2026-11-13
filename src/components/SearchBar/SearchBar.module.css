@@ -1,122 +1,129 @@
 .searchBarContainer {
-  margin: 2rem 0;
+  margin: 0.75rem 0 0.25rem;
   position: relative;
-  /* Crucial for positioning the suggestions */
   display: inline-block;
-  /* Ensures container wraps input width */
+  width: 100%;
+  max-width: 460px;
+}
+
+.searchForm {
+  position: relative;
+  width: 100%;
 }
 
 .searchInput {
-  padding: 0.8em 1.5em;
-  border-radius: 50px;
-  border: 2px solid #555;
-  background-color: #f2f0eb;
-  color: #333;
-  width: 350px;
-  /* Fixed width */
-  font-size: 1rem;
-  transition:
-    border-color 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+  padding: 0.82rem 2.6rem 0.82rem 1.25rem;
+  border-radius: 999px;
+  border: none;
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 0.96rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #00a862;
-  /* Starbucks Green */
+  box-shadow: 0 0 0 3px rgba(0, 112, 74, 0.22), 0 8px 22px var(--shadow-color);
+}
+
+.clearBtn {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clearBtn:hover {
+  color: var(--text-primary);
 }
 
 .suggestionsList {
   position: absolute;
-  top: 100%;
-  /* Position right below the search bar */
+  top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--background-secondary);
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
   list-style-type: none;
   margin: 0;
-  padding: 0;
-  z-index: 100;
+  padding: 0.35rem;
+  z-index: 250;
   text-align: left;
-  max-height: 250px;
+  max-height: 270px;
   overflow-y: auto;
+  animation: dropdownReveal 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .suggestionItem {
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  color: #333;
-}
-
-.suggestionItem:hover {
-  background-color: #d4e9e2;
-  /* Light green hover */
-}
-
-.searchBarContainer {
-  margin: 2rem 0;
-  position: relative;
-  /* Crucial for positioning the suggestions */
-  display: inline-block;
-  /* Ensures container wraps input width */
-  width: 350px;
-}
-
-.searchInput {
-  padding: 0.8em 1.5em;
-  border-radius: 50px;
-  border: 2px solid #555;
-  background-color: #f2f0eb;
-  color: #333;
-  width: 100%;
-  /* Make input fill the container */
-  box-sizing: border-box;
-  /* Include padding in the width */
-  font-size: 1rem;
-  transition:
-    border-color 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: #00a862;
-  /* Starbucks Green */
-}
-
-/* This is the key fix for the suggestions dropdown */
-.suggestionsList {
-  position: absolute;
-  top: 100%;
-  /* Position right below the search bar */
-  left: 0;
-  right: 0;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.68rem 1rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  list-style-type: none;
-  margin: 1em 0 0 0;
-  padding: 0;
-  z-index: 100;
-  text-align: left;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-.suggestionItem {
-  padding: 0.75rem 1.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  color: #333;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  animation: suggestionRowIn 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .suggestionItem:hover {
-  background-color: #d4e9e2;
-  /* Light green hover */
+  background-color: var(--surface-muted);
+  transform: translateX(3px);
+}
+
+.suggestionArrow {
+  color: var(--primary-green);
+  font-weight: 800;
+}
+
+@keyframes dropdownReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes suggestionRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .suggestionsList,
+  .suggestionItem {
+    animation: none;
+  }
 }

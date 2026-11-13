@@ -1,11 +1,11 @@
 .container {
   width: 100%;
-  max-width: 900px;
+  max-width: 720px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  padding: 0.5rem;
+  gap: 1.1rem;
+  padding: 0.25rem;
   box-sizing: border-box;
 }
 
@@ -14,98 +14,55 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.categoryBadge {
-  color: #a0c2b5;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  gap: 0.6rem;
+  width: 100%;
 }
 
 .drinkTitle {
-  font-size: 1.9rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  color: #ffffff !important;
-  margin: 0.25rem 0 0.35rem 0;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-.questionSubtext {
-  font-size: 0.95rem;
-  color: #d4e9e2 !important;
-  margin: 0 0 0.35rem 0;
-}
-
-.tapInstruction {
-  font-size: 0.75rem;
-  color: #a0a0a0;
-}
-
-.containsSection {
-  width: 100%;
-  background: rgba(30, 57, 50, 0.55);
-  border: 1px solid rgba(0, 168, 98, 0.45);
-  border-radius: 10px;
-  padding: 0.65rem 0.9rem;
-  box-sizing: border-box;
-}
-
-.containsHeader {
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #34d399;
-  margin-bottom: 0.45rem;
-  text-align: left;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .containsBadgeGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .containsPill {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
-  padding: 0.28rem 0.6rem;
-  font-size: 0.82rem;
+  background: rgba(0, 112, 74, 0.14);
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.8rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-}
-
-.containsCategory {
-  color: #9ca3af;
-  font-weight: 600;
 }
 
 .containsValue {
-  color: #ffffff;
+  color: var(--primary-green);
   font-weight: 700;
 }
 
 .cardsGrid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.85rem;
   width: 100%;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .cardsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
   }
 }
 
 .flipCard {
   background-color: transparent;
-  height: 155px;
+  height: 140px;
   perspective: 1000px;
   cursor: pointer;
 }
@@ -115,9 +72,9 @@
   width: 100%;
   height: 100%;
   text-align: center;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
 .flipCard.flipped .flipCardInner {
@@ -131,37 +88,29 @@
   height: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 1rem;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
 }
 
 .cardFront {
   background-color: #1e3932;
-  border: 2px solid #00a862;
   color: #ffffff;
 }
 
 .cardFront .sizeLabel {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #ffffff;
 }
 
-.cardFront .tapHint {
-  font-size: 0.75rem;
-  color: #a0c2b5;
-  margin-top: 0.35rem;
-}
-
 .cardBack {
-  background-color: #2c2c2c;
-  border: 2px solid #00a862;
+  background-color: #24302c;
   color: #ffffff;
   transform: rotateY(180deg);
   text-align: left;
@@ -172,28 +121,28 @@
 .dataRow {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .dataLabel {
-  color: #bbb;
+  color: #b7ccc4;
   font-weight: 600;
 }
 
 .dataValue {
-  color: #5cb85c;
-  font-weight: bold;
+  color: #e6c87d;
+  font-weight: 800;
   font-size: 1.15rem;
 }
 
 .notesBox {
-  background: rgba(0, 0, 0, 0.25);
-  border-left: 3px solid #00a862;
-  padding: 0.6rem 1rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  color: #ddd;
+  background: rgba(212, 177, 106, 0.2);
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  color: var(--text-primary);
   width: 100%;
   box-sizing: border-box;
   text-align: center;

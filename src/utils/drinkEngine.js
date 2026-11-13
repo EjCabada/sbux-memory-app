@@ -3,199 +3,50 @@
  * Pure relational recipe calculator & dynamic state-machine workflow compiler.
  */
 
-export const CATALOG_SCHEMA_VERSION = 2;
-export const CATALOG_SCHEMA_REVISION = "2.4";
+import {
+  ACTION_DICTIONARY,
+  ACTION_META,
+  ALL_SIZE_KEYS,
+  BUILD_TEMPLATES,
+  CATALOG_SCHEMA_REVISION,
+  CATALOG_SCHEMA_VERSION,
+  COLD_FOAM_MAP,
+  COLD_FOAM_PRESETS,
+  LEGACY_FAMILY_REMAP,
+  SEED_CURVES,
+  SEED_FAMILIES,
+  SEED_INGREDIENT_OPTIONS,
+  SEED_METRICS,
+  SEED_TOPPING_OPTIONS,
+  SIZE_SPECS,
+  TOPPING_OPTIONS,
+} from "./drinkConstants.js";
 
-// ============================================================================
-// 1. CUP SIZES & SEED MATHEMATICAL CURVES (USER-EXTENSIBLE IN GUI)
-// ============================================================================
-
-export const SIZE_SPECS = {
-  short: { key: "short", label: "Short (8oz)", shortLabel: "Short", rank: 1, barHeight: 16, temp: "hot" },
-  tall: { key: "tall", label: "Tall (12oz)", shortLabel: "Tall", rank: 2, barHeight: 24, temp: "both" },
-  grande: { key: "grande", label: "Grande (16oz)", shortLabel: "Grande", rank: 3, barHeight: 32, temp: "both" },
-  venti_hot: { key: "venti_hot", label: "Venti Hot (20oz)", shortLabel: "Vt Ht", rank: 4, barHeight: 40, temp: "hot" },
-  venti_iced: { key: "venti_iced", label: "Venti Iced (26oz)", shortLabel: "Vt Icd", rank: 5, barHeight: 48, temp: "iced" },
-  trenta: { key: "trenta", label: "Trenta (30oz)", shortLabel: "Trenta", rank: 6, barHeight: 54, temp: "iced" },
-};
-
-export const ALL_SIZE_KEYS = Object.keys(SIZE_SPECS);
-
-export const SEED_CURVES = [
-  {
-    id: "espressoShots",
-    label: "Standard Espresso Shots (1 / 1 / 2 / 2 / 3)",
-    category: "shots",
-    values: { short: 1, tall: 1, grande: 2, venti_hot: 2, venti_iced: 3 },
-  },
-  {
-    id: "flatWhiteShots",
-    label: "Flat White / Shaken Shots (2 / 2 / 3 / 3 / 4)",
-    category: "shots",
-    values: { short: 2, tall: 2, grande: 3, venti_hot: 3, venti_iced: 4 },
-  },
-  {
-    id: "americanoShots",
-    label: "Americano Shots (1 / 2 / 3 / 4 / 4)",
-    category: "shots",
-    values: { short: 1, tall: 2, grande: 3, venti_hot: 4, venti_iced: 4 },
-  },
-  {
-    id: "cortadoShots",
-    label: "Cortado Short Shots (3)",
-    category: "shots",
-    values: { short: 3 },
-  },
-  {
-    id: "curve_cortado_shots",
-    label: "Cortado Shots (3)",
-    category: "shots",
-    values: { short: 3 },
-  },
-  {
-    id: "hotBarPumps",
-    label: "Hot Bar Full Pumps (2 / 3 / 4 / 5 / 6)",
-    category: "pumps",
-    values: { short: 2, tall: 3, grande: 4, venti_hot: 5, venti_iced: 6, trenta: 7 },
-  },
-  {
-    id: "coldBarPumps",
-    label: "Cold Bar / Shaken Pumps (1 / 2 / 3 / 4)",
-    category: "pumps",
-    values: { short: 1, tall: 1, grande: 2, venti_iced: 3, trenta: 4 },
-  },
-  {
-    id: "blendedPumps",
-    label: "Frappuccino / Blended Pumps (2 / 3 / 4)",
-    category: "pumps",
-    values: { short: 1, tall: 2, grande: 3, venti_hot: 4, venti_iced: 4, trenta: 5 },
-  },
-  {
-    id: "energyPumps",
-    label: "Energy Progression (4 / 5 / 6 / 7)",
-    category: "pumps",
-    values: { short: 3, tall: 4, grande: 5, venti_iced: 6, trenta: 7 },
-  },
-  {
-    id: "hotTeaPumps",
-    label: "Hot Tea Honey Progression (1 / 1 / 2 / 2)",
-    category: "pumps",
-    values: { short: 1, tall: 1, grande: 2, venti_hot: 2 },
-  },
-  {
-    id: "frapRoastCurve",
-    label: "Frap Roast Pumps (2 / 3 / 4)",
-    category: "parameter",
-    values: { tall: 2, grande: 3, venti_iced: 4 },
-  },
-  {
-    id: "matchaScoopsCurve",
-    label: "Matcha Scoops (2 / 3 / 4)",
-    category: "parameter",
-    values: { short: 1, tall: 2, grande: 3, venti_hot: 4, venti_iced: 4 },
-  },
-  {
-    id: "fruitInclusionsCurve",
-    label: "Fruit Inclusions (1 / 1 / 1 / 2)",
-    category: "parameter",
-    values: { tall: 1, grande: 1, venti_iced: 1, trenta: 2 },
-  },
-  {
-    id: "hotTeaBagsCurve",
-    label: "Steeped Tea Bags (1 / 2 / 2 / 2)",
-    category: "parameter",
-    values: { short: 1, tall: 2, grande: 2, venti_hot: 2 },
-  },
-];
-
-export const SEED_METRICS = [
-  { key: "shots", label: "Shots" },
-  { key: "syrup_pumps", label: "Syrup Pumps" },
-  { key: "frap_roast", label: "Frap Roast" },
-  { key: "caffeine_pumps", label: "Caffeine Pumps" },
-  { key: "fruit_inclusions", label: "Fruit Inclusions" },
-  { key: "matcha_scoops", label: "Matcha Scoops" },
-  { key: "tea_bags", label: "Tea Bags" },
-];
-
-export const SEED_INGREDIENT_OPTIONS = {
-  roasts: [
-    "Signature Espresso",
-    "Blonde Espresso",
-    "Decaf Espresso",
-    "Frap Roast",
-    "Cold Brew",
-    "Nitro Cold Brew",
-    "Chai Concentrate",
-    "Chamomile Mint Blossom Tea",
-    "Earl Grey Tea",
-    "Matcha Green Tea",
-    "Strawberry Açaí Base",
-    "Mango Dragonfruit Base",
-    "Pineapple Passionfruit Base",
-    "None (Crème / Steamer)",
-  ],
-  milks: [
-    "2% Milk",
-    "Whole Milk",
-    "Oatmilk",
-    "Almondmilk",
-    "Soymilk",
-    "Coconutmilk",
-    "Nonfat Milk",
-    "Vanilla Sweet Cream",
-    "Breve (Half & Half)",
-    "Water",
-    "Water + Steamed Lemonade",
-    "Lemonade",
-    "None",
-  ],
-  syrups: [
-    "Classic Syrup",
-    "Vanilla Syrup",
-    "Brown Sugar Syrup",
-    "Caramel Syrup",
-    "Cinnamon Dolce Syrup",
-    "Hazelnut Syrup",
-    "Peppermint Syrup",
-    "Mocha Sauce",
-    "White Chocolate Mocha Sauce",
-    "Dark Caramel Sauce",
-    "Pumpkin Sauce",
-    "Honey Blend",
-    "Liquid Cane Sugar",
-    "Apple Brown Sugar",
-    "pistachio Sauce",
-    "Lavender Powder",
-  ],
-  toppings: [
-    "Cinnamon Powder (2 shakes)",
-    "Caramel Drizzle",
-    "Mocha Drizzle",
-    "Cinnamon Dolce Sprinkles",
-    "Pumpkin Spice Topping",
-    "Chocolate Curls",
-    "Cookie Crumble Topping",
-    "Caramel Crunch Topping",
-    "Freeze-Dried Strawberries",
-    "Dragonfruit Inclusions",
-  ],
+export {
+  ACTION_DICTIONARY,
+  ACTION_META,
+  ALL_SIZE_KEYS,
+  BUILD_TEMPLATES,
+  CATALOG_SCHEMA_REVISION,
+  CATALOG_SCHEMA_VERSION,
+  COLD_FOAM_MAP,
+  COLD_FOAM_PRESETS,
+  SEED_CURVES,
+  SEED_FAMILIES,
+  SEED_INGREDIENT_OPTIONS,
+  SEED_METRICS,
+  SEED_TOPPING_OPTIONS,
+  SIZE_SPECS,
+  TOPPING_OPTIONS,
 };
 
 export function normalizeIngredientOptions(rawOptions = {}) {
   const mergeUnique = (seedArr, customArr) => {
-    const seen = new Set();
-    const out = [];
-    for (const item of [...seedArr, ...(Array.isArray(customArr) ? customArr : [])]) {
-      const trimmed = String(item || "").trim();
-      if (!trimmed) continue;
-      const lower = trimmed.toLowerCase();
-      if (!seen.has(lower)) {
-        seen.add(lower);
-        out.push(trimmed);
-      }
-    }
-    return out;
+    const set = new Set([
+      ...seedArr,
+      ...(Array.isArray(customArr) ? customArr.map((x) => String(x || "").trim()).filter(Boolean) : []),
+    ]);
+    return Array.from(set);
   };
   return {
     roasts: mergeUnique(SEED_INGREDIENT_OPTIONS.roasts, rawOptions?.roasts),
@@ -205,173 +56,37 @@ export function normalizeIngredientOptions(rawOptions = {}) {
   };
 }
 
-export function getDefaultIngredientsForDrink(resolvedFamilyId, raw = {}) {
-  const defaultRoast =
-    raw.hasEspresso === false
-      ? "None (Crème / Steamer)"
-      : resolvedFamilyId === "cold_brew"
-      ? "Cold Brew"
-      : resolvedFamilyId === "refresher"
-      ? "Strawberry Açaí Base"
-      : resolvedFamilyId === "frappuccino"
-      ? "Frap Roast"
-      : "Signature Espresso";
+export function getDefaultIngredientsForDrink(familyId = "latte", raw = {}) {
+  let roast = "Signature Espresso";
+  let milk = "2% Milk";
 
-  const defaultMilk =
-    resolvedFamilyId === "flat_white"
-      ? "Whole Milk"
-      : resolvedFamilyId === "americano" || resolvedFamilyId === "cold_brew"
-      ? "Water"
-      : resolvedFamilyId === "frappuccino"
-      ? "Whole Milk"
-      : "2% Milk";
+  if (raw.hasEspresso === false) {
+    roast = "None (Crème / Steamer)";
+  } else if (familyId === "flat_white" || familyId === "cortados") {
+    milk = "Whole Milk";
+  } else if (familyId === "americano") {
+    milk = "Water";
+  } else if (familyId === "cold_brew") {
+    roast = "Cold Brew";
+    milk = "None";
+  } else if (familyId === "refresher") {
+    roast = "Strawberry Açaí Base";
+    milk = "Water / Lemonade";
+  } else if (familyId === "frappuccino") {
+    roast = "Frap Roast";
+    milk = "Whole Milk";
+  } else if (familyId === "iced_matcha") {
+    roast = "Matcha Green Tea";
+    milk = "2% Milk";
+  }
 
-  return {
-    roast: defaultRoast,
-    milk: defaultMilk,
-    syrups: [],
-    toppings: [],
-  };
+  return { roast, milk, syrups: [], toppings: [] };
 }
-
-export const COLD_FOAM_PRESETS = [
-  {
-    id: "vsc",
-    label: "Vanilla Sweet Cream Cold Foam",
-    recipe: "100mL Vanilla Sweet Cream only (no extra syrup)",
-  },
-  {
-    id: "salted_caramel",
-    label: "Salted Caramel Cream Cold Foam",
-    recipe: "100mL Sweet Cream + 2 pumps Caramel + 2 Salt packets",
-  },
-  {
-    id: "brown_sugar",
-    label: "Brown Sugar Cream Cold Foam",
-    recipe: "100mL Sweet Cream + 2 pumps Brown Sugar",
-  },
-  {
-    id: "chocolate",
-    label: "Chocolate Cream Cold Foam",
-    recipe: "100mL Sweet Cream + 2 scoops Chocolate Malt powder",
-  },
-  {
-    id: "matcha",
-    label: "Matcha Cream Cold Foam",
-    recipe: "100mL Sweet Cream + 2 scoops Matcha powder",
-  },
-  {
-    id: "white_mocha",
-    label: "White Chocolate Cream Cold Foam",
-    recipe: "100mL Sweet Cream + 2 pumps White Mocha sauce",
-  },
-  {
-    id: "pumpkin",
-    label: "Pumpkin Cream Cold Foam",
-    recipe: "100mL Sweet Cream + 2 pumps Pumpkin sauce",
-  },
-  {
-    id: "strawberry",
-    label: "Strawberry Cream Cold Foam",
-    recipe: "100mL Sweet Cream + Strawberry purée to 150mL line",
-  },
-  {
-    id: "custom",
-    label: "Custom Cold Foam Build",
-    recipe: "100mL Sweet Cream + custom flavor additions",
-  },
-];
-
-export const COLD_FOAM_MAP = Object.fromEntries(COLD_FOAM_PRESETS.map((p) => [p.id, p]));
-
-export const BUILD_TEMPLATES = [
-  { id: "espresso_standard", label: "Standard Latte / Mocha (Steam 2%, Free Pour)" },
-  { id: "macchiato", label: "Macchiato (Catch in Glass, Shots Over Top)" },
-  { id: "cappuccino", label: "Cappuccino (6-8s Aeration, Dense Foam)" },
-  { id: "flat_white", label: "Flat White / Cortado (Whole Milk, Dot of Foam)" },
-  { id: "americano", label: "Americano (Water + Espresso)" },
-  { id: "shaken_espresso", label: "Shaken Espresso (Shaker + Ice + Splash Milk)" },
-  { id: "chai_latte", label: "Chai / Concentrate Latte" },
-  { id: "steamer", label: "Hot Chocolate / Crème Steamer (No Espresso)" },
-  { id: "hot_tea_lemonade", label: "Honey Citrus Mint / Steamed Tea Lemonade" },
-  { id: "iced_tea", label: "Cold Bar Shaken Iced Tea" },
-  { id: "refresher", label: "Cold Bar Refresher (Base + Water/Lemonade + Inclusions + Shake)" },
-  { id: "refresher_cannonball", label: "Cannonball / Lemonade-First Refresher (Lemonade + Bases + Ice + Inclusions on Top)" },
-  { id: "matcha_iced", label: "Cold Bar Iced Matcha" },
-  { id: "frappuccino", label: "Blended Frappuccino" },
-  { id: "cold_brew", label: "Cold Brew / Nitro" },
-];
-
-// ============================================================================
-// 2. ACTION REGISTRY (SINGLE SOURCE OF TRUTH FOR WORKFLOWS & SIMULATOR)
-// ============================================================================
-
-export const ACTION_META = {
-  blend_cold_foam: { label: "Foam Sweet Cream in Blender", locksWand: false, releasesWand: false, isFinishing: false },
-  queue_shots: { label: "Queue Shots", locksWand: false, releasesWand: false, isFinishing: false, startsShots: true },
-  queue_ristretto: { label: "Queue Ristretto Shots", locksWand: false, releasesWand: false, isFinishing: false, startsShots: true },
-  pump_syrups: { label: "Pump Syrups in Cup", locksWand: false, releasesWand: false, isFinishing: false, pumpsSyrup: true },
-  pump_frap_roast: { label: "Pump Frap Roast", locksWand: false, releasesWand: false, isFinishing: false, pumpsSyrup: true },
-  pump_shaker: { label: "Pump Syrup in Shaker", locksWand: false, releasesWand: false, isFinishing: false, pumpsSyrup: true },
-  pump_caffeine: { label: "Pump Caffeine Base", locksWand: false, releasesWand: false, isFinishing: false, pumpsSyrup: true },
-  pump_liquid_cane: { label: "Pump Liquid Cane", locksWand: false, releasesWand: false, isFinishing: false, pumpsSyrup: true },
-  pump_honey: { label: "Pump Honey Blend", locksWand: false, releasesWand: false, isFinishing: false, pumpsSyrup: true },
-  catch_cup: { label: "Catch in Cup", locksWand: false, releasesWand: false, isFinishing: false, catchesShots: true },
-  catch_glass: { label: "Catch in Shot Glass", locksWand: false, releasesWand: false, isFinishing: false, catchesShots: true },
-  steam_milk: { label: "Steam 2% Milk", locksWand: true, releasesWand: false, isFinishing: false },
-  steam_cappuccino: { label: "Steam Milk (6-8s Aeration)", locksWand: true, releasesWand: false, isFinishing: false },
-  steam_whole_milk: { label: "Steam Whole Milk", locksWand: true, releasesWand: false, isFinishing: false },
-  steam_lemonade: { label: "Steam Lemonade", locksWand: true, releasesWand: false, isFinishing: false },
-  steam_all_pitcher: { label: "Steam Chai + Classic + Milk", locksWand: true, releasesWand: false, isFinishing: false },
-  clean_wand: { label: "Clean Steam Wand", locksWand: false, releasesWand: true, isFinishing: false },
-  groom_milk: { label: "Groom Milk Pitcher", locksWand: false, releasesWand: false, isFinishing: false },
-  free_pour_milk: { label: "Pour Steamed Milk / Lemonade", locksWand: false, releasesWand: false, isFinishing: true },
-  pour_foam_dot: { label: "Pour Milk (Dot of Foam)", locksWand: false, releasesWand: false, isFinishing: true },
-  pour_foam: { label: "Pour Dense Foam", locksWand: false, releasesWand: false, isFinishing: true },
-  pour_shots_over: { label: "Pour Shots Over Top", locksWand: false, releasesWand: false, isFinishing: true },
-  pour_cold_milk: { label: "Pour Cold Milk to Upper Line", locksWand: false, releasesWand: false, isFinishing: true },
-  pour_tea_shaker: { label: "Pour Tea to Shaker Line", locksWand: false, releasesWand: false, isFinishing: false },
-  pour_refresher_base: { label: "Pour Refresher Base", locksWand: false, releasesWand: false, isFinishing: false },
-  add_water_lemonade: { label: "Add Water / Lemonade / Coconutmilk", locksWand: false, releasesWand: false, isFinishing: false },
-  add_tea_bags: { label: "Add Tea Bags to Cup", locksWand: false, releasesWand: false, isFinishing: false },
-  add_inclusions: { label: "Add Fruit Inclusions", locksWand: false, releasesWand: false, isFinishing: false },
-  add_matcha_shaker: { label: "Add Matcha Scoops", locksWand: false, releasesWand: false, isFinishing: false },
-  add_hot_water: { label: "Add Hot Water", locksWand: false, releasesWand: false, isFinishing: true },
-  add_cold_water: { label: "Add Cold Water", locksWand: false, releasesWand: false, isFinishing: true },
-  add_ice: { label: "Add Ice", locksWand: false, releasesWand: false, isFinishing: true },
-  shake_10x: { label: "Shake 10 Times", locksWand: false, releasesWand: false, isFinishing: true },
-  top_milk: { label: "Top with Splash of Milk", locksWand: false, releasesWand: false, isFinishing: true },
-  add_cold_foam: { label: "Top with Cold Foam", locksWand: false, releasesWand: false, isFinishing: true },
-  blend_pitcher: { label: "Blend on #1", locksWand: false, releasesWand: false, isFinishing: false },
-  add_whip: { label: "Add Whipped Cream", locksWand: false, releasesWand: false, isFinishing: true },
-  add_caramel: { label: "Add Caramel Crosshatch", locksWand: false, releasesWand: false, isFinishing: true },
-  add_caramel_drizzle: { label: "Add Caramel Drizzle (Standard)", locksWand: false, releasesWand: false, isFinishing: true },
-  add_cd_topping: { label: "Add Cinnamon Dolce Topping", locksWand: false, releasesWand: false, isFinishing: true },
-  add_mocha_drizzle: { label: "Add Mocha Drizzle", locksWand: false, releasesWand: false, isFinishing: true },
-  add_cinnamon_powder: { label: "Add Cinnamon Powder", locksWand: false, releasesWand: false, isFinishing: true },
-  add_line_cup_caramel: { label: "Line Cup with Caramel / Dark Caramel", locksWand: false, releasesWand: false, isFinishing: false },
-  add_sleeve: { label: "Add Cup Sleeve", locksWand: false, releasesWand: false, isFinishing: true },
-  add_lid: { label: "Add Lid", locksWand: false, releasesWand: false, isFinishing: true },
-  connect_handoff: { label: "Connect & Hand-off", locksWand: false, releasesWand: false, isFinishing: true },
-};
-
-export const ACTION_DICTIONARY = Object.fromEntries(
-  Object.entries(ACTION_META).map(([k, v]) => [k, v.label])
-);
-
-export const SEED_TOPPING_OPTIONS = [
-  { id: "add_caramel", label: "Caramel Crosshatch" },
-  { id: "add_caramel_drizzle", label: "Caramel Drizzle (Standard)" },
-  { id: "add_cd_topping", label: "Cinnamon Dolce Topping" },
-  { id: "add_mocha_drizzle", label: "Mocha Drizzle" },
-  { id: "add_cinnamon_powder", label: "Cinnamon Powder" },
-];
-
-export const TOPPING_OPTIONS = SEED_TOPPING_OPTIONS;
 
 export const isSteamAction = (actionId) => Boolean(ACTION_META[actionId]?.locksWand);
 export const isWandReleaseAction = (actionId) => Boolean(ACTION_META[actionId]?.releasesWand);
 export const isFinishingAction = (actionId) => Boolean(ACTION_META[actionId]?.isFinishing);
+
 export const getActionLabel = (actionId) => {
   if (ACTION_META[actionId]) return ACTION_META[actionId].label;
   if (String(actionId).startsWith("custom_step:")) {
@@ -387,171 +102,7 @@ export const getActionLabel = (actionId) => {
 };
 
 // ============================================================================
-// 3. SEED RELATIONAL FAMILY BLUEPRINTS (9 STREAMLINED STRUCTURAL FAMILIES)
-// ============================================================================
-
-export const SEED_FAMILIES = [
-  {
-    id: "latte",
-    label: "Standard Espresso Latte",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["hot", "iced"],
-    baseSizes: ["tall", "grande", "venti_hot", "venti_iced"],
-    shotCurve: "espressoShots",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: {},
-    buildTemplate: "espresso_standard",
-  },
-  {
-    id: "macchiato",
-    label: "Espresso Macchiato (Layered)",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["hot", "iced"],
-    baseSizes: ["tall", "grande", "venti_hot", "venti_iced"],
-    shotCurve: "espressoShots",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: {},
-    buildTemplate: "macchiato",
-  },
-  {
-    id: "cappuccino",
-    label: "Cappuccino (High Foam)",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["hot"],
-    baseSizes: ["tall", "grande", "venti_hot"],
-    shotCurve: "espressoShots",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: {},
-    buildTemplate: "cappuccino",
-  },
-  {
-    id: "americano",
-    label: "Caffè Americano (Water Base)",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["hot", "iced"],
-    baseSizes: ["tall", "grande", "venti_hot", "venti_iced"],
-    shotCurve: "americanoShots",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: {},
-    buildTemplate: "americano",
-  },
-  {
-    id: "flat_white",
-    label: "Flat White (+1 Ristretto, Whole Milk)",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["hot", "iced"],
-    baseSizes: ["tall", "grande", "venti_hot", "venti_iced"],
-    shotCurve: "flatWhiteShots",
-    defaultShotType: "ristretto",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: {},
-    buildTemplate: "flat_white",
-  },
-  {
-    id: "shaken_espresso",
-    label: "Iced Shaken Espresso (+1 Shot, 1-2-3 Pumps)",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["iced"],
-    baseSizes: ["tall", "grande", "venti_iced"],
-    shotCurve: "flatWhiteShots",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "coldBarPumps",
-    extraMetrics: {},
-    buildTemplate: "shaken_espresso",
-  },
-  {
-    id: "cold_brew",
-    label: "Cold Brew / Nitro (1-2-3-4)",
-    defaultStation: "cold_bar",
-    defaultTemps: ["iced"],
-    baseSizes: ["tall", "grande", "venti_iced", "trenta"],
-    shotCurve: "none",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "coldBarPumps",
-    extraMetrics: {},
-    buildTemplate: "cold_brew",
-  },
-  {
-    id: "refresher",
-    label: "Refresher (1-2-3-4 Caffeine + Fruit)",
-    defaultStation: "cold_bar",
-    defaultTemps: ["iced"],
-    baseSizes: ["tall", "grande", "venti_iced", "trenta"],
-    shotCurve: "none",
-    defaultShotType: "standard",
-    primaryPumpMetric: "caffeine_pumps",
-    pumpCurve: "coldBarPumps",
-    extraMetrics: { fruit_inclusions: "fruitInclusionsCurve" },
-    buildTemplate: "refresher",
-  },
-  {
-    id: "frappuccino",
-    label: "Frappuccino Blended Beverage (2-3-4)",
-    defaultStation: "blended",
-    defaultTemps: ["iced"],
-    baseSizes: ["tall", "grande", "venti_iced"],
-    shotCurve: "none",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "blendedPumps",
-    extraMetrics: { frap_roast: "frapRoastCurve" },
-    buildTemplate: "frappuccino",
-  },
-  {
-    id: "iced_matcha",
-    label: "Iced Matcha",
-    defaultStation: "cold_bar",
-    defaultTemps: ["iced"],
-    baseSizes: ["tall", "grande", "venti_iced"],
-    shotCurve: "none",
-    defaultShotType: "standard",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: { matcha_scoops: "matchaScoopsCurve" },
-    buildTemplate: "matcha_iced",
-  },
-  {
-    id: "cortados",
-    label: "Cortados",
-    defaultStation: "espresso_bar",
-    defaultTemps: ["hot"],
-    baseSizes: ["short"],
-    shotCurve: "curve_cortado_shots",
-    defaultShotType: "ristretto",
-    primaryPumpMetric: "syrup_pumps",
-    pumpCurve: "hotBarPumps",
-    extraMetrics: {},
-    buildTemplate: "flat_white",
-  },
-];
-
-const LEGACY_FAMILY_REMAP = {
-  mocha: "latte",
-  cortado: "flat_white",
-  chai_latte: "latte",
-  hot_chocolate: "latte",
-  hot_tea: "americano",
-  iced_tea: "cold_brew",
-  refresher_standard: "refresher",
-  refresher_energy: "refresher",
-  matcha_cold_bar: "cold_brew",
-  frappuccino_coffee: "frappuccino",
-  frappuccino_creme: "frappuccino",
-};
-
-// ============================================================================
-// 4. NORMALIZERS & DYNAMIC METRIC / CURVE REGISTRIES
+// NORMALIZERS & DYNAMIC METRIC / CURVE REGISTRIES
 // ============================================================================
 
 export function normalizeCurve(rawCurve = {}) {
@@ -602,9 +153,7 @@ export function normalizeMetricDefinition(rawMetric = {}) {
 }
 
 export function buildMetricsMap(metricsArray = SEED_METRICS) {
-  const map = {
-    pumps: "Syrup Pumps",
-  };
+  const map = { pumps: "Syrup Pumps" };
   for (const m of SEED_METRICS) {
     map[m.key] = m.label;
   }
@@ -630,7 +179,6 @@ export function normalizeFamilyBlueprint(rawFam = {}, curvesMap = null) {
     }
   }
 
-  // Upgrade legacy flat_white / shaken_espresso shotCurve if migrating from 2.0
   let resolvedShotCurve = rawFam.shotCurve;
   if (
     (rawFam.id === "flat_white" || rawFam.id === "shaken_espresso") &&
@@ -698,7 +246,6 @@ export function normalizeRawDrink(raw = {}, familiesMap = null) {
     ? (raw.coldFoamRecipe || defaultFoamRecipe).trim()
     : "";
 
-  // Frappuccinos do not use espresso bar pump deltas
   const rawPumpsDelta = resolvedFamilyId === "frappuccino" ? 0 : Number(raw.pumpsDelta) || 0;
 
   const defaultIng = getDefaultIngredientsForDrink(resolvedFamilyId, raw);
@@ -707,7 +254,6 @@ export function normalizeRawDrink(raw = {}, familiesMap = null) {
     ? rawIng.syrups.map((s) => String(s || "").trim()).filter(Boolean)
     : defaultIng.syrups;
 
-  // Map legacy action topping IDs to human-readable labels if ingredients.toppings is not provided
   const fallbackToppings = Array.isArray(raw.toppings)
     ? raw.toppings
         .filter((t) => t !== "add_cold_foam")
@@ -801,7 +347,8 @@ export function computeSizes(drink, blueprint, curvesMap = null, metricsMap = nu
       ? drink.allowedSizes
       : blueprint.baseSizes;
 
-  const activeSizeKeys = candidateSizes.filter((sizeKey) => {
+  const activeSizeKeys = ALL_SIZE_KEYS.filter((sizeKey) => {
+    if (!candidateSizes.includes(sizeKey)) return false;
     const spec = SIZE_SPECS[sizeKey];
     if (!spec) return false;
     if (spec.temp === "hot") return hasHot;
@@ -819,7 +366,7 @@ export function computeSizes(drink, blueprint, curvesMap = null, metricsMap = nu
     const spec = SIZE_SPECS[sizeKey];
     const sizeMetricsObj = {};
 
-    // 1. Shots calculation (pure curve lookup, zero delta clutter)
+    // 1. Shots calculation
     if (drink.hasEspresso === false) {
       if (drink.station === "espresso_bar") sizeMetricsObj.shots = "0";
     } else if (activeShotCurve && activeShotCurve !== "none" && cMap[activeShotCurve]) {
@@ -846,7 +393,7 @@ export function computeSizes(drink, blueprint, curvesMap = null, metricsMap = nu
       }
     }
 
-    // 2b. Refresher Syrup Pumps (when a Refresher also contains a syrup like Mango Syrup)
+    // 2b. Refresher Syrup Pumps (when a Refresher also contains a syrup)
     if (
       drink.family === "refresher" &&
       drink.includeSyrupStep &&
@@ -890,8 +437,6 @@ export function computeSizes(drink, blueprint, curvesMap = null, metricsMap = nu
       sizeKey,
       size: spec.label,
       shortLabel: spec.shortLabel,
-      rank: spec.rank,
-      barHeight: spec.barHeight,
       shots: sizeMetricsObj.shots ?? "0",
       pumps: primaryPumpsVal,
       metrics,
@@ -902,7 +447,7 @@ export function computeSizes(drink, blueprint, curvesMap = null, metricsMap = nu
 }
 
 // ============================================================================
-// 5. DYNAMIC WORKFLOW & SEQUENCING COMPILER (OCT 2026 SLEEVE + COLD FOAM FIRST)
+// DYNAMIC WORKFLOW & SEQUENCING COMPILER (OCT 2026 SLEEVE + COLD FOAM FIRST)
 // ============================================================================
 
 export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, familiesMap = null) {
@@ -927,10 +472,8 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
 
   const queueAction = drink.shotType === "ristretto" ? "queue_ristretto" : "queue_shots";
   const tpl = drink.buildOverride || blueprint.buildTemplate || "espresso_standard";
-  const hasHotWater = tempMode === "hot" && (tpl === "americano" || tpl === "hot_tea_lemonade");
 
-  // OCT 2026 CORPORATE SLEEVE RULE:
-  // Every hot drink requires a sleeve EXCEPT Short (8oz).
+  // OCT 2026 CORPORATE SLEEVE RULE: Every hot drink requires a sleeve EXCEPT Short (8oz).
   const needsSleeve = tempMode === "hot" && resolvedSizeKey !== "short";
 
   const customStepArray =
@@ -1009,7 +552,6 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
           break;
       }
     } else {
-      // ICED / BLENDED WORKFLOWS
       const hasRefresherSyrup =
         drink.includeSyrupStep &&
         Array.isArray(drink.ingredients?.syrups) &&
@@ -1077,13 +619,10 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
       }
     }
 
-    // Cold Foam Rule:
-    // 1. Start foaming at the VERY BEGINNING of the drink (before queueing shots).
     if (drink.hasColdFoam) {
       steps.unshift("blend_cold_foam");
     }
 
-    // Whip & Toppings
     if (drink.hasWhip) steps.push("add_whip");
     for (const toppingId of drink.toppings) {
       if (toppingId && !steps.includes(toppingId)) {
@@ -1091,7 +630,6 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
       }
     }
 
-    // Packaging & Cold Foam Pour Towards the End (right before add_lid)
     if (needsSleeve) {
       steps.push("add_sleeve");
     }
@@ -1101,7 +639,6 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
     steps.push("add_lid", "connect_handoff");
   }
 
-  // Hard Invariant: stopPoint MUST exist in steps
   const stopPoint = steps.includes(preferredStopPoint) ? preferredStopPoint : steps[0];
   const requiresSteamedMilk = steps.some(isSteamAction);
 
@@ -1124,7 +661,6 @@ export function generateWorkflow(drink, tempMode = "hot", sizeKey = null, famili
     tempMode,
     sizeKey: resolvedSizeKey,
     sizeLabel: SIZE_SPECS[resolvedSizeKey]?.label || resolvedSizeKey,
-    hasHotWater,
     needsSleeve,
     requiresSteamedMilk,
     stopPoint,
@@ -1165,8 +701,6 @@ export function generateSequencingOrder(drink, tempMode = "hot", explicitSizeKey
     if (targetIndex === 0 && wf.steps.includes("shake_10x")) choiceSet.add("shake_10x");
     if (targetAction === "blend_pitcher") choiceSet.add("add_lid");
 
-    // Oct 2026 Sleeve Decision Point: Always pair add_sleeve & add_lid on hot drinks
-    // so Short (8oz) tests skipping the sleeve while Tall/Grande/Venti Hot require it.
     if (tempMode === "hot" && (targetAction === "add_sleeve" || targetAction === "add_lid")) {
       choiceSet.add("add_sleeve");
       choiceSet.add("add_lid");
@@ -1184,15 +718,10 @@ export function generateSequencingOrder(drink, tempMode = "hot", explicitSizeKey
     temp: tempMode === "hot" ? "Hot" : "Iced",
     sizeKey: chosenSizeKey,
     size: wf.sizeLabel,
-    isShortHot: tempMode === "hot" && chosenSizeKey === "short",
-    hasHotWater: wf.hasHotWater,
     needsSleeve: wf.needsSleeve,
     hasColdFoam: drink.hasColdFoam,
-    coldFoamLabel: drink.coldFoamLabel,
     coldFoamRecipe: drink.coldFoamRecipe,
     requiresSteamedMilk: wf.requiresSteamedMilk,
-    requiresBlender: wf.steps.includes("blend_pitcher") || wf.steps.includes("blend_cold_foam"),
-    stopPoint: wf.stopPoint,
     steps: wf.steps.map((actionId, idx) => ({
       actionId,
       isStopPoint: actionId === wf.stopPoint,
@@ -1202,7 +731,7 @@ export function generateSequencingOrder(drink, tempMode = "hot", explicitSizeKey
 }
 
 // ============================================================================
-// 6. RELATIONAL CATALOG HYDRATION & POOL SAMPLER
+// RELATIONAL CATALOG HYDRATION & POOL SAMPLER
 // ============================================================================
 
 export function deriveTags(drink) {
@@ -1237,7 +766,6 @@ export function compileDrink(rawDrink, familiesMap = null, curvesMap = null, met
     ? coldFoamPreset?.label || "Custom Cold Foam"
     : null;
 
-  // Build structured "What It Contains" summary list for Recipe Cards & Quizzes
   const containsList = [];
   const ing = normalized.ingredients || {};
   if (ing.roast && ing.roast !== "None" && ing.roast !== "None (Crème / Steamer)") {
@@ -1254,7 +782,7 @@ export function compileDrink(rawDrink, familiesMap = null, curvesMap = null, met
       value: `${ing.roast}${shotDetail}`,
     });
   }
-  if (ing.milk && ing.milk !== "None") {
+  if (ing.milk && ing.milk !== "None" && ing.milk !== "-") {
     containsList.push({
       category: "Milk / Liquid",
       value: ing.milk,
@@ -1301,8 +829,6 @@ export function compileDrink(rawDrink, familiesMap = null, curvesMap = null, met
     familyLabel: blueprint.label,
     isRistretto: enriched.shotType === "ristretto",
     tags: deriveTags(enriched),
-    question: enriched.station === "espresso_bar" ? "Shots & Syrup Pumps" : "Recipe Specifications",
-    notes: enriched.comments,
     sizes,
     sizeList,
     workflows,

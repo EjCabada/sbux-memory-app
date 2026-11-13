@@ -22,7 +22,18 @@ import {
 const DrinkContext = createContext(null);
 
 const UNIFIED_STORAGE_KEY = "sbux_raw_catalog_v2";
+const SOURCE_HASH_STORAGE_KEY = "sbux_source_hash_v2";
 const LEGACY_STORAGE_KEYS = ["sbux_drink_catalog_overrides", "sbux_family_archetypes"];
+
+// Deterministic FNV-1a string fingerprint so we detect whenever public/data/drinks.json changes
+function computeStringHash(str) {
+  let hash = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16);
+}
 
 export const DrinkProvider = ({ children }) => {
   const [sourceCatalog, setSourceCatalog] = useState({
@@ -47,17 +58,27 @@ export const DrinkProvider = ({ children }) => {
       try {
         const baseUrl = import.meta.env.BASE_URL || "./";
         const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-        const res = await fetch(`${normalizedBase}data/drinks.json`);
+        const res = await fetch(`${normalizedBase}data/drinks.json`, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status} fetching drinks.json`);
 
-        const filePayload = await res.json();
+        const rawText = await res.text();
+        const currentSourceHash = computeStringHash(rawText);
+        const lastSeenSourceHash = localStorage.getItem(SOURCE_HASH_STORAGE_KEY);
+
+        const filePayload = JSON.parse(rawText);
         const parsedSource = parseUnifiedCatalogPayload(filePayload);
         setSourceCatalog(parsedSource);
+
+        // If the server's drinks.json has changed since this browser last loaded it,
+        // automatically adopt the new source catalog so trainees never need to clear cookies!
+        if (lastSeenSourceHash !== currentSourceHash) {
+          localStorage.removeItem(UNIFIED_STORAGE_KEY);
+          localStorage.setItem(SOURCE_HASH_STORAGE_KEY, currentSourceHash);
+        }
 
         const localRaw = localStorage.getItem(UNIFIED_STORAGE_KEY);
         if (localRaw) {
           const parsedLocal = parseUnifiedCatalogPayload(JSON.parse(localRaw));
-          // Merge any newly added ingredients from drinks.json into local overrides
           const mergedIngOptions = normalizeIngredientOptions({
             roasts: [...parsedSource.ingredientOptions.roasts, ...parsedLocal.ingredientOptions.roasts],
             milks: [...parsedSource.ingredientOptions.milks, ...parsedLocal.ingredientOptions.milks],
@@ -122,7 +143,6 @@ export const DrinkProvider = ({ children }) => {
     [curves, ingredientOptions, metrics]
   );
 
-  // --- Drink Catalog & Dynamic Ingredient Operations (Tab A) ---
   const upsertDrink = useCallback(
     (drinkInput) => {
       const clean = normalizeRawDrink(drinkInput, familiesMap);
@@ -130,7 +150,6 @@ export const DrinkProvider = ({ children }) => {
       const nextDrinks = exists
         ? rawDrinks.map((d) => (d.id === clean.id ? clean : d))
         : [...rawDrinks, clean];
-      // Also auto-register any new syrups, toppings, roasts, or milks used on this drink
       const nextIngOptions = normalizeIngredientOptions({
         roasts: [...ingredientOptions.roasts, clean.ingredients?.roast].filter(Boolean),
         milks: [...ingredientOptions.milks, clean.ingredients?.milk].filter(Boolean),
@@ -184,7 +203,6 @@ export const DrinkProvider = ({ children }) => {
     [families, persistRelationalState, rawDrinks]
   );
 
-  // --- Family Blueprint, Curve & Parameter Operations (Tab B) ---
   const upsertFamily = useCallback(
     (familyInput) => {
       const cleanFam = normalizeFamilyBlueprint(familyInput, curvesMap);
@@ -241,7 +259,6 @@ export const DrinkProvider = ({ children }) => {
     [curves, families, metrics, persistRelationalState, rawDrinks]
   );
 
-  // --- JSON Dashboard & Sync Operations ---
   const exportUnifiedCatalogJSON = useCallback(() => {
     return JSON.stringify(
       serializeUnifiedCatalog(families, rawDrinks, curves, metrics, ingredientOptions),

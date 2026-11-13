@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
+import { getWeakSpotIds, loadTraineeStats, recordDrinkStudyResult } from "../utils/studyStats.js";
 import styles from "./BeginnerQuiz.module.css";
 
 const MODES = {
@@ -8,6 +9,15 @@ const MODES = {
   TIME_2: "2min",
   TIME_5: "5min",
   UNLIMITED: "unlimited",
+};
+
+const SIZE_BAR_HEIGHTS = {
+  short: 16,
+  tall: 24,
+  grande: 32,
+  venti_hot: 40,
+  venti_iced: 48,
+  trenta: 54,
 };
 
 const SHOT_OPTIONS_STANDARD = ["0", "1", "2", "3", "4"];
@@ -32,23 +42,108 @@ function getKeypadOptionsForMetric(metricKey, isRistretto) {
   return PUMP_OPTIONS;
 }
 
+function buildIngredientQuestionsForDrink(drink, allDrinks) {
+  const ing = drink.ingredients || {};
+  const correctRoast = ing.roast || "Signature Espresso";
+  const correctMilk = ing.milk && ing.milk !== "-" ? ing.milk : "None";
+  const correctSyrup =
+    Array.isArray(ing.syrups) && ing.syrups.length > 0 ? ing.syrups.join(" + ") : "Unsweetened";
+
+  const finishParts = [...(ing.toppings || [])];
+  if (drink.hasWhip && !finishParts.some((t) => t.toLowerCase().includes("whip"))) {
+    finishParts.unshift("Whipped Cream");
+  }
+  if (drink.hasColdFoam && drink.coldFoamLabel) {
+    finishParts.push(drink.coldFoamLabel);
+  }
+  const correctFinish = finishParts.length > 0 ? finishParts.join(", ") : "None";
+
+  const pickChoices = (correctVal, poolValues) => {
+    const distractors = shuffle(
+      Array.from(new Set(poolValues.filter((v) => v && v !== correctVal)))
+    ).slice(0, 3);
+    return shuffle([correctVal, ...distractors]);
+  };
+
+  const roastPool = [
+    "Signature Espresso",
+    "Blonde Espresso",
+    "Frap Roast",
+    "Cold Brew",
+    "Matcha Green Tea",
+    "Strawberry Açaí Base",
+    "Mango Dragonfruit Base",
+    ...allDrinks.map((d) => d.ingredients?.roast),
+  ];
+  const milkPool = [
+    "2% Milk",
+    "Whole Milk",
+    "Oatmilk",
+    "Vanilla Sweet Cream",
+    "Water",
+    "Water / Lemonade",
+    "Lemonade",
+    "None",
+    ...allDrinks.map((d) => d.ingredients?.milk).filter((m) => m && m !== "-"),
+  ];
+  const syrupPool = [
+    "Unsweetened",
+    "Vanilla Syrup",
+    "Brown Sugar Syrup",
+    "Classic Syrup",
+    "Caramel Syrup",
+    "Dark Caramel Sauce",
+    "Mocha Sauce",
+    "White Chocolate Mocha Sauce",
+    "Cinnamon Dolce Syrup",
+    ...allDrinks.map((d) =>
+      d.ingredients?.syrups?.length ? d.ingredients.syrups.join(" + ") : "Unsweetened"
+    ),
+  ];
+  const finishPool = [
+    "None",
+    "Whipped Cream",
+    "Whipped Cream, Caramel Drizzle",
+    "Caramel Crosshatch",
+    "Cinnamon Powder",
+    "Vanilla Sweet Cream Cold Foam",
+    "Salted Caramel Cream Cold Foam",
+    ...allDrinks.map((d) => {
+      const p = [...(d.ingredients?.toppings || [])];
+      if (d.hasWhip && !p.some((t) => t.toLowerCase().includes("whip"))) p.unshift("Whipped Cream");
+      if (d.hasColdFoam && d.coldFoamLabel) p.push(d.coldFoamLabel);
+      return p.length > 0 ? p.join(", ") : "None";
+    }),
+  ];
+
+  return [
+    { key: "roast", label: "Roast / Base", value: correctRoast, options: pickChoices(correctRoast, roastPool) },
+    { key: "milk", label: "Milk / Liquid", value: correctMilk, options: pickChoices(correctMilk, milkPool) },
+    { key: "syrup", label: "Syrup / Sauce", value: correctSyrup, options: pickChoices(correctSyrup, syrupPool) },
+    { key: "finish", label: "Toppings / Foam", value: correctFinish, options: pickChoices(correctFinish, finishPool) },
+  ];
+}
+
 const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
-  const { isLoading, getBalancedQuizPool } = useDrinkCatalog();
+  const { drinks, isLoading, getBalancedQuizPool } = useDrinkCatalog();
   const isColdBar = stationMode === "cold_bar";
+
+  const [quizFocus, setQuizFocus] = useState("proportions"); // "proportions" | "ingredients"
+  const [deckFilter, setDeckFilter] = useState("essentials"); // "essentials" | "missed"
+  const [traineeStats, setTraineeStats] = useState(loadTraineeStats);
 
   const [selectedMode, setSelectedMode] = useState(null);
   const [gameState, setGameState] = useState("menu");
-  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [drinkPool, setDrinkPool] = useState([]);
   const [currentDrink, setCurrentDrink] = useState(null);
   const [shuffledSizes, setShuffledSizes] = useState([]);
   const [currentSizeIndex, setCurrentSizeIndex] = useState(0);
+  const [ingredientPrompts, setIngredientPrompts] = useState([]);
   const [selectedValues, setSelectedValues] = useState({});
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [drinkTracking, setDrinkTracking] = useState({});
   const [currentDrinkHadError, setCurrentDrinkHadError] = useState(false);
 
-  // Stable session deck locked at quiz start — prevents mid-quiz re-randomization
   const sessionDeckRef = useRef([]);
   const retestQueueRef = useRef([]);
   const timerIntervalRef = useRef(null);
@@ -59,38 +154,75 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
   const [correctCardsCount, setCorrectCardsCount] = useState(0);
   const [wrongCardsCount, setWrongCardsCount] = useState(0);
 
-  // Reset to menu when switching between Hot Bar and Cold Bar quiz routes
   useEffect(() => {
     clearInterval(timerIntervalRef.current);
     setGameState("menu");
     setCurrentDrink(null);
     setSelectedValues({});
     setIsEvaluating(false);
+    setTraineeStats(loadTraineeStats());
   }, [stationMode]);
+
+  const stationEssentials = useMemo(
+    () =>
+      drinks.filter(
+        (d) =>
+          d.isActive &&
+          d.curriculum?.isFundamental &&
+          d.sizeList.length > 0 &&
+          (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar")
+      ),
+    [drinks, isColdBar]
+  );
+
+  const missedIds = useMemo(() => new Set(getWeakSpotIds(traineeStats)), [traineeStats]);
+  const missedStationDrinks = useMemo(
+    () =>
+      drinks.filter(
+        (d) =>
+          d.isActive &&
+          d.sizeList.length > 0 &&
+          missedIds.has(d.id) &&
+          (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar")
+      ),
+    [drinks, isColdBar, missedIds]
+  );
 
   const endQuiz = useCallback(() => {
     clearInterval(timerIntervalRef.current);
     setGameState("summary");
   }, []);
 
-  const loadDrink = useCallback((drink) => {
-    setCurrentDrink(drink);
-    setShuffledSizes(shuffle(drink.sizeList));
-    setCurrentSizeIndex(0);
-    setCurrentDrinkHadError(false);
-    setSelectedValues({});
-    setIsEvaluating(false);
-  }, []);
+  const loadDrink = useCallback(
+    (drink) => {
+      setCurrentDrink(drink);
+      if (quizFocus === "ingredients") {
+        setShuffledSizes([drink.sizeList[0]]);
+        setIngredientPrompts(buildIngredientQuestionsForDrink(drink, drinks));
+      } else {
+        setShuffledSizes(shuffle(drink.sizeList));
+        setIngredientPrompts([]);
+      }
+      setCurrentSizeIndex(0);
+      setCurrentDrinkHadError(false);
+      setSelectedValues({});
+      setIsEvaluating(false);
+    },
+    [drinks, quizFocus]
+  );
 
   const startQuiz = (mode) => {
-    const freshDeck = getBalancedQuizPool({
-      count: 12,
-      filterFn: (d) =>
-        d.isActive &&
-        d.curriculum?.isFundamental &&
-        d.sizeList.length > 0 &&
-        (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar"),
-    });
+    const useMissed = deckFilter === "missed" && missedStationDrinks.length > 0;
+    const freshDeck = useMissed
+      ? shuffle(missedStationDrinks)
+      : getBalancedQuizPool({
+          count: 12,
+          filterFn: (d) =>
+            d.isActive &&
+            d.curriculum?.isFundamental &&
+            d.sizeList.length > 0 &&
+            (isColdBar ? d.station !== "espresso_bar" : d.station === "espresso_bar"),
+        });
     if (!freshDeck.length) return;
 
     sessionDeckRef.current = freshDeck;
@@ -144,9 +276,9 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
 
   const activeSize = shuffledSizes[currentSizeIndex];
 
-  // Dynamically derive the quiz metrics for the current drink & cup size
   const activeQuizMetrics = useMemo(() => {
     if (!currentDrink || !activeSize) return [];
+    if (quizFocus === "ingredients") return ingredientPrompts;
     if (!isColdBar) {
       return [
         { key: "shots", label: "Shots", value: String(activeSize.shots ?? "0") },
@@ -157,13 +289,16 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
       return activeSize.metrics.filter((m) => m.key !== "shots");
     }
     return [{ key: "syrup_pumps", label: "Syrup Pumps", value: String(activeSize.pumps ?? "0") }];
-  }, [currentDrink, activeSize, isColdBar]);
+  }, [currentDrink, activeSize, ingredientPrompts, isColdBar, quizFocus]);
 
   const handleDrinkCompletion = () => {
     const drinkId = currentDrink.id;
     const currentTrack = drinkTracking[drinkId] || { consecutiveFails: 0, cleanPasses: 0 };
     let nextQueue = [...retestQueueRef.current];
     let nextPool = [...drinkPool];
+
+    const updatedStats = recordDrinkStudyResult(drinkId, !currentDrinkHadError);
+    setTraineeStats(updatedStats);
 
     if (currentDrinkHadError) {
       const newFails = currentTrack.consecutiveFails + 1;
@@ -288,23 +423,50 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2>{isColdBar ? "Cold Bar & Blended Essentials Quiz" : "Hot Bar Essentials Quiz"}</h2>
-          <p>
-            {isColdBar
-              ? "Master Frap Roast & pumps, Matcha scoops & syrup, Refresher caffeine & inclusions, and Cold Brew pumps"
-              : "Master espresso shots & syrup pumps with instant feedback"}
-          </p>
-          <button className={styles.rulesBtn} onClick={() => setIsRulesModalOpen(true)}>
-            How This Quiz Works
-          </button>
+          <h2>{isColdBar ? "Cold Bar Essentials" : "Hot Bar Essentials"}</h2>
+          <div className={styles.segmentedRow}>
+            <button
+              type="button"
+              className={`${styles.segBtn} ${quizFocus === "proportions" ? styles.segBtnActive : ""}`}
+              onClick={() => setQuizFocus("proportions")}
+            >
+              Numbers (Shots &amp; Pumps)
+            </button>
+            <button
+              type="button"
+              className={`${styles.segBtn} ${quizFocus === "ingredients" ? styles.segBtnActive : ""}`}
+              onClick={() => setQuizFocus("ingredients")}
+            >
+              What&apos;s in the Cup?
+            </button>
+          </div>
+
+          {missedStationDrinks.length > 0 && (
+            <div className={styles.segmentedRow}>
+              <button
+                type="button"
+                className={`${styles.segBtn} ${deckFilter === "essentials" ? styles.segBtnActive : ""}`}
+                onClick={() => setDeckFilter("essentials")}
+              >
+                All Essentials ({stationEssentials.length})
+              </button>
+              <button
+                type="button"
+                className={`${styles.segBtn} ${deckFilter === "missed" ? styles.segBtnMissed : ""}`}
+                onClick={() => setDeckFilter("missed")}
+              >
+                Missed Drinks ({missedStationDrinks.length})
+              </button>
+            </div>
+          )}
         </div>
+
         <div className={styles.modeSection}>
-          <h3>Select Practice Mode</h3>
           <div className={styles.modeList}>
             <button className={styles.perfectionCard} onClick={() => startQuiz(MODES.PERFECTION)}>
               <div className={styles.modeTitle}>Perfection Mode</div>
               <div className={styles.modeDesc}>
-                Drill until every {isColdBar ? "Cold Bar" : "Hot Bar"} Essentials drink is passed 100% cleanly without errors.
+                Pass every drink in the deck cleanly with zero mistakes.
               </div>
             </button>
             <div className={styles.timedRow}>
@@ -317,28 +479,6 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
             </button>
           </div>
         </div>
-        {isRulesModalOpen && (
-          <div className={styles.modalBackdrop} onClick={() => setIsRulesModalOpen(false)}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <h3>How the Quiz Works</h3>
-              <ul>
-                <li>
-                  <strong>One Drink &amp; One Size:</strong> Each card tests the core proportions for one specific cup size.
-                </li>
-                <li>
-                  <strong>Visual Cup Indicators:</strong> Ascending height bars indicate which cup size is active.
-                </li>
-                <li>
-                  <strong>Instant Feedback:</strong> Tapping all required numbers validates immediately green or red.
-                </li>
-                <li>
-                  <strong>Smart Retest Queue:</strong> Missed drinks return after 1 intervening drink.
-                </li>
-              </ul>
-              <button className={styles.modalCloseBtn} onClick={() => setIsRulesModalOpen(false)}>Got It!</button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -349,7 +489,7 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
     return (
       <div className={styles.container}>
         <div className={styles.summaryCard}>
-          <h2>{selectedMode === MODES.PERFECTION ? "Deck Mastered!" : "Time's Up!"}</h2>
+          <h2>{selectedMode === MODES.PERFECTION ? "Deck Mastered!" : "Session Complete"}</h2>
           <div className={styles.statsGrid}>
             <div className={styles.statBox}>
               <span className={styles.statVal}>
@@ -358,7 +498,7 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
                   : `${correctCardsCount}/${totalCardsAttempted}`}
               </span>
               <span className={styles.statLbl}>
-                {selectedMode === MODES.PERFECTION ? "Time Elapsed" : "Cards Correct"}
+                {selectedMode === MODES.PERFECTION ? "Time" : "Correct"}
               </span>
             </div>
             <div className={styles.statBox}>
@@ -370,24 +510,22 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
               <span className={styles.statLbl}>Mistakes</span>
             </div>
           </div>
-          <div className={styles.studySection}>
-            <h4>Top Drinks to Review</h4>
-            {studyList.length > 0 ? (
+          {studyList.length > 0 && (
+            <div className={styles.studySection}>
+              <h4>Saved to Missed Drinks</h4>
               <ol className={styles.studyList}>
                 {studyList.map((d, i) => (
                   <li key={i}>
                     <span>{d.name}</span>
-                    <span className={styles.errorPill}>{d.errors} errors</span>
+                    <span className={styles.errorPill}>{d.errors}</span>
                   </li>
                 ))}
               </ol>
-            ) : (
-              <p className={styles.flawlessMsg}>Flawless run! No drinks had errors!</p>
-            )}
-          </div>
+            </div>
+          )}
           <div className={styles.summaryActions}>
             <button className={styles.primaryAction} onClick={() => startQuiz(selectedMode)}>Try Again</button>
-            <button className={styles.secondaryAction} onClick={() => setGameState("menu")}>Choose Different Mode</button>
+            <button className={styles.secondaryAction} onClick={() => setGameState("menu")}>Change Mode</button>
           </div>
         </div>
       </div>
@@ -395,8 +533,6 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
   }
 
   if (!currentDrink || !activeSize) return null;
-
-  const orderedSizes = [...currentDrink.sizeList].sort((a, b) => a.rank - b.rank);
 
   return (
     <div className={styles.quizWrapper}>
@@ -411,32 +547,41 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
         </div>
       </div>
 
-      {/* Clean Header Card: ONLY Drink Name + Visual Cup Bars + Active Size Badge */}
       <div className={styles.drinkHeaderCard}>
         <h2 className={styles.drinkName}>{currentDrink.name}</h2>
-        <div className={styles.visualSizeContainer}>
-          {orderedSizes.map((s) => {
-            const isActive = s.sizeKey === activeSize.sizeKey;
-            return (
-              <div
-                key={s.sizeKey}
-                className={`${styles.sizeBarWrapper} ${isActive ? styles.activeSizeBarWrapper : ""}`}
-              >
-                <div
-                  className={`${styles.sizeBar} ${isActive ? styles.activeSizeBar : ""}`}
-                  style={{ height: `${s.barHeight}px` }}
-                />
-                <span className={styles.sizeBarLabel}>{s.shortLabel}</span>
-              </div>
-            );
-          })}
-        </div>
-        <div className={styles.sizeBadge}>{activeSize.size}</div>
+        {quizFocus === "proportions" ? (
+          <>
+            <div className={styles.visualSizeContainer}>
+              {currentDrink.sizeList.map((s) => {
+                const isActive = s.sizeKey === activeSize.sizeKey;
+                const barPx = SIZE_BAR_HEIGHTS[s.sizeKey] || 32;
+                return (
+                  <div
+                    key={s.sizeKey}
+                    className={`${styles.sizeBarWrapper} ${isActive ? styles.activeSizeBarWrapper : ""}`}
+                  >
+                    <div
+                      className={`${styles.sizeBar} ${isActive ? styles.activeSizeBar : ""}`}
+                      style={{ height: `${barPx}px` }}
+                    />
+                    <span className={styles.sizeBarLabel}>{s.shortLabel}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className={styles.sizeBadge}>{activeSize.size}</div>
+          </>
+        ) : (
+          <div className={styles.sizeBadge}>What&apos;s in the Cup?</div>
+        )}
       </div>
 
       <div className={styles.inputArea}>
         {activeQuizMetrics.map((metric) => {
-          const keypadOptions = getKeypadOptionsForMetric(metric.key, currentDrink.isRistretto);
+          const isIngredientChoice = Array.isArray(metric.options);
+          const keypadOptions = isIngredientChoice
+            ? metric.options
+            : getKeypadOptionsForMetric(metric.key, currentDrink.isRistretto);
           const selectedVal = selectedValues[metric.key];
           const expectedVal = String(metric.value);
           return (
@@ -445,15 +590,15 @@ const BeginnerQuiz = ({ stationMode = "hot_bar" }) => {
                 <span>{metric.label}</span>
                 {isEvaluating && (
                   <span className={selectedVal === expectedVal ? styles.okLabel : styles.errLabel}>
-                    {selectedVal === expectedVal ? "Correct" : `Answer: ${expectedVal}`}
+                    {selectedVal === expectedVal ? "Correct" : expectedVal}
                   </span>
                 )}
               </div>
-              <div className={styles.keypadRow}>
+              <div className={isIngredientChoice ? styles.chipGrid : styles.keypadRow}>
                 {keypadOptions.map((val) => {
                   const isSelected = selectedVal === val;
                   const isCorrect = val === expectedVal;
-                  let btnClass = styles.keyBtn;
+                  let btnClass = isIngredientChoice ? styles.chipBtn : styles.keyBtn;
                   if (isEvaluating) {
                     if (isCorrect) btnClass += ` ${styles.correctKey}`;
                     else if (isSelected && !isCorrect) btnClass += ` ${styles.wrongKey}`;

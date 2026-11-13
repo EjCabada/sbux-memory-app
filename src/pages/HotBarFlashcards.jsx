@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useDrinkCatalog } from "../context/DrinkContext.jsx";
+import { getWeakSpotIds, loadTraineeStats, recordDrinkStudyResult } from "../utils/studyStats.js";
 import MultiSizeCard from "../components/MultiSizeCard/MultiSizeCard.jsx";
 import styles from "./Quiz.module.css";
 
@@ -16,9 +18,14 @@ const loadMasteryMap = (storageKey) => {
 
 const HotBarFlashcards = ({ stationMode = "hot_bar" }) => {
   const { drinks, isLoading } = useDrinkCatalog();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isColdBar = stationMode === "cold_bar";
-  const storageKey = isColdBar ? "srs-mastery-coldbar-v2" : "srs-mastery-hotbar-v2";
 
+  const initialScope = searchParams.get("scope") || "essentials";
+  const [deckScope, setDeckScope] = useState(initialScope);
+  const [traineeStats, setTraineeStats] = useState(loadTraineeStats);
+
+  const storageKey = `${isColdBar ? "srs-coldbar" : "srs-hotbar"}-${deckScope}-v2`;
   const [masteryMap, setMasteryMap] = useState(() => loadMasteryMap(storageKey));
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
@@ -36,13 +43,30 @@ const HotBarFlashcards = ({ stationMode = "hot_bar" }) => {
     [drinks, isColdBar]
   );
 
+  const essentialsDrinks = useMemo(
+    () => stationDrinks.filter((d) => d.curriculum?.isFundamental),
+    [stationDrinks]
+  );
+
+  const missedIds = useMemo(() => new Set(getWeakSpotIds(traineeStats)), [traineeStats]);
+  const missedDrinks = useMemo(
+    () => stationDrinks.filter((d) => missedIds.has(d.id)),
+    [stationDrinks, missedIds]
+  );
+
+  const scopedDrinks = useMemo(() => {
+    if (deckScope === "missed") return missedDrinks;
+    if (deckScope === "all") return stationDrinks;
+    return essentialsDrinks;
+  }, [deckScope, essentialsDrinks, missedDrinks, stationDrinks]);
+
   const deck = useMemo(
     () =>
-      stationDrinks.map((d) => ({
+      scopedDrinks.map((d) => ({
         ...d,
         masteryLevel: masteryMap[d.id] || 0,
       })),
-    [stationDrinks, masteryMap]
+    [scopedDrinks, masteryMap]
   );
 
   const activeDeck = useMemo(
@@ -51,6 +75,12 @@ const HotBarFlashcards = ({ stationMode = "hot_bar" }) => {
   );
 
   const safeIndex = activeDeck.length > 0 ? currentCardIndex % activeDeck.length : 0;
+
+  const handleScopeChange = (nextScope) => {
+    setDeckScope(nextScope);
+    setSearchParams({ scope: nextScope }, { replace: true });
+    setCurrentCardIndex(0);
+  };
 
   const handleKnowledgeUpdate = (level) => {
     if (activeDeck.length === 0) return;
@@ -62,6 +92,9 @@ const HotBarFlashcards = ({ stationMode = "hot_bar" }) => {
     const nextMap = { ...masteryMap, [currentCard.id]: nextLevel };
     setMasteryMap(nextMap);
     sessionStorage.setItem(storageKey, JSON.stringify(nextMap));
+
+    const updatedStats = recordDrinkStudyResult(currentCard.id, level === 2);
+    setTraineeStats(updatedStats);
 
     if (cardWasMastered) {
       const nextLen = activeDeck.length - 1;
@@ -90,45 +123,80 @@ const HotBarFlashcards = ({ stationMode = "hot_bar" }) => {
 
   return (
     <div className={styles.quizContainer}>
-      <h2>{isColdBar ? "Cold Bar & Blended Flashcards" : "Hot Bar Multi-Size Flashcards"}</h2>
-      <p>
-        {isColdBar
-          ? "Tap each size card to test Frap Roast, Matcha scoops, Refresher caffeine & inclusions, and syrup pumps."
-          : "Tap each size card to test shots and pumps before grading."}
-      </p>
+      <div className={styles.topHeaderBar}>
+        <h2>{isColdBar ? "Cold Bar Flashcards" : "Hot Bar Flashcards"}</h2>
+        <div className={styles.scopeSegmented}>
+          <button
+            type="button"
+            className={`${styles.scopeBtn} ${deckScope === "essentials" ? styles.scopeBtnActive : ""}`}
+            onClick={() => handleScopeChange("essentials")}
+          >
+            Essentials ({essentialsDrinks.length})
+          </button>
+          <button
+            type="button"
+            className={`${styles.scopeBtn} ${deckScope === "all" ? styles.scopeBtnActive : ""}`}
+            onClick={() => handleScopeChange("all")}
+          >
+            All Drinks ({stationDrinks.length})
+          </button>
+          {missedDrinks.length > 0 && (
+            <button
+              type="button"
+              className={`${styles.scopeBtn} ${deckScope === "missed" ? styles.scopeBtnMissedActive : ""}`}
+              onClick={() => handleScopeChange("missed")}
+            >
+              Missed ({missedDrinks.length})
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className={styles.flashcardArea}>
         {currentCard ? (
           <MultiSizeCard item={currentCard} />
         ) : (
           <div className={styles.allDone}>
-            <h3>All {isColdBar ? "Cold Bar & Blended" : "Hot Bar"} drinks mastered!</h3>
-            <p>Reset progress to drill again.</p>
+            <h3>
+              {deckScope === "missed"
+                ? "All missed drinks cleared!"
+                : "Deck mastered!"}
+            </h3>
+            <p>
+              {deckScope === "essentials"
+                ? "Switch to All Drinks or reset progress to drill again."
+                : "Reset progress to drill this deck again."}
+            </p>
           </div>
         )}
       </div>
+
       {activeDeck.length > 0 && (
         <div className={styles.srsControls}>
           <button className={styles.dontKnow} onClick={() => handleKnowledgeUpdate(0)}>
-            Don&apos;t Know
+            Miss
           </button>
           <button className={styles.somewhat} onClick={() => handleKnowledgeUpdate(1)}>
-            Know Somewhat
+            Almost
           </button>
           <button className={styles.knowWell} onClick={() => handleKnowledgeUpdate(2)}>
-            Know Well
+            Got It
           </button>
         </div>
       )}
+
       <div className={styles.quizStats}>
-        <div className={styles.cardCounter}>
-          {activeDeck.length > 0 ? `Drink ${safeIndex + 1} of ${activeDeck.length}` : "Deck Completed"}
-        </div>
-        <div className={styles.knownCounter}>
-          ({knownCardsCount} / {deck.length} mastered)
-        </div>
-        <button onClick={resetProgress} className={styles.resetButton}>
-          Reset Progress
-        </button>
+        <span>
+          {activeDeck.length > 0
+            ? `${safeIndex + 1} / ${activeDeck.length} remaining`
+            : "Completed"}{" "}
+          &bull; {knownCardsCount}/{deck.length} mastered
+        </span>
+        {knownCardsCount > 0 && (
+          <button onClick={resetProgress} className={styles.resetButton}>
+            Reset Deck
+          </button>
+        )}
       </div>
     </div>
   );

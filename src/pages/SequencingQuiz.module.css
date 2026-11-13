@@ -82,9 +82,9 @@
 }
 
 .cardGoldActive {
-  border-color: #bba075 !important;
-  box-shadow: 0 0 10px rgba(187, 160, 117, 0.3);
-  background: rgba(187, 160, 117, 0.05);
+  border-color: #d4b16a !important;
+  box-shadow: 0 0 10px rgba(212, 177, 106, 0.35);
+  background: rgba(212, 177, 106, 0.08);
 }
 
 .cardHeaderRow {
@@ -103,8 +103,8 @@
 }
 
 .badgeGold {
-  background: #bba075;
-  color: white;
+  background: #d4b16a;
+  color: #172621;
   font-size: 0.65rem;
   font-weight: bold;
   padding: 0.15rem 0.4rem;
@@ -300,13 +300,13 @@
 }
 
 .btnGoldTheme {
-  border-color: #bba075;
-  color: #a08253;
+  border-color: #d4b16a;
+  color: #9e7d3b;
 }
 
 .btnGoldTheme:hover {
-  background: #bba075;
-  color: white;
+  background: #d4b16a;
+  color: #172621;
 }
 
 /* Menu & Summary Views */

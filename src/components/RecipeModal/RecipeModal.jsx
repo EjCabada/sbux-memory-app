@@ -1,8 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import styles from "./RecipeModal.module.css";
 
 const RecipeModal = ({ recipe, onClose }) => {
   const handleContentClick = (e) => e.stopPropagation();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   if (!recipe) return null;
 
   const hotSteps = recipe.workflows?.hot?.stepLabels || [];
@@ -77,15 +87,16 @@ const RecipeModal = ({ recipe, onClose }) => {
     </>
   );
 
-  return (
+  return createPortal(
     <div className={styles.modalBackdrop} onClick={onClose}>
       <div className={styles.modalContent} onClick={handleContentClick}>
-        <button className={styles.closeButton} onClick={onClose}>
+        <button className={styles.closeButton} onClick={onClose} aria-label="Close recipe details">
           &times;
         </button>
         <div className={styles.recipeDetails}>{renderRecipeDetails()}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

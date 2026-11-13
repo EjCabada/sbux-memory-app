@@ -21,6 +21,33 @@ const shuffleArray = (array) => {
   return arr;
 };
 
+function getStatusPillsForProgress(completedActionIds = [], isSteaming = false) {
+  const pills = [];
+  if (isSteaming) pills.push({ key: "steam", label: "Steaming", style: styles.indicatorPillSteaming });
+
+  const startedShots = completedActionIds.some((id) => ACTION_META[id]?.startsShots);
+  const caughtShots = completedActionIds.some((id) => ACTION_META[id]?.catchesShots);
+  if (startedShots && !caughtShots) {
+    pills.push({ key: "shots", label: "Shots Pulling", style: styles.indicatorPillShots });
+  }
+
+  const startedBlend = completedActionIds.includes("blend_pitcher") || completedActionIds.includes("blend_cold_foam");
+  const finishedDrink = completedActionIds.includes("add_lid");
+  if (startedBlend && !finishedDrink) {
+    pills.push({ key: "blend", label: "Blending", style: styles.indicatorPillSteaming });
+  }
+
+  if (completedActionIds.some((id) => ACTION_META[id]?.pumpsSyrup)) {
+    pills.push({ key: "syrup", label: "Syrup", style: styles.indicatorPillSyrup });
+  }
+
+  if (completedActionIds.includes("add_sleeve")) {
+    pills.push({ key: "sleeve", label: "Sleeved", style: styles.indicatorPillSleeve });
+  }
+
+  return pills;
+}
+
 const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
   const { drinks, familiesMap, isLoading } = useDrinkCatalog();
   const isColdBar = stationMode === "cold_bar";
@@ -91,12 +118,8 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
         currentStepIdx: 0,
         completedActionIds: [],
         reachedStopPoint: false,
-        isCompleted: false,
-        hasSleeve: false,
         hasSteamedMilk: false,
-        isShotsPulling: false,
-        isSyrupPumped: false,
-        isBlending: false,
+        isCompleted: false,
       };
     });
 
@@ -171,7 +194,6 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
     const progA = drinkA ? drinkProgress[drinkA.queueKey] : null;
     const progB = drinkB ? drinkProgress[drinkB.queueKey] : null;
 
-    // 1. Dual-Drink Interleaving Cadence Locks
     if (selectedSlot === "B") {
       if (progA && !progA.reachedStopPoint && !progA.isCompleted) {
         setFaults((prev) => ({ ...prev, stopPointViolations: prev.stopPointViolations + 1 }));
@@ -202,7 +224,6 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
       }
     }
 
-    // 2. Steam Wand Mutex Lock (includes steam_lemonade, steam_all_pitcher, etc.)
     if (isSteamAction(actionId)) {
       if (steamWandUser !== null && steamWandUser !== activeDrink.queueKey) {
         const busyDrink = activeQueue.find((d) => d.queueKey === steamWandUser);
@@ -215,7 +236,6 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
       }
     }
 
-    // 3. Keep-Wand-Active Cadence Check
     if (selectedSlot === "A" && isFinishingAction(actionId)) {
       if (
         drinkB &&
@@ -234,14 +254,12 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
       }
     }
 
-    // 4. Pure Linear Step Progression (with Oct 2026 Sleeve Validation Built-In)
     const currentStepTarget = activeDrink.steps[activeProg.currentStepIdx];
     if (!currentStepTarget) return;
 
     if (actionId === currentStepTarget.actionId) {
       const nextStepIdx = activeProg.currentStepIdx + 1;
       const isDrinkDone = nextStepIdx >= activeDrink.steps.length;
-      const meta = ACTION_META[actionId] || {};
 
       if (isSteamAction(actionId)) setSteamWandUser(activeDrink.queueKey);
       else if (isWandReleaseAction(actionId)) setSteamWandUser(null);
@@ -256,16 +274,7 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
             completedActionIds: [...cur.completedActionIds, actionId],
             reachedStopPoint: currentStepTarget.isStopPoint || cur.reachedStopPoint,
             hasSteamedMilk: isSteamAction(actionId) || cur.hasSteamedMilk,
-            hasSleeve: actionId === "add_sleeve" || cur.hasSleeve,
             isCompleted: isDrinkDone,
-            isShotsPulling: meta.startsShots ? true : meta.catchesShots ? false : cur.isShotsPulling,
-            isSyrupPumped: meta.pumpsSyrup ? true : cur.isSyrupPumped,
-            isBlending:
-              actionId === "blend_pitcher" || actionId === "blend_cold_foam"
-                ? true
-                : isFinishingAction(actionId)
-                ? false
-                : cur.isBlending,
           },
         };
       });
@@ -306,30 +315,28 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
     return (
       <div className={styles.container}>
         <div className={styles.menuCard}>
-          <h2>{isColdBar ? "Cold Bar & Blended Sequencing" : "Hot Bar Sequencing"}</h2>
+          <h2>{isColdBar ? "Cold Bar Sequencing" : "Hot Bar Sequencing"}</h2>
           <p>
             {isColdBar
-              ? "Master interleaved Cold Bar & Blended workflows (Frappuccinos, Refreshers, Iced Matcha, and Cold Brews with Cold Foam)."
-              : "Master the dual-drink interleaved routine across 10 randomized orders."}
+              ? "Interleave 10 Cold Bar & Blended orders using Cold Foam first and blender/shaker stop points."
+              : "Interleave 10 Espresso Bar orders while keeping the steam wand active."}
           </p>
           <ul className={styles.ruleList}>
-            <li><strong>Initiation Lock:</strong> Drink #1 must reach its Stop Point before Drink #2 starts.</li>
+            <li><strong>Initiation Lock:</strong> Reach Drink #1&apos;s Stop Point before starting Drink #2.</li>
             {isColdBar ? (
               <>
-                <li><strong>Cold Foam First:</strong> Start Cold Foam spinning at the very beginning of any Cold Foam drink.</li>
-                <li><strong>Blender &amp; Shaker Stop Points:</strong> Start Frappuccinos/Matchas blending or Refreshers prepped with ice before switching to Drink #2.</li>
-                <li><strong>Finish &amp; Handoff:</strong> Complete whip, drizzles, cold foam pour, lid, and handoff on Drink #1 once Drink #2 is at its Stop Point.</li>
+                <li><strong>Cold Foam First:</strong> Spin Cold Foam at the very beginning of any Cold Foam drink.</li>
+                <li><strong>Blender &amp; Shaker Stop Points:</strong> Start blending or prep shaker with ice before switching to Drink #2.</li>
               </>
             ) : (
               <>
-                <li><strong>Pre-Steam Lock:</strong> Prep Drink #2 to steam before finishing Drink #1.</li>
-                <li><strong>Keep Wand Active:</strong> Start Drink #2 milk/lemonade steaming before pouring Drink #1.</li>
-                <li><strong>Oct 2026 Sleeve Standard:</strong> Sleeve EVERY hot drink EXCEPT <strong>Short (8oz)</strong>.</li>
+                <li><strong>Keep Wand Active:</strong> Start Drink #2 steaming before pouring Drink #1.</li>
+                <li><strong>Oct 2026 Sleeve Rule:</strong> Sleeve every hot drink EXCEPT <strong>Short (8oz)</strong>.</li>
               </>
             )}
           </ul>
           <button className={styles.startBtn} onClick={startQuiz}>
-            Start 10-Drink {isColdBar ? "Cold Bar" : "Hot Bar"} Rush Drill
+            Start 10-Drink Rush
           </button>
         </div>
       </div>
@@ -345,11 +352,11 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
     return (
       <div className={styles.container}>
         <div className={styles.summaryCard}>
-          <h2>Rush Queue Mastered!</h2>
+          <h2>Rush Queue Complete!</h2>
           <div className={styles.statsGrid}>
             <div className={styles.statBox}>
               <span className={styles.statVal}>{formatTime(elapsedSeconds)}</span>
-              <span className={styles.statLbl}>Time Elapsed</span>
+              <span className={styles.statLbl}>Time</span>
             </div>
             <div className={styles.statBox}>
               <span className={styles.statVal}>{completedCount} / {activeQueue.length}</span>
@@ -357,20 +364,19 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
             </div>
             <div className={styles.statBox}>
               <span className={styles.statVal}>{totalFaults}</span>
-              <span className={styles.statLbl}>Total Faults</span>
+              <span className={styles.statLbl}>Faults</span>
             </div>
           </div>
           <div className={styles.faultBreakdown}>
-            <strong>Audit Breakdown:</strong>
             <ul className={styles.faultList}>
               <li>Stop-Point / Cadence Violations: {faults.stopPointViolations}</li>
               {!isColdBar && <li>Wand Resource Faults: {faults.wandResourceViolations}</li>}
-              {!isColdBar && <li>Sleeve Packaging Errors (Oct 2026 Rule): {faults.sleeveErrors}</li>}
+              {!isColdBar && <li>Sleeve Errors (Oct 2026 Rule): {faults.sleeveErrors}</li>}
               <li>Step Sequence Faults: {faults.wrongSteps}</li>
             </ul>
           </div>
           <button className={styles.startBtn} style={{ marginTop: "1rem" }} onClick={startQuiz}>
-            Run Drill Again
+            Run Again
           </button>
         </div>
       </div>
@@ -382,6 +388,49 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
   const currentHighlightedNum =
     selectedSlot === "A" ? slotAIdx + 1 : selectedSlot === "B" ? slotBIdx + 1 : "None";
 
+  const renderSlotCard = (drinkObj, slotIdx, slotCode) => {
+    if (!drinkObj) return null;
+    const prog = drinkProgress[drinkObj.queueKey];
+    const isSelected = selectedSlot === slotCode;
+    const pills = getStatusPillsForProgress(
+      prog?.completedActionIds || [],
+      steamWandUser === drinkObj.queueKey
+    );
+
+    return (
+      <div
+        className={`${styles.drinkCard} ${
+          isSelected
+            ? slotCode === "A"
+              ? styles.cardGreenActive
+              : styles.cardGoldActive
+            : ""
+        }`}
+        onClick={() => setSelectedSlot(slotCode)}
+      >
+        <div className={styles.cardHeaderRow}>
+          <span className={slotCode === "A" ? styles.badgeGreen : styles.badgeGold}>
+            #{slotIdx + 1}
+          </span>
+          <span className={styles.tempBadge}>{drinkObj.size}</span>
+        </div>
+        <div className={styles.drinkName}>{drinkObj.name}</div>
+        {drinkObj.hasColdFoam && drinkObj.coldFoamRecipe && (
+          <div className={styles.drinkSize}>Foam: {drinkObj.coldFoamRecipe}</div>
+        )}
+        {pills.length > 0 && (
+          <div className={styles.badgeRow}>
+            {pills.map((p) => (
+              <span key={p.key} className={p.style}>
+                {p.label}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.topStatus}>
@@ -389,93 +438,21 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
           &times; Exit
         </button>
         <div className={styles.highlightBanner}>
-          Active: {selectedSlot ? `Drink #${currentHighlightedNum}` : "Select a Drink"}
+          Drink #{currentHighlightedNum}
         </div>
         <div className={styles.timerBadge}>{formatTime(elapsedSeconds)}</div>
       </div>
 
       <div className={styles.dualHeaderContainer}>
-        {drinkA && (
-          <div
-            className={`${styles.drinkCard} ${selectedSlot === "A" ? styles.cardGreenActive : ""}`}
-            onClick={() => setSelectedSlot("A")}
-          >
-            <div className={styles.cardHeaderRow}>
-              <span className={styles.badgeGreen}>#{slotAIdx + 1} Slot 1</span>
-              <span className={styles.tempBadge}>{drinkA.temp}</span>
-            </div>
-            <div className={styles.drinkName}>{drinkA.name}</div>
-            <div className={styles.drinkSize}>
-              {drinkA.size}
-              {drinkA.hasColdFoam && drinkA.coldFoamRecipe
-                ? ` • Foam: ${drinkA.coldFoamRecipe}`
-                : ""}
-            </div>
-            <div className={styles.badgeRow}>
-              {steamWandUser === drinkA.queueKey && (
-                <span className={styles.indicatorPillSteaming}>Steaming</span>
-              )}
-              {drinkProgress[drinkA.queueKey]?.isBlending && (
-                <span className={styles.indicatorPillSteaming}>Blending</span>
-              )}
-              {drinkProgress[drinkA.queueKey]?.isShotsPulling && (
-                <span className={styles.indicatorPillShots}>Shots</span>
-              )}
-              {drinkProgress[drinkA.queueKey]?.isSyrupPumped && (
-                <span className={styles.indicatorPillSyrup}>Syrup</span>
-              )}
-              {drinkProgress[drinkA.queueKey]?.hasSleeve && (
-                <span className={styles.indicatorPillSleeve}>Sleeved</span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {drinkB && (
-          <div
-            className={`${styles.drinkCard} ${selectedSlot === "B" ? styles.cardGoldActive : ""}`}
-            onClick={() => setSelectedSlot("B")}
-          >
-            <div className={styles.cardHeaderRow}>
-              <span className={styles.badgeGold}>#{slotBIdx + 1} Slot 2</span>
-              <span className={styles.tempBadge}>{drinkB.temp}</span>
-            </div>
-            <div className={styles.drinkName}>{drinkB.name}</div>
-            <div className={styles.drinkSize}>
-              {drinkB.size}
-              {drinkB.hasColdFoam && drinkB.coldFoamRecipe
-                ? ` • Foam: ${drinkB.coldFoamRecipe}`
-                : ""}
-            </div>
-            <div className={styles.badgeRow}>
-              {steamWandUser === drinkB.queueKey && (
-                <span className={styles.indicatorPillSteaming}>Steaming</span>
-              )}
-              {drinkProgress[drinkB.queueKey]?.isBlending && (
-                <span className={styles.indicatorPillSteaming}>Blending</span>
-              )}
-              {drinkProgress[drinkB.queueKey]?.isShotsPulling && (
-                <span className={styles.indicatorPillShots}>Shots</span>
-              )}
-              {drinkProgress[drinkB.queueKey]?.isSyrupPumped && (
-                <span className={styles.indicatorPillSyrup}>Syrup</span>
-              )}
-              {drinkProgress[drinkB.queueKey]?.hasSleeve && (
-                <span className={styles.indicatorPillSleeve}>Sleeved</span>
-              )}
-            </div>
-          </div>
-        )}
+        {renderSlotCard(drinkA, slotAIdx, "A")}
+        {renderSlotCard(drinkB, slotBIdx, "B")}
       </div>
 
       {activeProg && (
         <div className={styles.stepHistoryContainer}>
-          <span className={styles.stepHistoryLabel}>
-            Drink #{currentHighlightedNum} Completed Actions:
-          </span>
           <div className={styles.stepPillList}>
             {activeProg.completedActionIds.length === 0 ? (
-              <span className={styles.unstartedText}>No actions performed yet</span>
+              <span className={styles.unstartedText}>Select first action below</span>
             ) : (
               activeProg.completedActionIds.map((actId, i) => (
                 <span key={i} className={styles.completedStepPill}>
@@ -504,7 +481,7 @@ const SequencingQuiz = ({ stationMode = "hot_bar" }) => {
       <div className={styles.actionCenter}>
         {!selectedSlot ? (
           <div className={styles.noSelectionPrompt}>
-            Tap <strong>Drink #{slotAIdx + 1}</strong> or <strong>Drink #{slotBIdx + 1}</strong> above to open actions.
+            Tap a drink card above to choose its next action.
           </div>
         ) : (
           <div className={styles.actionGrid}>
